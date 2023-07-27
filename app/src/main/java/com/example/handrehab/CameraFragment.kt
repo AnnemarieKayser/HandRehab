@@ -1,6 +1,5 @@
 package com.example.handrehab
 
-import com.example.handrehab.databinding.FragmentCameraBinding
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
@@ -17,19 +16,26 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.handrehab.GestureRecognizerHelper
-import com.example.handrehab.MainViewModel
+import com.example.handrehab.databinding.FragmentCameraBinding
+import com.google.android.material.math.MathUtils.dist
 import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizerResult
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
+
 
 class CameraFragment : Fragment(),
     GestureRecognizerHelper.GestureRecognizerListener {
 
     companion object {
         private const val TAG = "Hand gesture recognizer"
+        private const val TAG2 = "open palm detector"
+
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -50,6 +56,20 @@ class CameraFragment : Fragment(),
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
+    private var closed = ArrayList<Int>()
+    private var counterRepetition = 0
+    private var fingerOneClosed = false
+    private var fingerTwoClosed = false
+    private var fingerThreeClosed = false
+    private var fingerFourClosed = false
+    private var allFingersClosed = false
+    private var dist0812Before = 0f
+    private var fingersSpread = false
+    private var distFingersSpreadMax = 0f
+    private var distFingersSpreadMin = 10f
+
+    private var fingersSpreadCounter = 0
+
 
     /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
@@ -338,19 +358,22 @@ class CameraFragment : Fragment(),
     // image height/width to scale and place the landmarks properly through
     // OverlayView. Only one result is expected at a time. If two or more
     // hands are seen in the camera frame, only one will be processed.
-    override fun onResults(
-        resultBundle: GestureRecognizerHelper.ResultBundle
-    ) {
+    override fun onResults(resultBundle: GestureRecognizerHelper.ResultBundle) {
+
         activity?.runOnUiThread {
             if (_fragmentCameraBinding != null) {
                 // Show result of recognized gesture
                 val gestureCategories = resultBundle.results.first().gestures()
+
+
                 if (gestureCategories.isNotEmpty()) {
-                    gestureRecognizerResultAdapter.updateResults(
-                        gestureCategories.first()
-                    )
+                    gestureRecognizerResultAdapter.updateResults(gestureCategories.first())
+
+                    detectGestureOpenPalm(resultBundle.results.first())
+
                 } else {
                     gestureRecognizerResultAdapter.updateResults(emptyList())
+                    fingersSpreadCounter = 0
                 }
 
                 fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
@@ -369,6 +392,174 @@ class CameraFragment : Fragment(),
             }
         }
     }
+
+   private fun detectGestureOpenPalm (gestureRecognizer: GestureRecognizerResult) {
+
+       val x0 = gestureRecognizer.worldLandmarks()[0][0].x()
+       val y0 = gestureRecognizer.worldLandmarks()[0][0].y()
+
+       val x9 = gestureRecognizer.worldLandmarks().get(0).get(9).x()
+       val y9 = gestureRecognizer.worldLandmarks().get(0).get(9).y()
+
+       val x8 = gestureRecognizer.worldLandmarks().get(0).get(8).x()
+       val y8 = gestureRecognizer.worldLandmarks().get(0).get(8).y()
+
+       val x7 = gestureRecognizer.worldLandmarks().get(0).get(7).x()
+       val y7 = gestureRecognizer.worldLandmarks().get(0).get(7).y()
+
+       val x12 = gestureRecognizer.worldLandmarks().get(0).get(12).x()
+       val y12 = gestureRecognizer.worldLandmarks().get(0).get(12).y()
+
+       val x11 = gestureRecognizer.worldLandmarks().get(0).get(11).x()
+       val y11 = gestureRecognizer.worldLandmarks().get(0).get(11).y()
+
+       val x16 = gestureRecognizer.worldLandmarks().get(0).get(16).x()
+       val y16 = gestureRecognizer.worldLandmarks().get(0).get(16).y()
+
+       val x15 = gestureRecognizer.worldLandmarks().get(0).get(15).x()
+       val y15 = gestureRecognizer.worldLandmarks().get(0).get(15).y()
+
+       val x20 = gestureRecognizer.worldLandmarks().get(0).get(20).x()
+       val y20 = gestureRecognizer.worldLandmarks().get(0).get(20).y()
+
+       val x19 = gestureRecognizer.worldLandmarks().get(0).get(19).x()
+       val y19 = gestureRecognizer.worldLandmarks().get(0).get(19).y()
+
+       //Berechnung der Distanz Fingerspitze - Grundgelenk und Mittelgelenk Finger - Grundgelenk
+       val d08 = dist(x0, y0, x8, y8)
+       val d07 = dist(x0, y0, x7, y7)
+
+       val d012 = dist(x0, y0, x12, y12)
+       val d011 = dist(x0, y0, x11, y11)
+
+       val d015 = dist(x0, y0, x15, y15)
+       val d016 = dist(x0, y0, x16, y16)
+
+       val d020 = dist(x0, y0, x20, y20)
+       val d019 = dist(x0, y0, x19, y19)
+
+       //Distanz zwischen Zeige- und Mittelfingerspitze
+       var d0812 = dist(x8, y8, x12, y12)
+
+       //Runden der Dezimalzahl auf 3 Nachkommastellen
+       val bd = BigDecimal(d0812.toDouble())
+       d0812 = bd.setScale(4, RoundingMode.DOWN).toFloat()
+
+
+       if(d0812 > dist0812Before) {
+
+           //Maximum
+           if(dist0812Before > distFingersSpreadMax) {
+               distFingersSpreadMax = dist0812Before
+               Log.i(TAG2, "Maximale Distanz: $distFingersSpreadMax")
+
+           }
+
+           dist0812Before = d0812
+       }
+
+       if(d0812 < dist0812Before) {
+
+           //Minimum
+           if(dist0812Before < distFingersSpreadMin) {
+               distFingersSpreadMin = dist0812Before
+           }
+
+           dist0812Before = d0812
+       }
+
+       //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
+       val distMinMax = distFingersSpreadMax - distFingersSpreadMin
+       Log.i(TAG2, "Maximale Distanz: $distMinMax")
+
+       //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
+       if(d0812 > (distFingersSpreadMin + distMinMax/2)) {
+           if(!fingersSpread) {
+               fingersSpreadCounter++
+               Log.i(TAG2, "Finger Spread counter: $fingersSpreadCounter")
+               fingersSpread = true
+           }
+       }
+
+       if(d0812 < ((distFingersSpreadMin + distMinMax/2))) {
+           if(fingersSpread) {
+               fingersSpread = false
+           }
+       }
+
+
+       //Geschlossene Finger detektieren
+       //Zeigefinger geschlossen
+       if(d07 > d08 && !fingerOneClosed) {
+           closed.add(1)
+           fingerOneClosed = true
+           Log.i(TAG2, "FInger 1 closed")
+       }
+
+       //Mittelfinger geschlossen
+       if(d011 > d012 && !fingerTwoClosed) {
+           closed.add(2)
+           fingerTwoClosed = true
+           Log.i(TAG2, "FInger 2 closed")
+       }
+
+       //Ringfinger geschlossen
+       if(d015 > d016 && !fingerThreeClosed) {
+           closed.add(3)
+           fingerThreeClosed = true
+           Log.i(TAG2, "FInger 3 closed")
+       }
+
+       //Kleiner Finger geschlossen
+       if(d019 > d020 && !fingerFourClosed) {
+           closed.add(4)
+           fingerFourClosed = true
+           Log.i(TAG2, "FInger 4 closed")
+       }
+
+       // Wenn alle Finger geschlossen sind, wird der Counter für die Anzahl an Wiederholungen hochgezählt
+       if(closed.size == 4 && !allFingersClosed) {
+           counterRepetition++
+           Log.i(TAG2, "Wiederholungen: $counterRepetition")
+           allFingersClosed = true
+           closed.clear()
+       }
+
+       //Wenn die Hand wieder geöffnet ist, werden die Werte zurückgesetzt
+       if(gestureRecognizer.gestures().first().get(0).categoryName() == "Open_Palm"){
+           fingerOneClosed = false
+           fingerTwoClosed = false
+           fingerThreeClosed = false
+           fingerFourClosed = false
+           allFingersClosed = false
+
+       }
+
+
+
+       //Berechnung der Ausrichtung der offenen Hand
+       var m = 0f
+
+       m = if (abs(x9 - x0) < 0.05)
+           1000000000f
+       else
+           abs((y9 - y0)/(x9 - x0))
+
+       if (m in 0.0..1.0) {
+           if (x9 > x0)
+               Log.i(TAG2, "RIGHT")
+           else
+               Log.i(TAG2, "LEFT")
+       }
+
+       if (m>1) {
+           if (y9 < y0)
+               Log.i(TAG2, "UP")
+           else
+               Log.i(TAG2, "DOWN")
+       }
+
+   }
 
     override fun onError(error: String, errorCode: Int) {
         activity?.runOnUiThread {
