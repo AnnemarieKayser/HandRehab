@@ -58,6 +58,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         linePaint.style = Paint.Style.STROKE
 
+
         pointPaint.color = Color.YELLOW
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
@@ -91,14 +92,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                         gestureRecognizerResult.landmarks().get(0).get(it.end()).y() * imageHeight * scaleFactor,
                         linePaint)
                 }
-                HandLandmarker.HAND_CONNECTIONS.forEach {
+                /*HandLandmarker.HAND_CONNECTIONS.forEach {
                     canvas.drawLine(
                         gestureRecognizerResult.landmarks().get(0).get(8).x() * imageWidth * scaleFactor,
                         gestureRecognizerResult.landmarks().get(0).get(8).y() * imageHeight * scaleFactor,
                         gestureRecognizerResult.landmarks().get(0).get(12).x() * imageWidth * scaleFactor,
                         gestureRecognizerResult.landmarks().get(0).get(12).y() * imageHeight * scaleFactor,
                         linePaint)
-                }
+                }*/
             }
             i = 0
         }

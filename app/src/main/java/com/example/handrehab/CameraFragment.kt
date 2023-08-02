@@ -27,7 +27,9 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan
 
 
 class CameraFragment : Fragment(),
@@ -41,6 +43,8 @@ class CameraFragment : Fragment(),
         private const val TAG5 = "Middle Finger"
         private const val TAG6 = "All Fingers spread"
         private const val TAG7 = "Thumb counter"
+        private const val TAG8 = "Pointing Finger"
+        private const val TAG9 = "x Koordinaten"
 
 
     }
@@ -99,6 +103,29 @@ class CameraFragment : Fragment(),
 
     private var thumbUp = false
     private var counterUpDown = 0
+
+    //PointingFinger
+    private var pointingFingerMax = 0f
+    private var pointingFingerMin = 10f
+
+    //Middle Finger
+    private var middleFingerMax = 0f
+    private var middleFingerMin = 10f
+
+    //Ring Finger
+    private var ringFingerMax = 0f
+    private var ringFingerMin = 10f
+
+    //Little Finger
+    private var littleFingerMax = 0f
+    private var littleFingerMin = 10f
+
+    //Orientation of Hand
+    private var orientationHand = ""
+
+    //Hand Joint angle
+    private var handJointMaxAngleLeft = 90.0
+    private var handJointMaxAngleRight = -90.0
 
 
     /** Blocking ML operations are performed using this executor */
@@ -521,17 +548,14 @@ class CameraFragment : Fragment(),
             abs((y9 - y0)/(x9 - x0))
 
         if (m in 0.0..1.0) {
-            if (x9 > x0)
-                Log.i(TAG2, "RIGHT")
-            else
-                Log.i(TAG2, "LEFT")
+            orientationHand = if (x9 > x0) {
+                "RIGHT"
+            } else "LEFT"
         }
 
         if (m>1) {
-            if (y9 < y0)
-                Log.i(TAG2, "UP")
-            else
-                Log.i(TAG2, "DOWN")
+            orientationHand = if (y9 < y0) "UP"
+            else "DOWN"
         }
     }
 
@@ -587,7 +611,7 @@ class CameraFragment : Fragment(),
 
         dist0408Before = d0408
 
-        //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
+        //Berechnung der Maximalen Distanz
         val distMinMax = distThumbSpreadMax - distThumbSpreadMin
         Log.i(TAG4, "Maximale Distanz: $distMinMax")
 
@@ -655,51 +679,283 @@ class CameraFragment : Fragment(),
         }
     }
 
+    //Öffnen und Schließen des Zeigefingers
+    private fun pointingFinger (dist08: Float, dist07: Float, dist06: Float, dist05: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist08 < pointingFingerMin) {
+            pointingFingerMin = dist08
+            Log.i(TAG8, "Zeigefinger Min: $pointingFingerMin")
+        }
+
+        if(dist08 > pointingFingerMax) {
+            pointingFingerMax = dist08
+            Log.i(TAG8, "Zeigefinger Max: $pointingFingerMax")
+            //Sie können ihren FInger schon weiter als das letzte mal öffnen
+        }
+
+        //Phase 1
+        if(dist08 > dist07) {
+            Log.i(TAG8, "ZeigeFinger offen")
+        }
+
+        //Phase 2
+        if(dist08 < dist07) {
+
+            //Phase 3
+            if(dist08 < dist06) {
+
+                if(dist08 < dist05) {
+                    Log.i(TAG8, "ZeigeFinger geschlossen")
+                } else Log.i(TAG8, "ZeigeFinger fast geschlossen, Phase 3")
+
+            } else Log.i(TAG8, "ZeigeFinger halb geschlossen, Phase 2")
+        }
+
+        //Distanz zwischen Fingerspitze und Grundgelenk speichern (d08)
+    }
+
+    //Öffnen und SChließen des Mittelfingers
+    private fun middleFinger (dist09: Float, dist010: Float, dist011: Float, dist012: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist012 < middleFingerMin) {
+            middleFingerMin = dist012
+            Log.i(TAG8, "Min Mittelfinger: $middleFingerMin")
+        }
+
+        if(dist012 > middleFingerMax) {
+            middleFingerMax = dist012
+            Log.i(TAG8, "Max Mittelfinger: $middleFingerMax")
+            //Sie können ihren FInger schon weiter als das letzte mal öffnen
+        }
+
+        //Phase 1
+        if(dist012 > dist011) {
+            Log.i(TAG8, "MittelFinger offen")
+        }
+
+        //Phase 2
+        if(dist012 < dist011) {
+
+            //Phase 3
+            if(dist012 < dist010) {
+
+                if(dist012 < dist09) {
+                    Log.i(TAG8, "MittelFinger geschlossen")
+                } else Log.i(TAG8, "MittelFinger fast geschlossen, Phase 3")
+
+            } else Log.i(TAG8, "MittelFinger halb geschlossen, Phase 2")
+        }
+    }
+
+    //Öffnen und Schließen des Ringfingers
+    private fun ringFinger (dist013: Float, dist014: Float, dist015: Float, dist016: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist016 < ringFingerMin) {
+            ringFingerMin = dist016
+            Log.i(TAG8, "Min ringfinger: $ringFingerMin")
+        }
+
+        if(dist016 > ringFingerMax) {
+            ringFingerMax = dist016
+            Log.i(TAG8, "Max ringfinger: $ringFingerMax")
+            //Sie können ihren FInger schon weiter als das letzte mal öffnen
+        }
+
+        //Phase 1
+        if(dist016 > dist015) {
+            Log.i(TAG8, "ring Finger offen")
+        }
+
+        //Phase 2
+        if(dist016 < dist015) {
+
+            //Phase 3
+            if(dist016 < dist014) {
+
+                if(dist016 < dist013) {
+                    Log.i(TAG8, "ringFinger geschlossen")
+                } else Log.i(TAG8, "ringFinger fast geschlossen, Phase 3")
+
+            } else Log.i(TAG8, "ringFinger halb geschlossen, Phase 2")
+        }
+    }
+
+    //Öffnen und Schließen des kleinen Finger
+    private fun littleFinger (dist017: Float, dist018: Float, dist019: Float, dist020: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist020 < littleFingerMin) {
+            littleFingerMin = dist020
+            Log.i(TAG8, "Min little finger: $littleFingerMin")
+        }
+
+        if(dist020 > littleFingerMax) {
+            littleFingerMax = dist020
+            Log.i(TAG8, "Max little finger: $littleFingerMax")
+            //Sie können ihren FInger schon weiter als das letzte mal öffnen
+        }
+
+        //Phase 1
+        if(dist020 > dist019) {
+            Log.i(TAG8, "little Finger offen")
+        }
+
+        //Phase 2
+        if(dist020 < dist019) {
+
+            //Phase 3
+            if(dist020 < dist018) {
+
+                if(dist020 < dist017) {
+                    Log.i(TAG8, "little Finger geschlossen")
+                } else Log.i(TAG8, "little Finger fast geschlossen, Phase 3")
+
+            } else Log.i(TAG8, "little Finger halb geschlossen, Phase 2")
+        }
+    }
+
+    // Daumen zur HandinnenFläche und wieder nach außen bewegen
+    private fun movingThumb (gestureRecognizer: GestureRecognizerResult) {
+
+        // Normalisierte Landmarks
+        val x4Normalized = gestureRecognizer.landmarks()[0][4].x()
+        val x5Normalized = gestureRecognizer.landmarks()[0][5].x()
+        val x9Normalized = gestureRecognizer.landmarks()[0][9].x()
+        val x13Normalized = gestureRecognizer.landmarks()[0][13].x()
+
+        //Verwenden der x-Koordinaten
+        //Log.i(TAG9, "x4: $x4Normalized, x5: $x5Normalized, x9: $x9Normalized, x13: $x13Normalized")
+
+        if (orientationHand == "UP") {
+            //Phase 1
+            if (x4Normalized > x5Normalized) {
+                //Daumen überkreut Zeigefinger
+
+                if (x4Normalized > x9Normalized) {
+                    //Daumen überkreut Mittelfinger
+
+                    if (x4Normalized > x13Normalized) {
+                        //Daumen überkreut Ringfinger
+                        Log.i(TAG9, "Daumen überkreuzt Ringfinger")
+                    } else Log.i(TAG9, "Daumen überkreuzt Mittelfinger")
+
+                } else Log.i(TAG9, "Daumen überkreuzt Zeigefinger")
+            }
+        }else Log.i(TAG9, "Ändern sie die Orientation ihrer Hand")
+    }
+
+    private fun tiltHandJoint (x9: Float, x0: Float, y9:Float, y0: Float) {
+        //Neigung des Handgelenks -> Gerade Handfläche -> 90 Grad
+        //Neigung kleiner 90 Grad -> Neigung nach links
+        //Neigung negativ -> Neigung nach rechts
+        val m: Double = (atan((y9 - y0)/(x9 - x0)) * 180)/ PI
+        Log.i("Hand Joint","$m" )
+
+        if(m>0) {
+            if (m < handJointMaxAngleLeft) {
+                handJointMaxAngleLeft = m
+                Log.i("Hand Joint Left","Left: $handJointMaxAngleLeft" )
+
+            }
+        }
+
+        if(m<0) {
+            if (m > handJointMaxAngleRight){
+                handJointMaxAngleRight = m
+                Log.i("Hand Joint Right","Right: $handJointMaxAngleRight" )
+
+            }
+        }
+
+    }
+
+
+
    private fun calculateDistance (gestureRecognizer: GestureRecognizerResult) {
 
        val x0 = gestureRecognizer.worldLandmarks()[0][0].x()
        val y0 = gestureRecognizer.worldLandmarks()[0][0].y()
 
+       val x1 = gestureRecognizer.worldLandmarks()[0][1].x()
+       val y1 = gestureRecognizer.worldLandmarks()[0][1].y()
+
+       val x2 = gestureRecognizer.worldLandmarks()[0][2].x()
+       val y2 = gestureRecognizer.worldLandmarks()[0][2].y()
+
+       val x3 = gestureRecognizer.worldLandmarks()[0][3].x()
+       val y3 = gestureRecognizer.worldLandmarks()[0][3].y()
+
        val x4 = gestureRecognizer.worldLandmarks()[0][4].x()
        val y4 = gestureRecognizer.worldLandmarks()[0][4].y()
 
-       val x9 = gestureRecognizer.worldLandmarks()[0][9].x()
-       val y9 = gestureRecognizer.worldLandmarks()[0][9].y()
+       val x5 = gestureRecognizer.worldLandmarks()[0][5].x()
+       val y5 = gestureRecognizer.worldLandmarks()[0][5].y()
 
-       val x8 = gestureRecognizer.worldLandmarks()[0][8].x()
-       val y8 = gestureRecognizer.worldLandmarks()[0][8].y()
+       val x6 = gestureRecognizer.worldLandmarks()[0][6].x()
+       val y6 = gestureRecognizer.worldLandmarks()[0][6].y()
 
        val x7 = gestureRecognizer.worldLandmarks()[0][7].x()
        val y7 = gestureRecognizer.worldLandmarks()[0][7].y()
 
-       val x12 = gestureRecognizer.worldLandmarks()[0][12].x()
-       val y12 = gestureRecognizer.worldLandmarks()[0][12].y()
+       val x8 = gestureRecognizer.worldLandmarks()[0][8].x()
+       val y8 = gestureRecognizer.worldLandmarks()[0][8].y()
+
+       val x9 = gestureRecognizer.worldLandmarks()[0][9].x()
+       val y9 = gestureRecognizer.worldLandmarks()[0][9].y()
+
+       val x10 = gestureRecognizer.worldLandmarks()[0][10].x()
+       val y10 = gestureRecognizer.worldLandmarks()[0][10].y()
 
        val x11 = gestureRecognizer.worldLandmarks()[0][11].x()
        val y11 = gestureRecognizer.worldLandmarks()[0][11].y()
 
-       val x16 = gestureRecognizer.worldLandmarks()[0][16].x()
-       val y16 = gestureRecognizer.worldLandmarks()[0][16].y()
+       val x12 = gestureRecognizer.worldLandmarks()[0][12].x()
+       val y12 = gestureRecognizer.worldLandmarks()[0][12].y()
+
+       val x13 = gestureRecognizer.worldLandmarks()[0][13].x()
+       val y13 = gestureRecognizer.worldLandmarks()[0][13].y()
+
+       val x14 = gestureRecognizer.worldLandmarks()[0][14].x()
+       val y14 = gestureRecognizer.worldLandmarks()[0][14].y()
 
        val x15 = gestureRecognizer.worldLandmarks()[0][15].x()
        val y15 = gestureRecognizer.worldLandmarks()[0][15].y()
 
-       val x20 = gestureRecognizer.worldLandmarks()[0][20].x()
-       val y20 = gestureRecognizer.worldLandmarks()[0][20].y()
+       val x16 = gestureRecognizer.worldLandmarks()[0][16].x()
+       val y16 = gestureRecognizer.worldLandmarks()[0][16].y()
+
+       val x17 = gestureRecognizer.worldLandmarks()[0][17].x()
+       val y17 = gestureRecognizer.worldLandmarks()[0][17].y()
+
+       val x18 = gestureRecognizer.worldLandmarks()[0][18].x()
+       val y18 = gestureRecognizer.worldLandmarks()[0][18].y()
 
        val x19 = gestureRecognizer.worldLandmarks()[0][19].x()
        val y19 = gestureRecognizer.worldLandmarks()[0][19].y()
+
+       val x20 = gestureRecognizer.worldLandmarks()[0][20].x()
+       val y20 = gestureRecognizer.worldLandmarks()[0][20].y()
+
 
 
        //Berechnung der Distanz Fingerspitze - Grundgelenk und Mittelgelenk Finger - Grundgelenk
        val d08 = dist(x0, y0, x8, y8)
        val d07 = dist(x0, y0, x7, y7)
+       val d06 = dist(x0, y0, x6, y6)
+       val d05 = dist(x0, y0, x5, y5)
 
        val d012 = dist(x0, y0, x12, y12)
        val d011 = dist(x0, y0, x11, y11)
+       val d010 = dist(x0, y0, x10, y10)
+       val d09 = dist(x0, y0, x9, y9)
+
+       val d013 = dist(x0, y0, x13, y13)
+       val d014 = dist(x0, y0, x14, y14)
 
        val d015 = dist(x0, y0, x15, y15)
        val d016 = dist(x0, y0, x16, y16)
+       val d017 = dist(x0, y0, x17, y17)
+       val d018 = dist(x0, y0, x18, y18)
+
 
        val d20 = dist(x0, y0, x20, y20)
        val d19 = dist(x0, y0, x19, y19)
@@ -732,6 +988,7 @@ class CameraFragment : Fragment(),
        val bd0408 = BigDecimal(d0408.toDouble())
        d0408 = bd0408.setScale(4, RoundingMode.DOWN).toFloat()
 
+       tiltHandJoint(x9, x0, y9, y0)
 
        detectSpreadPointingFinger(d0812)
 
@@ -746,6 +1003,16 @@ class CameraFragment : Fragment(),
        detectClosedFingers(d07, d08, d011, d012, d015, d016, d19, d20, gestureRecognizer)
 
        detectOrientation(x9, x0, y9, y0)
+
+       pointingFinger(d08, d07, d06, d05, gestureRecognizer)
+
+       middleFinger(d09, d010, d011, d012, gestureRecognizer)
+
+       ringFinger(d013, d014, d015, d016, gestureRecognizer)
+
+       littleFinger(d017, d018, d19, d20, gestureRecognizer)
+
+       movingThumb(gestureRecognizer)
 
    }
 
