@@ -73,7 +73,6 @@ class CameraFragment : Fragment(),
     private var fingerTwoClosed = false
     private var fingerThreeClosed = false
     private var fingerFourClosed = false
-    private var allFingersClosed = false
 
     private var dist0812Before = 0f
     private var pointingFingerSpread = false
@@ -104,21 +103,43 @@ class CameraFragment : Fragment(),
     private var thumbUp = false
     private var counterUpDown = 0
 
+    //all Fingers
+    private var allFingersOpen = false
+    private var allFingersClosed = false
+    private var allFingershalfClosed = false
+
+    //Thumb
+    private var thumbOpen = false
+    private var thumbClosed = false
+    private var thumbHalfClosed = false
+
     //PointingFinger
     private var pointingFingerMax = 0f
     private var pointingFingerMin = 10f
+    private var pointingFingerOpen = false
+    private var pointingFingerClosed = false
+    private var pointingFingerHalfClosed = false
 
     //Middle Finger
     private var middleFingerMax = 0f
     private var middleFingerMin = 10f
+    private var middleFingerOpen = false
+    private var middleFingerClosed = false
+    private var middleFingerHalfClosed = false
 
     //Ring Finger
     private var ringFingerMax = 0f
     private var ringFingerMin = 10f
+    private var ringFingerOpen = false
+    private var ringFingerClosed = false
+    private var ringFingerHalfClosed = false
 
     //Little Finger
     private var littleFingerMax = 0f
     private var littleFingerMin = 10f
+    private var littleFingerOpen = false
+    private var littleFingerClosed = false
+    private var littleFingerHalfClosed = false
 
     //Orientation of Hand
     private var orientationHand = ""
@@ -696,7 +717,8 @@ class CameraFragment : Fragment(),
         //Phase 1
         if(dist08 > dist07) {
             Log.i(TAG8, "ZeigeFinger offen")
-        }
+            pointingFingerOpen = true
+        } else pointingFingerOpen = false
 
         //Phase 2
         if(dist08 < dist07) {
@@ -706,10 +728,18 @@ class CameraFragment : Fragment(),
 
                 if(dist08 < dist05) {
                     Log.i(TAG8, "ZeigeFinger geschlossen")
-                } else Log.i(TAG8, "ZeigeFinger fast geschlossen, Phase 3")
-
-            } else Log.i(TAG8, "ZeigeFinger halb geschlossen, Phase 2")
-        }
+                    pointingFingerClosed = true
+                    pointingFingerHalfClosed = false
+                } else {
+                    Log.i(TAG8, "ZeigeFinger fast geschlossen, Phase 3")
+                    pointingFingerClosed = false
+                    pointingFingerHalfClosed = true
+                }
+            } else {
+                pointingFingerHalfClosed = true
+                Log.i(TAG8, "ZeigeFinger halb geschlossen, Phase 2")
+            }
+        } else pointingFingerHalfClosed = false
 
         //Distanz zwischen Fingerspitze und Grundgelenk speichern (d08)
     }
@@ -730,8 +760,9 @@ class CameraFragment : Fragment(),
 
         //Phase 1
         if(dist012 > dist011) {
+            middleFingerOpen = true
             Log.i(TAG8, "MittelFinger offen")
-        }
+        } else middleFingerOpen = false
 
         //Phase 2
         if(dist012 < dist011) {
@@ -740,11 +771,20 @@ class CameraFragment : Fragment(),
             if(dist012 < dist010) {
 
                 if(dist012 < dist09) {
+                    middleFingerClosed = true
+                    middleFingerHalfClosed = false
                     Log.i(TAG8, "MittelFinger geschlossen")
-                } else Log.i(TAG8, "MittelFinger fast geschlossen, Phase 3")
+                } else {
+                    middleFingerHalfClosed = true
+                    middleFingerClosed = false
+                    Log.i(TAG8, "MittelFinger fast geschlossen, Phase 3")
+                }
 
-            } else Log.i(TAG8, "MittelFinger halb geschlossen, Phase 2")
-        }
+            } else {
+                middleFingerHalfClosed = true
+                Log.i(TAG8, "MittelFinger halb geschlossen, Phase 2")
+            }
+        } else middleFingerHalfClosed = false
     }
 
     //Öffnen und Schließen des Ringfingers
@@ -763,8 +803,9 @@ class CameraFragment : Fragment(),
 
         //Phase 1
         if(dist016 > dist015) {
+            ringFingerOpen = true
             Log.i(TAG8, "ring Finger offen")
-        }
+        } else ringFingerOpen = false
 
         //Phase 2
         if(dist016 < dist015) {
@@ -773,11 +814,20 @@ class CameraFragment : Fragment(),
             if(dist016 < dist014) {
 
                 if(dist016 < dist013) {
+                    ringFingerClosed = true
+                    ringFingerHalfClosed = false
                     Log.i(TAG8, "ringFinger geschlossen")
-                } else Log.i(TAG8, "ringFinger fast geschlossen, Phase 3")
+                } else {
+                    ringFingerClosed = false
+                    ringFingerHalfClosed = true
+                    Log.i(TAG8, "ringFinger fast geschlossen, Phase 3")
+                }
 
-            } else Log.i(TAG8, "ringFinger halb geschlossen, Phase 2")
-        }
+            } else {
+                ringFingerHalfClosed = true
+                Log.i(TAG8, "ringFinger halb geschlossen, Phase 2")
+            }
+        } else ringFingerHalfClosed = false
     }
 
     //Öffnen und Schließen des kleinen Finger
@@ -796,8 +846,9 @@ class CameraFragment : Fragment(),
 
         //Phase 1
         if(dist020 > dist019) {
+            littleFingerOpen = true
             Log.i(TAG8, "little Finger offen")
-        }
+        } else littleFingerOpen = false
 
         //Phase 2
         if(dist020 < dist019) {
@@ -806,11 +857,20 @@ class CameraFragment : Fragment(),
             if(dist020 < dist018) {
 
                 if(dist020 < dist017) {
+                    littleFingerClosed = true
+                    littleFingerHalfClosed = false
                     Log.i(TAG8, "little Finger geschlossen")
-                } else Log.i(TAG8, "little Finger fast geschlossen, Phase 3")
+                } else {
+                    littleFingerClosed = false
+                    littleFingerHalfClosed = true
+                    Log.i(TAG8, "little Finger fast geschlossen, Phase 3")
+                }
 
-            } else Log.i(TAG8, "little Finger halb geschlossen, Phase 2")
-        }
+            } else {
+                littleFingerHalfClosed = true
+                Log.i(TAG8, "little Finger halb geschlossen, Phase 2")
+            }
+        } else littleFingerHalfClosed = false
     }
 
     // Daumen zur HandinnenFläche und wieder nach außen bewegen
@@ -825,6 +885,13 @@ class CameraFragment : Fragment(),
         //Verwenden der x-Koordinaten
         //Log.i(TAG9, "x4: $x4Normalized, x5: $x5Normalized, x9: $x9Normalized, x13: $x13Normalized")
 
+        if(x4Normalized < x5Normalized) {
+            if(thumbSpread) {
+                thumbHalfClosed = false
+                thumbOpen = true
+            } else thumbOpen = false
+        }
+
         if (orientationHand == "UP") {
             //Phase 1
             if (x4Normalized > x5Normalized) {
@@ -832,15 +899,20 @@ class CameraFragment : Fragment(),
 
                 if (x4Normalized > x9Normalized) {
                     //Daumen überkreut Mittelfinger
-
+                    thumbClosed = true
+                    thumbHalfClosed = false
                     if (x4Normalized > x13Normalized) {
                         //Daumen überkreut Ringfinger
                         Log.i(TAG9, "Daumen überkreuzt Ringfinger")
                     } else Log.i(TAG9, "Daumen überkreuzt Mittelfinger")
 
-                } else Log.i(TAG9, "Daumen überkreuzt Zeigefinger")
+                } else {
+                    thumbClosed = false
+                    thumbHalfClosed = true
+                    Log.i(TAG9, "Daumen überkreuzt Zeigefinger")
+                }
             }
-        }else Log.i(TAG9, "Ändern sie die Orientation ihrer Hand")
+        } else Log.i(TAG9, "Ändern sie die Orientation ihrer Hand")
     }
 
     private fun tiltHandJoint (x9: Float, x0: Float, y9:Float, y0: Float) {
@@ -854,7 +926,6 @@ class CameraFragment : Fragment(),
             if (m < handJointMaxAngleLeft) {
                 handJointMaxAngleLeft = m
                 Log.i("Hand Joint Left","Left: $handJointMaxAngleLeft" )
-
             }
         }
 
@@ -862,10 +933,21 @@ class CameraFragment : Fragment(),
             if (m > handJointMaxAngleRight){
                 handJointMaxAngleRight = m
                 Log.i("Hand Joint Right","Right: $handJointMaxAngleRight" )
-
             }
         }
+    }
 
+    // schließen und öffnen aller Finger erkennen
+    private fun openToClosedFingers () {
+
+
+        allFingersClosed = thumbClosed && pointingFingerClosed && ringFingerClosed && middleFingerClosed && littleFingerClosed
+
+        allFingershalfClosed = thumbHalfClosed && pointingFingerHalfClosed && ringFingerHalfClosed && littleFingerHalfClosed && middleFingerHalfClosed
+
+        allFingersOpen = thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen
+
+        Log.i("Alle Finger", "Alle Finger: open: $allFingersOpen, closed: $allFingersClosed, half closed: $allFingershalfClosed")
     }
 
 
@@ -1013,6 +1095,8 @@ class CameraFragment : Fragment(),
        littleFinger(d017, d018, d19, d20, gestureRecognizer)
 
        movingThumb(gestureRecognizer)
+
+       openToClosedFingers()
 
    }
 
