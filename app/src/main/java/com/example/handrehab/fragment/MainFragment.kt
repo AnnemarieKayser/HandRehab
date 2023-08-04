@@ -23,6 +23,10 @@ class MainFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    // === Datenbank === //
+    private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,6 +44,12 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_main_to_permissions)
         }
 
+        binding.buttonLogOut.setOnClickListener {
+            mFirebaseAuth.signOut()
+            val intent = Intent(activity, LoginInActivity::class.java)
+            activity?.startActivity(intent)
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

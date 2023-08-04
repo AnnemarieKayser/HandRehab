@@ -14,4 +14,10 @@
     <style name="AppThemeProgressStyle">
         <item name="colorAccent">@color/mp_color_primary_variant</item>
     </style>
+
+    <style name="Theme.HandRehab.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 </resources>

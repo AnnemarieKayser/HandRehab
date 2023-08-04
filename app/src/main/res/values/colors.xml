@@ -16,4 +16,14 @@
     <color name="icActive">#FFFFFFFF</color>
     <color name="icFocused">#DDFFFFFF</color>
     <color name="icPressed">#AAFFFFFF</color>
+
+    <color name="grey_light">#CFC6C6</color>
+
+    <color name="green">#49613F</color>
+    <color name="green_dark">#94af76</color>
+    <color name="green_dark2">#182015</color>
+    <color name="green_light">#BEFCA4</color>
+    <color name="green_medium">#232F1F</color>
+    <color name="yellow">#8CD34F</color>
+
 </resources>

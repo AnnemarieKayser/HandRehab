@@ -43,5 +43,37 @@
         <item>GPU</item>
     </string-array>
 
+    <!-- LoginInFragment-->
+    <string name="tv_welcome">Willkommen in der HandRehab-App</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_passwort">Passwort</string>
+    <string name="btn_login">Einloggen</string>
+    <string name="tv_passwort">Passwort vergessen?</string>
+    <string name="hint_name">Benutzername</string>
+    <string name="tv_login">Login</string>
+    <string name="tv_signin">Registrieren</string>
+    <string name="tv_login_register">Logge dich ein oder registriere dich!</string>
+    <string name="btn_register">Registrieren</string>
+    <string name="required">erforderlich</string>
+    <string name="verify_mail">Bestätigen Sie ihre Email-Adresse!</string>
+    <string name="login_success">Einloggen erfolgreich!</string>
+    <string name="reminder_verify">Bestätigen Sie ihre Email-Adresse!</string>
+    <string name="reset_pw">Passwort zurückgesetzt</string>
+    <string name="forgotPw_title">Passwort vergessen</string>
+    <string name="forgotPw_msg">Setzen Sie ihr Passwort zurück</string>
+    <string name="button_cancel">Abbrechen</string>
+    <string name="fill_out">Email eintragen</string>
+    <string name="btn_log_out">Ausloggen</string>
+
+    <string name="alert_dialog_message_wifi">Für die Nutzung dieser App wird W-lan benötigt. Bitte verbinde dein Smartphone zunächst mit dem W-lan.</string>
+    <string name="alert_dialog_title_reminder">Erinnerung:</string>
+    <string name="accept">Ok</string>
+
+    <string name="title_home">Startseite</string>
+    <string name="title_exercise">Übungen</string>
+    <string name="title_setting">Einstellungen</string>
+
+    <string name="hand_rehab">HandRehab</string>
+
 
 </resources>
