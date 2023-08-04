@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/MainFragment"
-        android:name="com.example.handrehab.MainFragment"
+        android:name="com.example.handrehab.fragment.MainFragment"
         android:label="@string/main_fragment"
         tools:layout="@layout/fragment_main">
 
@@ -17,10 +17,16 @@
         <action
             android:id="@+id/action_main_to_permissions"
             app:destination="@id/permissionsFragment" />
+        <action
+            android:id="@+id/action_MainFragment_to_exerciseFragment"
+            app:destination="@id/exerciseFragment" />
+        <action
+            android:id="@+id/action_MainFragment_to_settingFragment"
+            app:destination="@id/settingFragment" />
     </fragment>
     <fragment
         android:id="@+id/CameraFragment"
-        android:name="com.example.handrehab.CameraFragment"
+        android:name="com.example.handrehab.fragment.CameraFragment"
         android:label="@string/camera_fragment"
         tools:layout="@layout/fragment_camera">
 
@@ -43,5 +49,23 @@
             app:destination="@id/CameraFragment"
             app:popUpTo="@id/permissionsFragment"
             app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/exerciseFragment"
+        android:name="com.example.handrehab.fragment.ExerciseFragment"
+        android:label="fragment_exercise"
+        tools:layout="@layout/fragment_exercise" >
+        <action
+            android:id="@+id/action_exerciseFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.handrehab.fragment.SettingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" >
+        <action
+            android:id="@+id/action_settingFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
     </fragment>
 </navigation>

@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.moveup.MainActivity"
+    >
+
+    <item
+        android:id="@+id/MainFragment"
+        android:icon="@drawable/ic_home"
+        android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/exerciseFragment"
+        android:icon="@drawable/ic_hand_outlined"
+        android:title="@string/title_exercise"/>
+    <item
+        android:id="@+id/settingFragment"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/title_setting"/>
+
+
+
+
+
+
+</menu>
