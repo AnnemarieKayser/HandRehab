@@ -1,5 +1,6 @@
 package com.example.handrehab
 import androidx.lifecycle.ViewModel
+import com.example.handrehab.fragment.GestureRecognizerHelper
 
 class MainViewModel: ViewModel() {
     private var _delegate: Int = GestureRecognizerHelper.DELEGATE_CPU
