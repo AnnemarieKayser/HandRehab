@@ -1,4 +1,4 @@
-package com.example.handrehab
+package com.example.handrehab.fragment
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -16,10 +16,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.handrehab.MainViewModel
+import com.example.handrehab.PermissionsFragment
+import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentCameraBinding
 import com.google.android.material.math.MathUtils.dist
 import com.google.mediapipe.tasks.vision.core.RunningMode
-import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizer
 import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizerResult
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -157,7 +159,9 @@ class CameraFragment : Fragment(),
         // Make sure that all permissions are still present, since the
         // user could have removed them while the app was in paused state.
         if (!PermissionsFragment.hasPermissions(requireContext())) {
-            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main).navigate(R.id.camera_to_permissons)
+            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main).navigate(
+                R.id.camera_to_permissons
+            )
         }
 
         // Start the GestureRecognizerHelper again when users come back
@@ -475,6 +479,7 @@ class CameraFragment : Fragment(),
         }
     }
 
+
     private fun detectSpreadPointingFinger(d0812: Float) {
 
         //Maximum
@@ -512,7 +517,8 @@ class CameraFragment : Fragment(),
     }
 
     private fun detectClosedFingers (d07: Float, d08: Float, d011: Float, d012: Float, d015: Float, d016: Float,
-    d19: Float, d20: Float, gestureRecognizer: GestureRecognizerResult) {
+                                     d19: Float, d20: Float, gestureRecognizer: GestureRecognizerResult
+    ) {
 
         //Geschlossene Finger detektieren
         //Zeigefinger geschlossen
@@ -952,7 +958,8 @@ class CameraFragment : Fragment(),
 
 
 
-   private fun calculateDistance (gestureRecognizer: GestureRecognizerResult) {
+
+    private fun calculateDistance (gestureRecognizer: GestureRecognizerResult) {
 
        val x0 = gestureRecognizer.worldLandmarks()[0][0].x()
        val y0 = gestureRecognizer.worldLandmarks()[0][0].y()
