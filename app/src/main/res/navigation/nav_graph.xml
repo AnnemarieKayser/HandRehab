@@ -53,7 +53,7 @@
     <fragment
         android:id="@+id/exerciseFragment"
         android:name="com.example.handrehab.fragment.ExerciseFragment"
-        android:label="fragment_exercise"
+        android:label="@string/title_exercise"
         tools:layout="@layout/fragment_exercise" >
         <action
             android:id="@+id/action_exerciseFragment_to_MainFragment"
@@ -62,7 +62,7 @@
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.example.handrehab.fragment.SettingFragment"
-        android:label="fragment_setting"
+        android:label="@string/title_setting"
         tools:layout="@layout/fragment_setting" >
         <action
             android:id="@+id/action_settingFragment_to_MainFragment"

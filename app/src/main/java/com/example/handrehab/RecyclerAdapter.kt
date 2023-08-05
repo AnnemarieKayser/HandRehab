@@ -1,0 +1,53 @@
+package com.example.handrehab
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.handrehab.item.Exercises
+
+class RecyclerAdapter(val listItems: List<Exercises>) :
+    RecyclerView.Adapter<RecyclerAdapter.TextHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextHolder {
+        // Hier wird das Layout eingebunden, wie jede einzelne Zeile der Liste aussehen soll
+        // Diese Datei (recycler_row.xml) anlegen mittels layout->new->layout ressource file
+        return TextHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.recyclerview_row, parent, false)
+        )
+    }
+
+    override fun getItemCount(): Int {
+        return listItems.count()
+    }
+
+    override fun onBindViewHolder(holder: TextHolder, position: Int) {
+        val listItem = listItems[position]
+        holder.bindItemText(listItem)
+    }
+
+    class TextHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
+        private val textView: TextView = v.findViewById(R.id.textViewItem)
+        private var imageView: ImageView = v.findViewById(R.id.item_image)
+
+
+        private var view: View = v
+        private var itemText: String = ""
+
+        // Die Elemente des Views füllen
+        // Im Beispiel nur ein einfacher TextView
+        fun bindItemText(itemText: Exercises) {
+            this.itemText = itemText.textItem
+            textView.text = itemText.textItem
+            imageView.setImageResource(itemText.imageItem)
+        }
+
+        override fun onClick(v: View?) {
+            TODO("Not yet implemented")
+
+        }
+    }
+}
