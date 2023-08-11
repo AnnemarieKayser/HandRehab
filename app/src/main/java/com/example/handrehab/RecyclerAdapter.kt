@@ -8,10 +8,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.handrehab.item.Exercises
 
+
 class RecyclerAdapter(val listItems: List<Exercises>) :
+
     RecyclerView.Adapter<RecyclerAdapter.TextHolder>() {
+    var itemClickListener: AdapterItemClickListener? = null
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextHolder {
+
         // Hier wird das Layout eingebunden, wie jede einzelne Zeile der Liste aussehen soll
         // Diese Datei (recycler_row.xml) anlegen mittels layout->new->layout ressource file
         return TextHolder(
@@ -26,7 +31,14 @@ class RecyclerAdapter(val listItems: List<Exercises>) :
 
     override fun onBindViewHolder(holder: TextHolder, position: Int) {
         val listItem = listItems[position]
+        this.itemClickListener = itemClickListener;
         holder.bindItemText(listItem)
+        holder.itemView.setOnClickListener { v ->
+            itemClickListener!!.onItemClickListener(
+                listItem,
+                position
+            )
+        }
     }
 
     class TextHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
@@ -49,5 +61,16 @@ class RecyclerAdapter(val listItems: List<Exercises>) :
             TODO("Not yet implemented")
 
         }
+
     }
+
+    // A function to bind the onclickListener.
+    fun setOnClickListener(itemClickListener: AdapterItemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+    interface AdapterItemClickListener {
+        fun onItemClickListener(exercises: Exercises, position: Int)
+    }
+
+
 }

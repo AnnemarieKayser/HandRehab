@@ -10,7 +10,7 @@
         android:title="@string/title_home" />
 
     <item
-        android:id="@+id/exerciseFragment"
+        android:id="@+id/exerciseListFragment"
         android:icon="@drawable/ic_hand_outlined"
         android:title="@string/title_exercise"/>
     <item

@@ -74,6 +74,14 @@
     <string name="title_setting">Einstellungen</string>
 
     <string name="hand_rehab">HandRehab</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_view_description">Hier steht die Beschreibung zu dieser Übung. Die Übung wird erläutert und erklärt. Stellen Sie zunächst die Anzahl
+    an Wiederholungen und die Anzahl an Sätzen für diese Übung fest. Anschließend drücken sie den "Start"-Knopf und die Übung kann druchgeführt werden. Nehme sie sie Hand aus
+    dem Bild um eine Pause einzulegen, die Übung wird dadruch pausiert. Stellen sie die rechte oder linke Hand ein.</string>
+    <string name="text_view_title_exercise">Titel der Übung</string>
+    <string name="button_start">Übung starten</string>
+    <string name="hint_text_repetitions">Wiederholungen</string>
+    <string name="hint_text_sets">Sätze</string>
 
 
 </resources>
