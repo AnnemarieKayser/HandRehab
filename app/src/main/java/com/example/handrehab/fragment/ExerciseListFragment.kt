@@ -7,8 +7,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.handrehab.MainViewModel
 import com.example.handrehab.R
 import com.example.handrehab.RecyclerAdapter
 import com.example.handrehab.databinding.FragmentExerciseListBinding
@@ -22,6 +24,9 @@ class ExerciseListFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var layoutManager : LinearLayoutManager
     private lateinit var adapter : RecyclerAdapter
+
+    // === Viewmodel === //
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +54,7 @@ class ExerciseListFragment : Fragment() {
         adapter.setOnClickListener(object : RecyclerAdapter.AdapterItemClickListener {
             override fun onItemClickListener(exercises: Exercises, position: Int) {
                 findNavController().navigate(R.id.action_exerciseListFragment_to_exerciseFragment)
+                viewModel.setSelectedExercise(exercises)
             }
         })
 

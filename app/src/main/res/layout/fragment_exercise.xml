@@ -17,7 +17,7 @@
             android:id="@+id/FrameLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
+
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -42,7 +42,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/text_view_description"
             android:textAlignment="textStart"
-            app:layout_constraintStart_toStartOf="@+id/FrameLayout"
+            app:layout_constraintStart_toStartOf="@+id/textViewTitle"
             app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
 
         <TextView
@@ -61,20 +61,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
+            android:text="@string/button_start"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.444"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editTextRepetition"
-            tools:text="@string/button_start" />
+            app:layout_constraintTop_toBottomOf="@+id/editTextRepetition" />
 
         <EditText
             android:id="@+id/editTextSets"
             android:layout_width="140dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
             android:ems="10"
             android:hint="@string/hint_text_sets"
             android:inputType="number"
-            app:layout_constraintEnd_toEndOf="parent"
+
+            android:minHeight="48dp"
             app:layout_constraintStart_toEndOf="@+id/editTextRepetition"
             app:layout_constraintTop_toTopOf="@+id/editTextRepetition" />
 
@@ -82,12 +84,12 @@
             android:id="@+id/editTextRepetition"
             android:layout_width="140dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
             android:layout_marginTop="32dp"
             android:ems="10"
             android:hint="@string/hint_text_repetitions"
             android:inputType="number"
-            app:layout_constraintStart_toStartOf="parent"
+            android:minHeight="48dp"
+            app:layout_constraintStart_toStartOf="@+id/textViewDescription"
             app:layout_constraintTop_toBottomOf="@+id/textViewDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

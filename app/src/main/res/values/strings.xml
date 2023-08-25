@@ -84,4 +84,32 @@
     <string name="hint_text_sets">Sätze</string>
 
 
+    <!-- Titel der Übungen-->
+    <string name="title_hand_extension_flexion">Finger Extension/Flexion</string>
+    <string name="title_little_finger_extension_flexion">Kleiner Finger Extension/Flexion</string>
+    <string name="title_middle_finger_extension_flexion">Mittelfinger Extension/Flexion</string>
+    <string name="title_pointing_finger_extension_flexion">Zeigefinger Extension/Flexion</string>
+    <string name="title_thumb_extension_flexion">Daumen Extension/Flexion</string>
+
+
+
+
+    <!-- Beschreibung der Übungen-->
+    <string name="description_hand_extension_flexion">Starten Sie mit einer offnen Handfläche. Schließen Sie anschließend die Finger zu einer Faust zusammen.
+    Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
+    nächsten Satz.</string>
+    <string name="description_little_finger_extension_flexion">Öffnen Sie die Handfläche. Spreizen Sie den kleinen Finger von dem Ringfinger weg und ziehen sie diesen anschließend
+        wieder zu diesem hin. Die Haltung der restlichen Finger kann nach individueller Präferenz geschlossen oder gespreizt sein. Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
+    nächsten Satz.</string>
+    <string name="description_middle_finger_extension_flexion">Öffnen Sie die Handfläche. Spreizen Sie den kleinen Finger und den Ringfinger zusammen weg und ziehen sie diese anschließend
+        wieder zusammen. Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
+    nächsten Satz.</string>
+    <string name="description_thumb_extension_flexion">Öffnen Sie die Handfläche. Spreizen Sie den Daumen weg und ziehen sie diese anschließend
+        wieder zum Zeigefinger hin. Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
+    nächsten Satz.</string>
+    <string name="description_pointing_finger_extension_flexion">Schließend Sie ihre Finger zu einer Faust zusammen. Anschließend öffnen Sie lediglich den Zeigefinger so weit wie möglich und schließend diesen anschließend
+        wieder. Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
+    nächsten Satz.</string>
+
+
 </resources>

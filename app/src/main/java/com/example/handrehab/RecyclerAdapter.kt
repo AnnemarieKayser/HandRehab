@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.handrehab.item.Exercises
+import com.example.handrehab.R
 
 
 class RecyclerAdapter(val listItems: List<Exercises>) :
@@ -51,6 +52,7 @@ class RecyclerAdapter(val listItems: List<Exercises>) :
 
         // Die Elemente des Views füllen
         // Im Beispiel nur ein einfacher TextView
+
         fun bindItemText(itemText: Exercises) {
             this.itemText = itemText.textItem
             textView.text = itemText.textItem
