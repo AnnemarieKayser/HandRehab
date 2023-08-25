@@ -1,7 +1,9 @@
 package com.example.handrehab
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.handrehab.fragment.CameraFragment
 import com.example.handrehab.fragment.GestureRecognizerHelper
 import com.example.handrehab.item.Exercises
 
@@ -17,6 +19,11 @@ class MainViewModel: ViewModel() {
     private var _selectedExercise = MutableLiveData<Exercises?>()
     private var _repetitions = MutableLiveData<Int>()
     private var _sets = MutableLiveData<Int>()
+
+    //Kleiner Finger
+    private var _littleFingerCounter = MutableLiveData<Int>()
+
+
     val selectedExercise: LiveData<Exercises?>
         get() = _selectedExercise
 
@@ -26,12 +33,27 @@ class MainViewModel: ViewModel() {
     val sets: LiveData<Int>
         get() = _sets
 
+    val counter: LiveData<Int>
+        get() = _littleFingerCounter
+
+    fun littleFingerCounter() {
+        _littleFingerCounter.value = (_littleFingerCounter.value ?: 0) + 1
+    }
+
     init {
         _selectedExercise.value = null
         _repetitions.value = 0
         _sets.value = 0
+        _littleFingerCounter.value = 0
     }
 
+    fun getCounterLittleFinger(): Int? {
+        return _littleFingerCounter.value
+    }
+
+    fun setCounterLittleFinger(counter: Int){
+        _littleFingerCounter.value = counter
+    }
     fun getRepetitions(): Int? {
         return _repetitions.value
     }
@@ -86,5 +108,7 @@ class MainViewModel: ViewModel() {
     fun <T> MutableLiveData<T>.notifyObserver() {
         this.value = this.value
     }
+
+    //Funktionen Gestenerkennung
 
 }

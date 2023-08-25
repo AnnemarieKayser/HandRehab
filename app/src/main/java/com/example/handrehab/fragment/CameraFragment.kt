@@ -38,15 +38,15 @@ class CameraFragment : Fragment(),
     GestureRecognizerHelper.GestureRecognizerListener {
 
     companion object {
-        private const val TAG = "Hand gesture recognizer"
-        private const val TAG2 = "open palm detector"
-        private const val TAG3 = "little Finger"
-        private const val TAG4 = "Thumb"
-        private const val TAG5 = "Middle Finger"
-        private const val TAG6 = "All Fingers spread"
-        private const val TAG7 = "Thumb counter"
-        private const val TAG8 = "Pointing Finger"
-        private const val TAG9 = "x Koordinaten"
+        private const val TAG = "test123Hand gesture recognizer"
+        private const val TAG2 = "test123open palm detector"
+        const val TAG3 = "test123little Finger"
+        private const val TAG4 = "test123Thumb"
+        private const val TAG5 = "test123Middle Finger"
+        private const val TAG6 = "test123All Fingers spread"
+        private const val TAG7 = "test123Thumb counter"
+        private const val TAG8 = "test123Pointing Finger"
+        private const val TAG9 = "test123 xKoordinaten"
 
 
     }
@@ -82,7 +82,6 @@ class CameraFragment : Fragment(),
     private var distFingersSpreadMin = 10f
     private var fingersSpreadCounter = 0
 
-    private var dist1620Before = 0f
     private var distLittleFingerSpreadMax = 0f
     private var distLittleFingerSpreadMin = 10f
     private var littleFingerSpread = false
@@ -150,6 +149,8 @@ class CameraFragment : Fragment(),
     private var handJointMaxAngleLeft = 90.0
     private var handJointMaxAngleRight = -90.0
 
+    //Counter all
+    private var counter = 0
 
     /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
@@ -459,6 +460,7 @@ class CameraFragment : Fragment(),
                     gestureRecognizerResultAdapter.updateResults(emptyList())
                     fingersSpreadCounter = 0
                     littleFingerCounter = 0
+                    counter = 0
                     counterUpDown = 0
                 }
 
@@ -470,7 +472,8 @@ class CameraFragment : Fragment(),
                     resultBundle.results.first(),
                     resultBundle.inputImageHeight,
                     resultBundle.inputImageWidth,
-                    RunningMode.LIVE_STREAM
+                    RunningMode.LIVE_STREAM,
+                    counter
                 )
 
                 // Force a redraw
@@ -502,7 +505,7 @@ class CameraFragment : Fragment(),
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
         if(d0812 > (distFingersSpreadMin + distMinMax/2)) {
             if(!pointingFingerSpread) {
-                fingersSpreadCounter++
+                counter++
                 Log.i(TAG2, "Finger Spread counter: $fingersSpreadCounter")
                 pointingFingerSpread = true
             }
@@ -551,7 +554,7 @@ class CameraFragment : Fragment(),
 
         // Wenn alle Finger geschlossen sind, wird der Counter für die Anzahl an Wiederholungen hochgezählt
         if(closed.size == 4 && !allFingersClosed) {
-            counterRepetition++
+            counter++
             Log.i(TAG2, "Wiederholungen: $counterRepetition")
             allFingersClosed = true
             closed.clear()
@@ -600,8 +603,6 @@ class CameraFragment : Fragment(),
             Log.i(TAG3, "Minimale Distanz kleiner finger: $distLittleFingerSpreadMin")
         }
 
-        dist1620Before = d1620
-
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
         val distMinMax = distLittleFingerSpreadMax - distLittleFingerSpreadMin
         Log.i(TAG3, "Maximale Distanz: $distMinMax")
@@ -609,7 +610,7 @@ class CameraFragment : Fragment(),
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
         if(d1620 > (distLittleFingerSpreadMin + distMinMax/2)) {
             if(!littleFingerSpread) {
-                littleFingerCounter++
+                counter++
                 Log.i(TAG3, "Finger Spread counter: $fingersSpreadCounter")
                 littleFingerSpread = true
             }
@@ -645,7 +646,7 @@ class CameraFragment : Fragment(),
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
         if(d0408 > (distThumbSpreadMin + distMinMax/2)) {
             if(!thumbSpread) {
-                thumbSpreadCounter++
+                counter++
                 Log.i(TAG4, "Thumb Spread counter: $thumbSpreadCounter")
                 thumbSpread = true
             }
@@ -689,7 +690,7 @@ class CameraFragment : Fragment(),
 
         if(d1216 < ((distMiddleFingerSpreadMin + distMinMax/2))) {
             if(middleFingerSpread) {
-                middleFingerSpreadCounter++
+                counter++
                 middleFingerSpread = false
             }
         }
@@ -957,8 +958,6 @@ class CameraFragment : Fragment(),
     }
 
 
-
-
     private fun calculateDistance (gestureRecognizer: GestureRecognizerResult) {
 
        val x0 = gestureRecognizer.worldLandmarks()[0][0].x()
@@ -1025,7 +1024,6 @@ class CameraFragment : Fragment(),
        val y20 = gestureRecognizer.worldLandmarks()[0][20].y()
 
 
-
        //Berechnung der Distanz Fingerspitze - Grundgelenk und Mittelgelenk Finger - Grundgelenk
        val d08 = dist(x0, y0, x8, y8)
        val d07 = dist(x0, y0, x7, y7)
@@ -1044,7 +1042,6 @@ class CameraFragment : Fragment(),
        val d016 = dist(x0, y0, x16, y16)
        val d017 = dist(x0, y0, x17, y17)
        val d018 = dist(x0, y0, x18, y18)
-
 
        val d20 = dist(x0, y0, x20, y20)
        val d19 = dist(x0, y0, x19, y19)
@@ -1077,34 +1074,31 @@ class CameraFragment : Fragment(),
        val bd0408 = BigDecimal(d0408.toDouble())
        d0408 = bd0408.setScale(4, RoundingMode.DOWN).toFloat()
 
-       tiltHandJoint(x9, x0, y9, y0)
-
-       detectSpreadPointingFinger(d0812)
-
-       detectSpreadLittleFinger(d1620)
-
-       detectThumbSpread(d0408)
-
-       detectMiddleFingerSpread(d1216)
-
-       detectAllFingersSpread()
-
-       detectClosedFingers(d07, d08, d011, d012, d015, d016, d19, d20, gestureRecognizer)
-
+        when(viewModel.getSelectedExercise()?.id) {
+            1 -> {
+                detectSpreadLittleFinger(d1620)
+                detectMiddleFingerSpread(d1216)
+                detectSpreadPointingFinger(d0812)
+                detectThumbSpread(d0408)
+                detectAllFingersSpread()
+            }
+            2 -> detectSpreadLittleFinger(d1620)
+            3 -> detectMiddleFingerSpread(d1216)
+            4 -> detectSpreadPointingFinger(d0812)
+            5 -> detectThumbSpread(d0408)
+            6 -> tiltHandJoint(x9, x0, y9, y0)
+            7 -> detectClosedFingers(d07, d08, d011, d012, d015, d016, d19, d20, gestureRecognizer)
+            8 -> pointingFinger(d08, d07, d06, d05, gestureRecognizer)
+            9 -> middleFinger(d09, d010, d011, d012, gestureRecognizer)
+            10 -> ringFinger(d013, d014, d015, d016, gestureRecognizer)
+            11 -> littleFinger(d017, d018, d19, d20, gestureRecognizer)
+            12 -> movingThumb(gestureRecognizer)
+            13 -> openToClosedFingers()
+            else -> {
+                //Nothing
+            }
+        }
        detectOrientation(x9, x0, y9, y0)
-
-       pointingFinger(d08, d07, d06, d05, gestureRecognizer)
-
-       middleFinger(d09, d010, d011, d012, gestureRecognizer)
-
-       ringFinger(d013, d014, d015, d016, gestureRecognizer)
-
-       littleFinger(d017, d018, d19, d20, gestureRecognizer)
-
-       movingThumb(gestureRecognizer)
-
-       openToClosedFingers()
-
    }
 
     private fun thumbUpThumbDown (gestureRecognizer: GestureRecognizerResult) {
@@ -1115,7 +1109,7 @@ class CameraFragment : Fragment(),
 
         if(gestureRecognizer.gestures().first()[0].categoryName() == "Thumb_Down" && thumbUp){
             thumbUp = false
-            counterUpDown++
+            counter++
             Log.i(TAG7, "Thumb counter: $counterUpDown")
         }
 

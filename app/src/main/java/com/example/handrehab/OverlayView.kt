@@ -22,6 +22,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizerResult
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
@@ -35,10 +36,15 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var linePaint = Paint()
     private var pointPaint = Paint()
     private var numberPaint = Paint()
+    private var counterPaint = Paint()
 
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
+
+    private var counterFinger = 0
+
+
 
     init {
         initPaints()
@@ -58,7 +64,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         linePaint.style = Paint.Style.STROKE
 
-
         pointPaint.color = Color.YELLOW
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
@@ -67,6 +72,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
         var i = 0
+        counterPaint.color = Color.WHITE
+        counterPaint.setTextSize(50F)
+        canvas.drawText("Wiederholungen: $counterFinger", 100F, 100F, counterPaint)
+        canvas.drawText("Sets: ", 100F, 200F, counterPaint)
         results?.let { gestureRecognizerResult ->
             for(landmark in gestureRecognizerResult.landmarks()) {
                 for(normalizedLandmark in landmark) {
@@ -109,8 +118,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         gestureRecognizerResult: GestureRecognizerResult,
         imageHeight: Int,
         imageWidth: Int,
-        runningMode: RunningMode = RunningMode.IMAGE
+        runningMode: RunningMode = RunningMode.IMAGE,
+        counter: Int
     ) {
+
+        counterFinger = counter
         results = gestureRecognizerResult
 
         this.imageHeight = imageHeight

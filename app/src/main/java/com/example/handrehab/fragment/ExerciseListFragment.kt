@@ -53,8 +53,8 @@ class ExerciseListFragment : Fragment() {
         // Applying OnClickListener to our Adapter
         adapter.setOnClickListener(object : RecyclerAdapter.AdapterItemClickListener {
             override fun onItemClickListener(exercises: Exercises, position: Int) {
-                findNavController().navigate(R.id.action_exerciseListFragment_to_exerciseFragment)
                 viewModel.setSelectedExercise(exercises)
+                findNavController().navigate(R.id.action_exerciseListFragment_to_exerciseFragment)
             }
         })
 
