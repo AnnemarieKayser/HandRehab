@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.MainFragment, R.id.exerciseListFragment, R.id.settingFragment
+                R.id.MainFragment, R.id.dataFragment, R.id.exerciseListFragment, R.id.settingFragment
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

@@ -92,8 +92,6 @@
     <string name="title_thumb_extension_flexion">Daumen Extension/Flexion</string>
 
 
-
-
     <!-- Beschreibung der Übungen-->
     <string name="description_hand_extension_flexion">Starten Sie mit einer offnen Handfläche. Schließen Sie anschließend die Finger zu einer Faust zusammen.
     Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
@@ -110,6 +108,7 @@
     <string name="description_pointing_finger_extension_flexion">Schließend Sie ihre Finger zu einer Faust zusammen. Anschließend öffnen Sie lediglich den Zeigefinger so weit wie möglich und schließend diesen anschließend
         wieder. Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
     nächsten Satz.</string>
+    <string name="title_data">Daten\n</string>
 
 
 </resources>

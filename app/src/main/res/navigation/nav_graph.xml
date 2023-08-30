@@ -80,4 +80,9 @@
             android:id="@+id/action_exerciseFragment_to_permissionsFragment"
             app:destination="@id/permissionsFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/dataFragment"
+        android:name="com.example.handrehab.fragment.DataFragment"
+        android:label="@string/title_data"
+        tools:layout="@layout/fragment_data" />
 </navigation>

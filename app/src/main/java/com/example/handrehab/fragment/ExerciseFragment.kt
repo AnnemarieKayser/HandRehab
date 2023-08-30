@@ -10,9 +10,16 @@ import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.handrehab.Data
 import com.example.handrehab.MainViewModel
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentExerciseBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
 
 
 class ExerciseFragment : Fragment() {
@@ -25,6 +32,12 @@ class ExerciseFragment : Fragment() {
 
     // === Viewmodel === //
     private val viewModel: MainViewModel by activityViewModels()
+
+    // === Firebase database === //
+    private val db : FirebaseFirestore by lazy { FirebaseFirestore.getInstance()  }
+    private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private var counterExercise = 0
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +56,8 @@ class ExerciseFragment : Fragment() {
             binding.editTextSets.text.toString().toIntOrNull()
                 ?.let { it1 -> viewModel.setSets(it1) }
             Log.i("Repetition", viewModel.getRepetitions().toString())
+            counterExercise++
+            insertDataInDb(counterExercise)
             findNavController().navigate(R.id.action_exerciseFragment_to_permissionsFragment)
 
         }
@@ -69,6 +84,34 @@ class ExerciseFragment : Fragment() {
 
 
 
+    }
+
+    private fun insertDataInDb(counter: Int) {
+
+        // Weather Objekt mit Daten befüllen (ID wird automatisch ergänzt)
+        val data = Data()
+        data.setCounterExercises(counter)
+
+        // Wandle String date (im Format yyyy-MM-dd !!!) um in ein Date Objekt
+        /*val dateFormat: DateFormat = SimpleDateFormat("yyyy-MM-dd")
+        var datetimestamp: Date? = null
+        try {
+            datetimestamp = dateFormat.parse("")
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }*/
+        //data.setDateTimestamp(datetimestamp)
+
+        // Schreibe Daten als Document in die Collection Messungen in DB;
+        // Eine id als Document Name wird automatisch vergeben
+        // Implementiere auch onSuccess und onFailure Listender
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("Daten")
+            .add(data)
+            .addOnSuccessListener { documentReference ->
+            }
+            .addOnFailureListener { e ->
+            }
     }
 
     override fun onDestroyView() {

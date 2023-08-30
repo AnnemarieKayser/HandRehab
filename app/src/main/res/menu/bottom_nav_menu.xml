@@ -10,6 +10,11 @@
         android:title="@string/title_home" />
 
     <item
+        android:id="@+id/dataFragment"
+        android:icon="@drawable/ic_data"
+        android:title="@string/title_data"/>
+
+    <item
         android:id="@+id/exerciseListFragment"
         android:icon="@drawable/ic_hand_outlined"
         android:title="@string/title_exercise"/>
@@ -17,6 +22,8 @@
         android:id="@+id/settingFragment"
         android:icon="@drawable/ic_settings"
         android:title="@string/title_setting"/>
+
+
 
 
 
