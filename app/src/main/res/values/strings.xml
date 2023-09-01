@@ -109,6 +109,11 @@
         wieder. Wiederholen sie diese Bewegung so oft bis die festgelegt Anzahl erreicht ist. Lege Sie anschließend eine kurze Pause ein und starten anschließend mit dem
     nächsten Satz.</string>
     <string name="title_data">Daten\n</string>
+    <string name="save">Daten gespeichert</string>
+    <string name="not_save">Daten nicht gespeichert</string>
+    <string name="date_picker_title">Wähle ein Datum aus</string>
+    <string name="chart_title">Anzahl abgeschlossener Übungen</string>
+    <string name="btn_get_data">Daten</string>
 
 
 </resources>

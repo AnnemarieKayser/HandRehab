@@ -43,6 +43,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var imageHeight: Int = 1
 
     private var counterFinger = 0
+    private var repetitions: Int? = 0
+    private var sets: Int? = 0
+    private var setsCompleted = 0
+    private var exerciseCompleted = false
 
 
 
@@ -74,8 +78,12 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         var i = 0
         counterPaint.color = Color.WHITE
         counterPaint.setTextSize(50F)
-        canvas.drawText("Wiederholungen: $counterFinger", 100F, 100F, counterPaint)
-        canvas.drawText("Sets: ", 100F, 200F, counterPaint)
+        if(exerciseCompleted){
+            canvas.drawText("Übung abgeschlossen", 100F, 100F, counterPaint)
+        } else {
+            canvas.drawText("Wiederholungen: $counterFinger / $repetitions", 100F, 100F, counterPaint)
+            canvas.drawText("Sets: $setsCompleted / $sets", 100F, 200F, counterPaint)
+        }
         results?.let { gestureRecognizerResult ->
             for(landmark in gestureRecognizerResult.landmarks()) {
                 for(normalizedLandmark in landmark) {
@@ -119,11 +127,19 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         imageHeight: Int,
         imageWidth: Int,
         runningMode: RunningMode = RunningMode.IMAGE,
-        counter: Int
+        counter: Int,
+        setsCompleted1: Int,
+        repetitions1: Int?,
+        sets1: Int?,
+        statusExercise: Boolean
     ) {
 
+        repetitions = repetitions1
+        sets = sets1
         counterFinger = counter
         results = gestureRecognizerResult
+        setsCompleted = setsCompleted1
+        exerciseCompleted = statusExercise
 
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth

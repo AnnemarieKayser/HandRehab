@@ -16,15 +16,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.handrehab.Data
 import com.example.handrehab.MainViewModel
 import com.example.handrehab.PermissionsFragment
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentCameraBinding
 import com.google.android.material.math.MathUtils.dist
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizerResult
+import splitties.toast.toast
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -52,6 +58,10 @@ class CameraFragment : Fragment(),
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
+
+    // === Firebase database === //
+    private val db : FirebaseFirestore by lazy { FirebaseFirestore.getInstance()  }
+    private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
@@ -108,6 +118,7 @@ class CameraFragment : Fragment(),
     private var allFingersOpen = false
     private var allFingersClosed = false
     private var allFingershalfClosed = false
+    private var counterAllFingersSpread = 0
 
     //Thumb
     private var thumbOpen = false
@@ -148,9 +159,12 @@ class CameraFragment : Fragment(),
     //Hand Joint angle
     private var handJointMaxAngleLeft = 90.0
     private var handJointMaxAngleRight = -90.0
+    private var handJointLeft = false
 
     //Counter all
     private var counter = 0
+    private var sets = 0
+    private var exerciseCompleted = false
 
     /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
@@ -467,19 +481,89 @@ class CameraFragment : Fragment(),
                 fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
                     String.format("%d ms", resultBundle.inferenceTime)
 
+                if(viewModel.getSelectedExercise()?.id == 1){
+                    counter = counterAllFingersSpread
+                }
+
+                if(counter == viewModel.getRepetitions()) {
+                    counter = 0
+                    counterAllFingersSpread = 0
+                    sets++
+
+                    if(sets == viewModel.getSets()) {
+                        //Übung abgeschlossen
+                        exerciseCompleted = true
+
+                        //Speichern der Übung in der Datenbank
+                        saveExercise()
+                        viewModel.setSets(0)
+                        viewModel.setRepetitions(0)
+                    }
+                }
+
+
+
                 // Pass necessary information to OverlayView for drawing on the canvas
                 fragmentCameraBinding.overlay.setResults(
                     resultBundle.results.first(),
                     resultBundle.inputImageHeight,
                     resultBundle.inputImageWidth,
                     RunningMode.LIVE_STREAM,
-                    counter
+                    counter,
+                    sets,
+                    viewModel.getRepetitions(),
+                    viewModel.getSets(),
+                    exerciseCompleted
                 )
 
                 // Force a redraw
                 fragmentCameraBinding.overlay.invalidate()
             }
         }
+    }
+
+    private fun saveExercise() {
+
+
+        // Einlesen des aktuellen Datums
+        val kalender: Calendar = Calendar.getInstance()
+        val zeitformat = SimpleDateFormat("yyyy-MM-dd")
+        val hourFormat =  SimpleDateFormat("hh-mm-ss")
+        val date = zeitformat.format(kalender.time)
+        val hour = hourFormat.format(kalender.time)
+
+        var datetimestamp: Date? = null
+        try {
+            datetimestamp = zeitformat.parse(date)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+
+
+        //Data Objekt mit Daten befüllen (ID wird automatisch ergänzt)
+        val data = Data()
+        data.setCounterExercises(counter)
+        data.setRepetitions(viewModel.getRepetitions()!!)
+        data.setSets(viewModel.getSets()!!)
+        data.setExerciseName(viewModel.getSelectedExercise()!!.textItem)
+        data.setDate(datetimestamp!!)
+
+
+        // Schreibe Daten als Document in die Collection Messungen in DB;
+        // Eine id als Document Name wird automatisch vergeben
+        // Implementiere auch onSuccess und onFailure Listender
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("Daten")
+            .add(data)
+            .addOnSuccessListener { documentReference ->
+                toast(getString(R.string.save))
+
+            }
+            .addOnFailureListener { e ->
+                toast(getString(R.string.not_save))
+            }
+
+
     }
 
 
@@ -699,6 +783,9 @@ class CameraFragment : Fragment(),
     private fun detectAllFingersSpread () {
 
         if(thumbSpread && middleFingerSpread && littleFingerSpread && pointingFingerSpread) {
+            if(!allFingersSpread){
+                counterAllFingersSpread++
+            }
             allFingersSpread = true
             Log.i(TAG6, "Alle Finger offen")
         }
@@ -735,6 +822,10 @@ class CameraFragment : Fragment(),
 
                 if(dist08 < dist05) {
                     Log.i(TAG8, "ZeigeFinger geschlossen")
+
+                    if(!pointingFingerClosed) {
+                        counter++
+                    }
                     pointingFingerClosed = true
                     pointingFingerHalfClosed = false
                 } else {
@@ -778,6 +869,10 @@ class CameraFragment : Fragment(),
             if(dist012 < dist010) {
 
                 if(dist012 < dist09) {
+
+                    if(!middleFingerClosed){
+                        counter++
+                    }
                     middleFingerClosed = true
                     middleFingerHalfClosed = false
                     Log.i(TAG8, "MittelFinger geschlossen")
@@ -821,6 +916,10 @@ class CameraFragment : Fragment(),
             if(dist016 < dist014) {
 
                 if(dist016 < dist013) {
+
+                    if(!ringFingerClosed){
+                        counter++
+                    }
                     ringFingerClosed = true
                     ringFingerHalfClosed = false
                     Log.i(TAG8, "ringFinger geschlossen")
@@ -864,6 +963,9 @@ class CameraFragment : Fragment(),
             if(dist020 < dist018) {
 
                 if(dist020 < dist017) {
+                    if(!littleFingerClosed){
+                        counter++
+                    }
                     littleFingerClosed = true
                     littleFingerHalfClosed = false
                     Log.i(TAG8, "little Finger geschlossen")
@@ -906,6 +1008,9 @@ class CameraFragment : Fragment(),
 
                 if (x4Normalized > x9Normalized) {
                     //Daumen überkreut Mittelfinger
+                    if(!thumbClosed){
+                        counter++
+                    }
                     thumbClosed = true
                     thumbHalfClosed = false
                     if (x4Normalized > x13Normalized) {
@@ -930,6 +1035,11 @@ class CameraFragment : Fragment(),
         Log.i("Hand Joint","$m" )
 
         if(m>0) {
+
+            if(!handJointLeft){
+                counter++
+                handJointLeft = true
+            }
             if (m < handJointMaxAngleLeft) {
                 handJointMaxAngleLeft = m
                 Log.i("Hand Joint Left","Left: $handJointMaxAngleLeft" )
@@ -937,6 +1047,7 @@ class CameraFragment : Fragment(),
         }
 
         if(m<0) {
+            handJointLeft = false
             if (m > handJointMaxAngleRight){
                 handJointMaxAngleRight = m
                 Log.i("Hand Joint Right","Right: $handJointMaxAngleRight" )

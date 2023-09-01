@@ -1,5 +1,6 @@
 package com.example.handrehab.fragment
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +21,8 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
+import splitties.toast.toast
+
 
 
 class ExerciseFragment : Fragment() {
@@ -57,8 +60,11 @@ class ExerciseFragment : Fragment() {
                 ?.let { it1 -> viewModel.setSets(it1) }
             Log.i("Repetition", viewModel.getRepetitions().toString())
             counterExercise++
-            insertDataInDb(counterExercise)
-            findNavController().navigate(R.id.action_exerciseFragment_to_permissionsFragment)
+           // insertDataInDb(counterExercise)
+            if(viewModel.getRepetitions() == 0 || viewModel.getSets() == 0){
+                toast("Trage bitte eine Anzahl ein")
+                binding.editTextRepetition.setHintTextColor(Color.RED)
+            } else findNavController().navigate(R.id.action_exerciseFragment_to_permissionsFragment)
 
         }
 

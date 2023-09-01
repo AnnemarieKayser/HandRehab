@@ -72,5 +72,11 @@ dependencies {
     implementation 'com.louiscad.splitties:splitties-alertdialog:3.0.0'
     implementation 'com.mikhaellopez:circularprogressbar:3.1.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
+    implementation("com.louiscad.splitties:splitties-toast:3.0.0")
+    implementation 'com.github.AAChartModel:AAChartCore-Kotlin:7.2.0'
+    implementation 'com.mikhaellopez:circularprogressbar:3.1.0'
+
+
+
 
 }
