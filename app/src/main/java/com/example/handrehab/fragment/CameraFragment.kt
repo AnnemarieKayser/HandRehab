@@ -527,10 +527,11 @@ class CameraFragment : Fragment(),
 
         // Einlesen des aktuellen Datums
         val kalender: Calendar = Calendar.getInstance()
-        val zeitformat = SimpleDateFormat("yyyy-MM-dd")
+        val zeitformat = SimpleDateFormat("yyyy-MM-dd-hh-mm")
         val hourFormat =  SimpleDateFormat("hh-mm-ss")
         val date = zeitformat.format(kalender.time)
         val hour = hourFormat.format(kalender.time)
+        val day = kalender.get(Calendar.DAY_OF_WEEK) - 2
 
         var datetimestamp: Date? = null
         try {
@@ -547,6 +548,7 @@ class CameraFragment : Fragment(),
         data.setSets(viewModel.getSets()!!)
         data.setExerciseName(viewModel.getSelectedExercise()!!.textItem)
         data.setDate(datetimestamp!!)
+        data.setDayOfWeek(day)
 
 
         // Schreibe Daten als Document in die Collection Messungen in DB;

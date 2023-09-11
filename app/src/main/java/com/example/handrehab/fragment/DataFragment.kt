@@ -23,9 +23,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import splitties.toast.longToast
 import splitties.toast.toast
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -52,11 +50,22 @@ class DataFragment : Fragment() {
     private var aaChartModel = AAChartModel()
     private var arrayWeekDays = arrayOfNulls<Any>(7)
 
+    // === week days === //
+    private var monday = 0
+    private var thuesday = 0
+    private var wednesday = 0
+    private var thursday = 0
+    private var friday = 0
+    private var saturday = 0
+    private var sunday = 0
+    private var counterWeeksSunday = 0
+    private var counterWeeksMonday = 0
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentDataBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -66,6 +75,22 @@ class DataFragment : Fragment() {
 
         binding.buttonGetData.setOnClickListener {
             loadDbData()
+        }
+
+        binding.imageButtonBefore.setOnClickListener {
+            counterWeeksMonday+= 7
+            counterWeeksSunday += 1
+            loadDbData()
+        }
+
+        binding.imageButtonAfter.setOnClickListener {
+            if(counterWeeksSunday != 0 && counterWeeksMonday != 0) {
+                counterWeeksMonday -= 7
+                counterWeeksSunday -= 1
+                loadDbData()
+            } else {
+                toast("Aktuelles Datum")
+            }
         }
 
 
@@ -162,87 +187,48 @@ class DataFragment : Fragment() {
     // Einlesen der Daten aus der Datenbank
     private fun loadDbData() {
 
-       // db.collection("users").document(uid).collection(date).document(viewModel.getSelectedExercise()!!.textItem).collection(hour)
+        val seriesArr = configureChartSeriesArray()
+        binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
 
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("yyyy-MM-dd")
-        val dayNumberFormat = SimpleDateFormat("c")
-        var dayNumber = dayNumberFormat.format(calendar.time)
-     //   var date2 = format.format(calendar.time)
-      //  toast(date2)
 
-       // val myDate: Date = format.parse(calendar.time.toString())
+        val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
 
-        //val calendar = Calendar.getInstance()
-       // calendar.time = myDate
-        //calendar.add(Calendar.DAY_OF_WEEK, -2)
-        val day = calendar.get(Calendar.DAY_OF_WEEK)
-        toast(day.toString())
-       // val newDate: Date = calendar.time
-        //val date: String = dayNumberFormat.format(newDate)
-        //longToast(date)
+        calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
 
+        val dateMonday = format.format(calendar.time)
 
-            //calendar.add(Calendar.DAY_OF_WEEK, -2)
-            calendar.add(Calendar.DAY_OF_WEEK, -day)
-            // val day = calendar.get(Calendar.DAY_OF_WEEK)
-            //toast(day.toString())
-            val newDate: Date = calendar.time
-        toast(newDate.toString())
-            val date: String = format.format(newDate)
+        val dateMondayBefore: Date = format.parse(dateMonday) as Date
 
+        calendar.add(Calendar.DAY_OF_WEEK, + 6)
 
-        var datetimestamp: Date? = null
-        try {
-            datetimestamp = format.parse(date)
-        } catch (e: ParseException) {
-            e.printStackTrace()
-        }
+        val dateSunday: Date = calendar.time
 
-            // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
-            val uid = mFirebaseAuth.currentUser!!.uid
-            db.collection("users").document(uid).collection("Daten")
-                .whereGreaterThanOrEqualTo("dateTimestamp", datetimestamp!!) // abrufen
-                // .whereEqualTo("exerciseName", "Zeigefinger Extension,Flexion") // alle Einträge abrufen
-                .get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Datenbankantwort in Objektvariable speichern
-                       // data = task.result!!.toObject(Data::class.java)
-                         updateListView(task)
-                        //toast(data.toString())
-                    } else {
-                        Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
-                    }
-                }
-
-
-/*
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
-        db.collection("users").document(uid)
-           // .whereEqualTo("exerciseName", "Zeigefinger Extension,Flexion") // alle Einträge abrufen
+        db.collection("users").document(uid).collection("Daten")
+            .whereGreaterThanOrEqualTo("date", dateMondayBefore) // abrufen
+            .whereLessThanOrEqualTo("date", dateSunday)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // Datenbankantwort in Objektvariable speichern
-                    data = task.result!!.toObject(Data::class.java)
-                   // updateListView(task)
-                    //toast(data.toString())
+                    updateListView(task)
                 } else {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
-            }*/
+            }
+
     }
 
     private fun updateListView(task: Task<QuerySnapshot>) {
         // Einträge in dbList kopieren, um sie im ListView anzuzeigen
-       // dbList = ArrayList()
 
         // Diese for schleife durchläuft alle Documents der Abfrage
         for (document in task.result!!) {
             (dbList as ArrayList<Data>).add(document.toObject(Data::class.java))
-            //Log.d(TAG, document.id + " => " + document.data)
+             Log.d("Daten", document.id + " => " + document.data)
         }
         // jetzt liegt die vollständige Liste vor und
         // kann im ListView angezeigt werden
@@ -252,8 +238,66 @@ class DataFragment : Fragment() {
             android.R.layout.simple_list_item_1,   // Layout zur Darstellung der ListItems
             dbList)
 
-
         binding.listViewData.adapter = adapter
+
+        dataToGraph(dbList)
+    }
+
+    private fun dataToGraph(data: ArrayList<Data>) {
+
+        for(i in data){
+
+            when(i.getDayOfWeek()) {
+                0 -> {
+                    monday++
+                }
+
+                1 -> {
+                    thuesday++
+                }
+
+                2 -> {
+                    wednesday++
+                }
+
+                3 -> {
+                    thursday++
+                }
+
+                4 -> {
+                    friday++
+                }
+
+                5 -> {
+                    saturday++
+                }
+
+                6 -> {
+                    sunday++
+                }
+
+                else -> {}
+            }
+        }
+
+        arrayWeekDays[0] = monday
+        arrayWeekDays[1] = thuesday
+        arrayWeekDays[2] = wednesday
+        arrayWeekDays[3] = thursday
+        arrayWeekDays[4] = friday
+        arrayWeekDays[5] = saturday
+        arrayWeekDays[6] = sunday
+
+        val seriesArr = configureChartSeriesArray()
+        binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
+
+        monday = 0; thuesday = 0; wednesday = 0; thursday = 0; friday = 0; saturday = 0; sunday = 0;
+
+        for (i in 0 until 7) {
+            arrayWeekDays[i] = 0
+        }
+
+        dbList.clear()
     }
 
     override fun onDestroyView() {

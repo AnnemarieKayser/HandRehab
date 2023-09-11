@@ -14,6 +14,19 @@
         android:padding="16dp">
 
 
+        <ImageButton
+            android:id="@+id/imageButtonBefore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="23dp"
+            android:src="@drawable/ic_before"
+            app:layout_constraintBottom_toTopOf="@+id/chartView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/listViewData"
+            app:layout_constraintVertical_bias="1.0" />
+
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
@@ -58,10 +71,9 @@
             android:id="@+id/chartView"
             android:layout_width="0dp"
             android:layout_height="350dp"
-            android:layout_marginTop="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/listViewData" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/buttonGetData"
@@ -73,6 +85,15 @@
             app:layout_constraintHorizontal_bias="0.492"
             app:layout_constraintStart_toEndOf="@+id/textViewDate"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAfter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="23dp"
+            android:src="@drawable/ic_after"
+            app:layout_constraintBottom_toTopOf="@+id/chartView"
+            app:layout_constraintStart_toEndOf="@+id/imageButtonBefore" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

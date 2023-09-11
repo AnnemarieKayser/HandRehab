@@ -11,10 +11,19 @@ class Data {
     private var repetitions = 0
     private var sets = 0
     private var exerciseName = ""
+    private var dayOfWeek = 1
     // serverTimestamp soll automatisch vom Server gesetzt werden
     @ServerTimestamp
     private var serverTimestamp: Timestamp? = null
 
+
+    fun getDayOfWeek(): Int {
+        return dayOfWeek
+    }
+
+    fun setDayOfWeek(day: Int) {
+        this.dayOfWeek = day
+    }
 
     fun getDate(): Date? {
         return dateTimestamp
@@ -70,6 +79,7 @@ class Data {
                 ", counterExercises=" + counterExercises +
                 ", Repetitions=" + repetitions +
                 ", Sets=" + sets +
+                ", dayOfWeek=" + dayOfWeek +
                 '}'
     }
 
