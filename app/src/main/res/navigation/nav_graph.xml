@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/MainFragment"
         android:name="com.example.handrehab.fragment.MainFragment"
-        android:label="@string/main_fragment"
+        android:label="@string/title_welcome_short"
         tools:layout="@layout/fragment_main">
 
         <action
@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_MainFragment_to_settingFragment"
             app:destination="@id/settingFragment" />
+        <action
+            android:id="@+id/action_MainFragment_to_dataFragment"
+            app:destination="@id/dataFragment" />
     </fragment>
     <fragment
         android:id="@+id/CameraFragment"

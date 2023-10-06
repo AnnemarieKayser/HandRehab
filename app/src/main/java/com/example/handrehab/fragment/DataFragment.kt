@@ -61,6 +61,10 @@ class DataFragment : Fragment() {
     private var counterWeeksSunday = 0
     private var counterWeeksMonday = 0
 
+    private lateinit var dateMonday: String
+    private lateinit var dateThuesday: String
+    private var arrayDays = arrayOf("", "", "", "", "", "", "")
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -129,6 +133,30 @@ class DataFragment : Fragment() {
         }
 
         // --- Initialisierung und Konfiguration des Graphen --- //
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("yyyy-MM-dd")
+        dateMonday = format.format(calendar.time)
+        dateThuesday = format.format(calendar.time)
+
+        val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
+
+
+        calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+
+        for(i in 0 until 7) {
+
+            //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+
+            val date1 = format.format(calendar.time)
+
+            arrayDays[i] = date1
+
+            calendar.add(Calendar.DAY_OF_WEEK, + 1)
+
+        }
+
         setUpAAChartView()
 
     }
@@ -156,12 +184,14 @@ class DataFragment : Fragment() {
             .setChartType(AAChartType.Column)
             .setXAxisVisible(true)
             .setTitle(getString(R.string.chart_title))
-            .setColorsTheme(arrayOf("#699638", "#BEFCA4", "#EEFF05","#345428", "#a7e810", "#0a6e09" ))
+            .setColorsTheme(arrayOf("#291521","#3C002C",
+                "#311303", "#80543D",
+                       "#1F1A1C", "#4F4349"))
             .setStacking(AAChartStackingType.Normal)
-            .setTitleStyle(AAStyle.Companion.style("#FFFFFF"))
-            .setBackgroundColor("#182015")
-            .setAxesTextColor("#FFFFFF")
-            .setCategories("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+            .setTitleStyle(AAStyle.Companion.style("#3C002C"))
+            .setBackgroundColor("FFF2E7EF")
+            .setAxesTextColor("#291521")
+            .setCategories(arrayDays[0], arrayDays[1], arrayDays[2],arrayDays[3],arrayDays[4],arrayDays[5],arrayDays[6])
             .setYAxisTitle("Anzahl")
             .setYAxisMax(30f)
             .setScrollablePlotArea(
@@ -197,9 +227,28 @@ class DataFragment : Fragment() {
 
         calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
 
-        val dateMonday = format.format(calendar.time)
+        dateMonday = format.format(calendar.time)
 
-        val dateMondayBefore: Date = format.parse(dateMonday) as Date
+        val dateMondayNew = format.parse(dateMonday) as Date
+
+        //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+
+        for(i in 0 until 7) {
+
+            val date = format.format(calendar.time)
+
+            arrayDays[i] = date
+
+            calendar.add(Calendar.DAY_OF_WEEK, + 1)
+
+        }
+
+
+        dateThuesday = format.format(calendar.time)
+
+        setUpAAChartView()
+
 
         calendar.add(Calendar.DAY_OF_WEEK, + 6)
 
@@ -208,7 +257,7 @@ class DataFragment : Fragment() {
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("Daten")
-            .whereGreaterThanOrEqualTo("date", dateMondayBefore) // abrufen
+            .whereGreaterThanOrEqualTo("date", dateMondayNew) // abrufen
             .whereLessThanOrEqualTo("date", dateSunday)
             .get()
             .addOnCompleteListener { task ->

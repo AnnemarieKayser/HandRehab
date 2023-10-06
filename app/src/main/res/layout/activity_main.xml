@@ -14,21 +14,17 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
 
-        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_gravity="bottom"
-        android:background="#D1850D"
         android:fadeScrollbars="true"
         app:elevation="5dp"
         app:hideOnScroll="true"
         app:itemActiveIndicatorStyle="@style/Theme.HandRehab"
-        app:itemIconTint="@color/white"
-        app:itemRippleColor="#FDF39A"
-        app:itemTextColor="#FFFFFF"
         app:labelVisibilityMode="unlabeled"
         app:layout_anchorGravity="bottom|center"
+        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -48,13 +44,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#DCD5C9" />
+            android:background="#FEFAFE" />
 
     </com.google.android.material.appbar.AppBarLayout>
-
-
-
-
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

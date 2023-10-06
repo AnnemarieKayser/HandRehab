@@ -40,9 +40,19 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonFirst.setOnClickListener {
-            findNavController().navigate(R.id.action_main_to_permissions)
+        binding.buttonGoToData.setOnClickListener {
+            findNavController().navigate(R.id.action_MainFragment_to_dataFragment)
         }
+
+        binding.buttonGoToSettings.setOnClickListener {
+            findNavController().navigate(R.id.action_MainFragment_to_settingFragment)
+        }
+
+        binding.buttonToExerciseList.setOnClickListener {
+            findNavController().navigate(R.id.action_MainFragment_to_exerciseListFragment)
+        }
+
+
 
         binding.buttonLogOut.setOnClickListener {
             mFirebaseAuth.signOut()

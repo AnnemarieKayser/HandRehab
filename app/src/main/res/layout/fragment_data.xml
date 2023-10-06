@@ -4,13 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E4DDD1"
     tools:context=".fragment.DataFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#E4DDD1"
         android:padding="16dp">
 
 
@@ -22,7 +20,6 @@
             android:layout_marginTop="32dp"
             android:layout_marginBottom="23dp"
             android:src="@drawable/ic_before"
-            app:layout_constraintBottom_toTopOf="@+id/chartView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/listViewData"
             app:layout_constraintVertical_bias="1.0" />
@@ -66,14 +63,41 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageButtonCalender" />
 
-
-        <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
-            android:id="@+id/chartView"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/materialCardView5"
             android:layout_width="0dp"
-            android:layout_height="350dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="280dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="15dp"
+
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageButtonBefore"
+            app:strokeWidth="0dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
+                    android:id="@+id/chartView"
+                    android:layout_width="0dp"
+
+                    android:layout_height="250dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
 
         <Button
             android:id="@+id/buttonGetData"
@@ -90,10 +114,11 @@
             android:id="@+id/imageButtonAfter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="23dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
             android:src="@drawable/ic_after"
-            app:layout_constraintBottom_toTopOf="@+id/chartView"
-            app:layout_constraintStart_toEndOf="@+id/imageButtonBefore" />
+            app:layout_constraintStart_toEndOf="@+id/imageButtonBefore"
+            app:layout_constraintTop_toBottomOf="@+id/listViewData" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

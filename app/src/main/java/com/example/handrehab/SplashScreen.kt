@@ -37,7 +37,16 @@ class SplashScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
-
+        mRunnable = Runnable {
+            if (mFirebaseAuth.currentUser == null) {
+               val intent = Intent(this, LoginInActivity::class.java)
+               startActivity(intent)
+            } else {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+            }
+        }
+        mHandler.postDelayed(mRunnable, 2000)
 
         // --- Prüfen, ob eine Verbindung zum WLAN besteht --- //
         // Wenn keine Verbindung besteht, wird ein alertDialog angezeigt und erinnert

@@ -17,6 +17,7 @@ import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentExerciseBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -67,6 +68,28 @@ class ExerciseFragment : Fragment() {
             } else findNavController().navigate(R.id.action_exerciseFragment_to_permissionsFragment)
 
         }
+
+        // --- Änderung des Status des toggle-Buttons --- //
+        // Senden der Einstellung an ESP32 thing
+        binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
+
+            if (isChecked) {
+                // Überprüfen, welcher Button ausgewählt wurde
+                when (checkedId) {
+                    R.id.button1 -> {
+                        Log.i("ToggleButton", "Button 1 checked")
+                    }
+
+                    R.id.button2 -> {
+                        Log.i("ToggleButton", "Button 2 checked")
+
+                    }
+                }
+            }
+
+        }
+
+
 
         binding.textViewTitle.text = viewModel.getSelectedExercise()?.textItem
 
