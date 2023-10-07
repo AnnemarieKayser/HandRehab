@@ -100,4 +100,6 @@
     <color name="md_theme_dark_shadow">#000000</color>
     <color name="md_theme_dark_surfaceTint">#FFAEDC</color>
     <color name="md_theme_dark_outlineVariant">#4F4349</color>
-    <color name="md_theme_dark_scrim">#000000</color></resources>
+    <color name="md_theme_dark_scrim">#000000</color>
+    <color name="light_pink">#FFF2E7EF</color>
+</resources>
