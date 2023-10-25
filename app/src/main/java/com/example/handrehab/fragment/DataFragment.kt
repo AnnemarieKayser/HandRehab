@@ -189,7 +189,7 @@ class DataFragment : Fragment() {
                        "#1F1A1C", "#4F4349"))
             .setStacking(AAChartStackingType.Normal)
             .setTitleStyle(AAStyle.Companion.style("#3C002C"))
-            .setBackgroundColor("FFF2E7EF")
+            .setBackgroundColor(R.color.light_pink)
             .setAxesTextColor("#291521")
             .setCategories(arrayDays[0], arrayDays[1], arrayDays[2],arrayDays[3],arrayDays[4],arrayDays[5],arrayDays[6])
             .setYAxisTitle("Anzahl")

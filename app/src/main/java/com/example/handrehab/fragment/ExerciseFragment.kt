@@ -2,11 +2,14 @@ package com.example.handrehab.fragment
 
 import android.graphics.Color
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.INVISIBLE
 import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.fragment.app.activityViewModels
@@ -15,6 +18,8 @@ import com.example.handrehab.Data
 import com.example.handrehab.MainViewModel
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentExerciseBinding
+import com.example.handrehab.item.Datasource
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
@@ -54,6 +59,18 @@ class ExerciseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+
+        view.visibility = View.VISIBLE
+
+        val id = viewModel.getSelectedExercise()!!.id
+
+        if(id == 1 || id == 2 || id==3 || id==4 || id==5) {
+
+            binding.toggleButton.visibility = GONE
+        }
+
+
         binding.buttonStartExercise.setOnClickListener {
             binding.editTextRepetition.text.toString().toIntOrNull()
                 ?.let { it1 -> viewModel.setRepetitions(it1) }
@@ -70,19 +87,64 @@ class ExerciseFragment : Fragment() {
         }
 
         // --- Änderung des Status des toggle-Buttons --- //
-        // Senden der Einstellung an ESP32 thing
+        // Einstellung der Start Position der Hand
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
                 // Überprüfen, welcher Button ausgewählt wurde
                 when (checkedId) {
                     R.id.button1 -> {
+                        viewModel.setStartModus("open")
                         Log.i("ToggleButton", "Button 1 checked")
                     }
 
                     R.id.button2 -> {
+                        viewModel.setStartModus("closed")
                         Log.i("ToggleButton", "Button 2 checked")
+                    }
+                }
+            }
 
+        }
+
+
+        // --- Änderung des Status des toggle-Buttons --- //
+        //Einstellung, welche Hand verwendet wird
+        binding.toggleButtonHandSide.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
+
+            if (isChecked) {
+                // Überprüfen, welcher Button ausgewählt wurde
+                when (checkedId) {
+                    R.id.buttonRight -> {
+                        viewModel.setSelectedHandSide("right")
+                        Log.i("ToggleButton", "Button 1 checked")
+                    }
+
+                    R.id.buttonLeft -> {
+                        viewModel.setSelectedHandSide("left")
+                        Log.i("ToggleButton", "Button 2 checked")
+                    }
+                }
+            }
+        }
+
+
+        // --- Änderung des Status des toggle-Buttons --- //
+        // Einstellung der Start Position der Hand
+        binding.toggleButtonLevel.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
+
+            if (isChecked) {
+                // Überprüfen, welcher Button ausgewählt wurde
+                when (checkedId) {
+                    R.id.buttonEasy -> {
+                        viewModel.setDivideFactor(3.0)
+                    }
+
+                    R.id.buttonMedium -> {
+                        viewModel.setDivideFactor(2.0)
+                    }
+                    R.id.buttonHard -> {
+                        viewModel.setDivideFactor(1.5)
                     }
                 }
             }
@@ -110,8 +172,6 @@ class ExerciseFragment : Fragment() {
         binding.videoViewExercise.requestFocus()
         binding.videoViewExercise.seekTo(1)
         //binding.videoViewExercise.start()
-
-
 
     }
 

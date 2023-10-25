@@ -114,8 +114,8 @@
     <string name="date_picker_title">Wähle ein Datum aus</string>
     <string name="chart_title">Anzahl abgeschlossener Übungen</string>
     <string name="btn_get_data">Daten</string>
-    <string name="button_full_open">vollständig geöffnet</string>
-    <string name="button_half_open">Halb geöffnet</string>
+    <string name="button_open">geöffnet</string>
+    <string name="button_closed">geschlossen</string>
     <string name="title_welcome">in der HandRehab-App!</string>
     <string name="title_home_start_exercise">Starte eine neue Übungseinheit</string>
     <string name="button_go_to_exercise_list">Neue Übungseinheit starten</string>
@@ -127,6 +127,14 @@
     <string name="textViewNumber">Anzahl</string>
     <string name="tv_register">Erstelle einen neuen Account:</string>
     <string name="title_welcome_short">Willkommen</string>
+    <string name="tv_hand_open_or_closed">Möchten Sie die Übung mit einer geschlossenen oder bereits geöffneten Hand starten?</string>
+    <string name="tv_data_last_exercise">Daten ihrer letzten Übung:</string>
+    <string name="tv_right_hand">Rechte Hand</string>
+    <string name="tv_left_hand">Linke Hand</string>
+    <string name="button_easy">Leicht</string>
+    <string name="button_medium">Mittel</string>
+    <string name="button_hard">Schwer</string>
+    <string name="toggle_button_show_info">Info ausblenden</string>
 
 
 </resources>
