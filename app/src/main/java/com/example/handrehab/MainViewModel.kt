@@ -19,16 +19,28 @@ class MainViewModel: ViewModel() {
     private var _selectedExercise = MutableLiveData<Exercises?>()
     private var _repetitions = MutableLiveData<Int>()
     private var _sets = MutableLiveData<Int>()
+    private var _handOpenOrClosed =  MutableLiveData<String>()
+    private var _selectedHandSide = MutableLiveData<String>()
+    private var _divideFactor = MutableLiveData<Double>()
 
     //Kleiner Finger
     private var _littleFingerCounter = MutableLiveData<Int>()
 
+
+    val handOpenOrClosed: LiveData<String>
+        get() = _handOpenOrClosed
+
+    val selectedHandSide: LiveData<String>
+        get() = _selectedHandSide
 
     val selectedExercise: LiveData<Exercises?>
         get() = _selectedExercise
 
     val repetitions: LiveData<Int>
         get() = _repetitions
+
+    val divideFactor: LiveData<Double>
+        get() = _divideFactor
 
     val sets: LiveData<Int>
         get() = _sets
@@ -45,6 +57,9 @@ class MainViewModel: ViewModel() {
         _repetitions.value = 0
         _sets.value = 0
         _littleFingerCounter.value = 0
+        _handOpenOrClosed.value = "open"
+        _selectedHandSide.value = "right"
+        _divideFactor.value = 2.0
     }
 
     fun getCounterLittleFinger(): Int? {
@@ -70,6 +85,14 @@ class MainViewModel: ViewModel() {
         _sets.value = set
     }
 
+    fun getDivideFactor(): Double? {
+        return _divideFactor.value
+    }
+
+    fun setDivideFactor(factor: Double){
+        _divideFactor.value = factor
+    }
+
     fun getSelectedExercise(): Exercises? {
         return _selectedExercise.value
     }
@@ -77,6 +100,23 @@ class MainViewModel: ViewModel() {
     fun setSelectedExercise(exercise: Exercises) {
         _selectedExercise.value = exercise
     }
+
+    fun getStartModus(): String? {
+        return _handOpenOrClosed.value
+    }
+
+    fun setStartModus(hand: String){
+        _handOpenOrClosed.value = hand
+    }
+
+    fun getSelectedHandSide(): String? {
+        return _selectedHandSide.value
+    }
+
+    fun setSelectedHandSide(side: String){
+        _selectedHandSide.value = side
+    }
+
 
     val currentMinHandDetectionConfidence: Float
     get() = _minHandDetectionConfidence

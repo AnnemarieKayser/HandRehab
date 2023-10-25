@@ -1,13 +1,19 @@
 package com.example.handrehab.fragment
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.MediaController
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -17,10 +23,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.handrehab.Data
+import com.example.handrehab.DataMinMax
 import com.example.handrehab.MainViewModel
 import com.example.handrehab.PermissionsFragment
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentCameraBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.math.MathUtils.dist
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -54,7 +62,6 @@ class CameraFragment : Fragment(),
         private const val TAG8 = "test123Pointing Finger"
         private const val TAG9 = "test123 xKoordinaten"
 
-
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -62,6 +69,8 @@ class CameraFragment : Fragment(),
     // === Firebase database === //
     private val db : FirebaseFirestore by lazy { FirebaseFirestore.getInstance()  }
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+
+
 
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
@@ -79,35 +88,33 @@ class CameraFragment : Fragment(),
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
-    private var closed = ArrayList<Int>()
-    private var counterRepetition = 0
-    private var fingerOneClosed = false
-    private var fingerTwoClosed = false
-    private var fingerThreeClosed = false
-    private var fingerFourClosed = false
 
-    private var dist0812Before = 0f
+
+
+    // min und max Werte
+    private var Min = 10f
+    private var Max = 0f
+    private var divideFactor = 2.0
+
+    private var pointingFingerSpreadMax = 0f
+    private var pointingFingerSpreadMin = 10f
     private var pointingFingerSpread = false
-    private var distFingersSpreadMax = 0f
-    private var distFingersSpreadMin = 10f
     private var fingersSpreadCounter = 0
 
-    private var distLittleFingerSpreadMax = 0f
-    private var distLittleFingerSpreadMin = 10f
+
+    private var littleFingerSpreadMax = 0f
+    private var littleFingerSpreadMin = 10f
     private var littleFingerSpread = false
     private var littleFingerCounter = 0
 
-    private var dist0408Before = 0f
-    private var distThumbSpreadMax = 0f
-    private var distThumbSpreadMin = 10f
+    private var thumbSpreadMax = 0f
+    private var thumbSpreadMin = 10f
     private var thumbSpread = false
     private var thumbSpreadCounter = 0
 
-    private var dist1216Before = 0f
-    private var distMiddleFingerSpreadMax = 0f
-    private var distMiddleFingerSpreadMin =0f
+    private var middleFingerSpreadMax = 0f
+    private var middleFingerSpreadMin = 10f
     private var middleFingerSpread = false
-    private var middleFingerSpreadCounter = 0
 
     private var allFingersSpread = false
 
@@ -119,6 +126,7 @@ class CameraFragment : Fragment(),
     private var allFingersClosed = false
     private var allFingershalfClosed = false
     private var counterAllFingersSpread = 0
+    private var counterAllFingersOpenClose = 0
 
     //Thumb
     private var thumbOpen = false
@@ -126,32 +134,28 @@ class CameraFragment : Fragment(),
     private var thumbHalfClosed = false
 
     //PointingFinger
-    private var pointingFingerMax = 0f
-    private var pointingFingerMin = 10f
     private var pointingFingerOpen = false
     private var pointingFingerClosed = false
     private var pointingFingerHalfClosed = false
+    private var pointingFingerHalfOpen = false
 
     //Middle Finger
-    private var middleFingerMax = 0f
-    private var middleFingerMin = 10f
     private var middleFingerOpen = false
     private var middleFingerClosed = false
     private var middleFingerHalfClosed = false
+    private var middleFingerHalfOpen = false
 
     //Ring Finger
-    private var ringFingerMax = 0f
-    private var ringFingerMin = 10f
     private var ringFingerOpen = false
     private var ringFingerClosed = false
     private var ringFingerHalfClosed = false
+    private var ringFingerHalfOpen = false
 
     //Little Finger
-    private var littleFingerMax = 0f
-    private var littleFingerMin = 10f
     private var littleFingerOpen = false
     private var littleFingerClosed = false
     private var littleFingerHalfClosed = false
+    private var littleFingerHalfOpen = false
 
     //Orientation of Hand
     private var orientationHand = ""
@@ -165,9 +169,15 @@ class CameraFragment : Fragment(),
     private var counter = 0
     private var sets = 0
     private var exerciseCompleted = false
+    private var counterHalfClosed = 0
+    private var counterHalfOpen = 0
+
+    //show infos
+    private var showInfo = true
 
     /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
+
 
     override fun onResume() {
         super.onResume()
@@ -215,13 +225,14 @@ class CameraFragment : Fragment(),
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
-        _fragmentCameraBinding =
-            FragmentCameraBinding.inflate(inflater, container, false)
+        _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
 
         return fragmentCameraBinding.root
     }
+
+
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -230,6 +241,11 @@ class CameraFragment : Fragment(),
             layoutManager = LinearLayoutManager(requireContext())
             adapter = gestureRecognizerResultAdapter
         }
+        setHasOptionsMenu(true)
+
+        loadMinMax()
+
+        divideFactor = viewModel.getDivideFactor()!!
 
         // Initialize our background executor
         backgroundExecutor = Executors.newSingleThreadExecutor()
@@ -239,6 +255,11 @@ class CameraFragment : Fragment(),
             // Set up the camera and its use cases
             setUpCamera()
         }
+
+        val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+
+        view.visibility = View.GONE
+
 
         // Create the Hand Gesture Recognition Helper that will handle the
         // inference
@@ -254,120 +275,45 @@ class CameraFragment : Fragment(),
             )
         }
 
+
+
         // Attach listeners to UI control widgets
         initBottomSheetControls()
+
+
     }
 
     private fun initBottomSheetControls() {
         // init bottom sheet settings
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdValue.text =
-            String.format(
-                Locale.US, "%.2f", viewModel.currentMinHandDetectionConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdValue.text =
-            String.format(
-                Locale.US, "%.2f", viewModel.currentMinHandTrackingConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdValue.text =
-            String.format(
-                Locale.US, "%.2f", viewModel.currentMinHandPresenceConfidence
-            )
 
-        // When clicked, lower hand detection score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdMinus.setOnClickListener {
-            if (gestureRecognizerHelper.minHandDetectionConfidence >= 0.2) {
-                gestureRecognizerHelper.minHandDetectionConfidence -= 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, raise hand detection score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdPlus.setOnClickListener {
-            if (gestureRecognizerHelper.minHandDetectionConfidence <= 0.8) {
-                gestureRecognizerHelper.minHandDetectionConfidence += 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, lower hand tracking score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdMinus.setOnClickListener {
-            if (gestureRecognizerHelper.minHandTrackingConfidence >= 0.2) {
-                gestureRecognizerHelper.minHandTrackingConfidence -= 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, raise hand tracking score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdPlus.setOnClickListener {
-            if (gestureRecognizerHelper.minHandTrackingConfidence <= 0.8) {
-                gestureRecognizerHelper.minHandTrackingConfidence += 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, lower hand presence score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdMinus.setOnClickListener {
-            if (gestureRecognizerHelper.minHandPresenceConfidence >= 0.2) {
-                gestureRecognizerHelper.minHandPresenceConfidence -= 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, raise hand presence score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdPlus.setOnClickListener {
-            if (gestureRecognizerHelper.minHandPresenceConfidence <= 0.8) {
-                gestureRecognizerHelper.minHandPresenceConfidence += 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, change the underlying hardware used for inference.
-        // Current options are CPU and GPU
-        fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.setSelection(
-            viewModel.currentDelegate, false
-        )
-        fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long
-                ) {
-                    try {
-                        gestureRecognizerHelper.currentDelegate = p2
-                        updateControlsUi()
-                    } catch(e: UninitializedPropertyAccessException) {
-                        Log.e(TAG, "GestureRecognizerHelper has not been initialized yet.")
-
-                    }
-                }
-
-                override fun onNothingSelected(p0: AdapterView<*>?) {
-                    /* no op */
-                }
-            }
     }
+
+    // === onCreateOptionsMenu === //
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_main, menu)
+    }
+
+    // === onOptionsItemSelected === //
+    // Hier werden Klicks auf Elemente der Aktionsleiste behandelt
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.app_bar_switch -> {
+                showInfo = !showInfo
+                Log.i("InfoToggleButton", showInfo.toString())
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
     // Update the values displayed in the bottom sheet. Reset recognition
     // helper.
     private fun updateControlsUi() {
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdValue.text =
-            String.format(
-                Locale.US,
-                "%.2f",
-                gestureRecognizerHelper.minHandDetectionConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdValue.text =
-            String.format(
-                Locale.US,
-                "%.2f",
-                gestureRecognizerHelper.minHandTrackingConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdValue.text =
-            String.format(
-                Locale.US,
-                "%.2f",
-                gestureRecognizerHelper.minHandPresenceConfidence
-            )
-
         // Needs to be cleared instead of reinitialized because the GPU
         // delegate needs to be initialized on the thread using it when applicable
         backgroundExecutor.execute {
@@ -474,20 +420,33 @@ class CameraFragment : Fragment(),
                     gestureRecognizerResultAdapter.updateResults(emptyList())
                     fingersSpreadCounter = 0
                     littleFingerCounter = 0
-                    counter = 0
+                   // counter = 0
                     counterUpDown = 0
                 }
 
-                fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
-                    String.format("%d ms", resultBundle.inferenceTime)
 
                 if(viewModel.getSelectedExercise()?.id == 1){
                     counter = counterAllFingersSpread
                 }
 
+                if(viewModel.getSelectedExercise()?.id == 13){
+                    counter = counterAllFingersOpenClose
+                }
+
+                var id = viewModel.getSelectedExercise()?.id
+
+                if(id == 14 || id == 15 ||id == 16 ||id == 17 ) {
+                    if(viewModel.getStartModus() == "open") {
+                        counter = counterHalfClosed
+                    } else counter = counterHalfOpen
+                }
+
                 if(counter == viewModel.getRepetitions()) {
                     counter = 0
                     counterAllFingersSpread = 0
+                    counterAllFingersOpenClose = 0
+                    counterHalfClosed = 0
+                    counterHalfOpen = 0
                     sets++
 
                     if(sets == viewModel.getSets()) {
@@ -496,6 +455,7 @@ class CameraFragment : Fragment(),
 
                         //Speichern der Übung in der Datenbank
                         saveExercise()
+                        saveMinMax()
                         viewModel.setSets(0)
                         viewModel.setRepetitions(0)
                     }
@@ -513,13 +473,90 @@ class CameraFragment : Fragment(),
                     sets,
                     viewModel.getRepetitions(),
                     viewModel.getSets(),
-                    exerciseCompleted
+                    exerciseCompleted,
+                    viewModel.getSelectedExercise()!!.textItem,
+                    showInfo,
+                    viewModel.getSelectedHandSide()!!,
+                    viewModel.getStartModus()!!,
                 )
 
                 // Force a redraw
                 fragmentCameraBinding.overlay.invalidate()
             }
         }
+    }
+
+
+    // === loadMinMax === //
+    // Einlesen der Daten aus der Datenbank
+    private fun loadMinMax() {
+
+        var data: DataMinMax? = null
+
+        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DatenMinMax").document(viewModel.getSelectedExercise()!!.textItem)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Datenbankantwort in Objektvariable speichern
+                    data = task.result!!.toObject(DataMinMax::class.java)
+
+                    if(data != null) {
+                        Min = data!!.getMin()
+                        Max = data!!.getMax()
+                        toast("daten empfangen: Min : $Min und Max: $Max")
+
+                    }
+                } else {
+                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
+                }
+            }
+
+    }
+
+    private fun saveMinMax() {
+
+
+        // Einlesen des aktuellen Datums
+        val kalender: Calendar = Calendar.getInstance()
+        val zeitformat = SimpleDateFormat("yyyy-MM-dd-hh-mm")
+        val hourFormat =  SimpleDateFormat("hh-mm-ss")
+        val date = zeitformat.format(kalender.time)
+        val hour = hourFormat.format(kalender.time)
+        val day = kalender.get(Calendar.DAY_OF_WEEK) - 2
+
+        var datetimestamp: Date? = null
+        try {
+            datetimestamp = zeitformat.parse(date)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+
+
+        //Data Objekt mit Daten befüllen (ID wird automatisch ergänzt)
+        val data = DataMinMax()
+        data.setMin(Min)
+        data.setMax(Max)
+        data.setExerciseName(viewModel.getSelectedExercise()!!.textItem)
+        data.setDate(datetimestamp!!)
+        data.setExerciseId(viewModel.getSelectedExercise()!!.id)
+
+
+
+        // Schreibe Daten als Document in die Collection Messungen in DB;
+        // Eine id als Document Name wird automatisch vergeben
+        // Implementiere auch onSuccess und onFailure Listender
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DatenMinMax").document(viewModel.getSelectedExercise()!!.textItem)
+            .set(data)
+            .addOnSuccessListener { documentReference ->
+                toast(getString(R.string.save))
+
+            }
+            .addOnFailureListener { e ->
+                toast(getString(R.string.not_save))
+            }
     }
 
     private fun saveExercise() {
@@ -549,6 +586,11 @@ class CameraFragment : Fragment(),
         data.setExerciseName(viewModel.getSelectedExercise()!!.textItem)
         data.setDate(datetimestamp!!)
         data.setDayOfWeek(day)
+        data.setStartMode(viewModel.getStartModus()!!)
+        data.setSelectedHandSide(viewModel.getSelectedHandSide()!!)
+        data.setMin(Min)
+        data.setMax(Max)
+        data.setExerciseId(viewModel.getSelectedExercise()!!.id)
 
 
         // Schreibe Daten als Document in die Collection Messungen in DB;
@@ -564,217 +606,154 @@ class CameraFragment : Fragment(),
             .addOnFailureListener { e ->
                 toast(getString(R.string.not_save))
             }
-
-
     }
 
 
-    private fun detectSpreadPointingFinger(d0812: Float) {
+    ///------------------------------------------------------------------------------//
+    ///------------------------------------------------------------------------------//
+    /// --------------------- Spreizen der Finger ---------------------------------- //
+    ///------------------------------------------------------------------------------//
+    ///------------------------------------------------------------------------------//
+
+    private fun pointingFingerSpread(d0812: Float) {
 
         //Maximum
-        if(d0812 > distFingersSpreadMax) {
-            distFingersSpreadMax = d0812
-            Log.i(TAG2, "Maximale Distanz: $distFingersSpreadMax")
+        if(d0812 > pointingFingerSpreadMax) {
+            Max = d0812
+            pointingFingerSpreadMax = d0812
+            Log.i(TAG2, "Maximale Distanz: $Max")
         }
 
         //Minimum
-        if(d0812 < distFingersSpreadMin) {
-            distFingersSpreadMin = d0812
+        if(d0812 < pointingFingerSpreadMin) {
+            Min = d0812
+            pointingFingerSpreadMin = d0812
         }
 
-        dist0812Before = d0812
-
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
-        val distMinMax = distFingersSpreadMax - distFingersSpreadMin
+        val distMinMax = pointingFingerSpreadMax - pointingFingerSpreadMin
         Log.i(TAG2, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d0812 > (distFingersSpreadMin + distMinMax/2)) {
+        if(d0812 > (pointingFingerSpreadMin + distMinMax/divideFactor)) {
+            Log.i(TAG2, "factor: $divideFactor, distMinMAx: $distMinMax, ergebnis: ${distMinMax/divideFactor}")
             if(!pointingFingerSpread) {
-                counter++
                 Log.i(TAG2, "Finger Spread counter: $fingersSpreadCounter")
                 pointingFingerSpread = true
             }
         }
 
-        if(d0812 < ((distFingersSpreadMin + distMinMax/2))) {
+        if(d0812 < ((pointingFingerSpreadMin + distMinMax/divideFactor))) {
             if(pointingFingerSpread) {
+                counter++
                 pointingFingerSpread = false
             }
         }
 
     }
 
-    private fun detectClosedFingers (d07: Float, d08: Float, d011: Float, d012: Float, d015: Float, d016: Float,
-                                     d19: Float, d20: Float, gestureRecognizer: GestureRecognizerResult
-    ) {
-
-        //Geschlossene Finger detektieren
-        //Zeigefinger geschlossen
-        if(d07 > d08 && !fingerOneClosed) {
-            closed.add(1)
-            fingerOneClosed = true
-            Log.i(TAG2, "FInger 1 closed")
-        }
-
-        //Mittelfinger geschlossen
-        if(d011 > d012 && !fingerTwoClosed) {
-            closed.add(2)
-            fingerTwoClosed = true
-            Log.i(TAG2, "FInger 2 closed")
-        }
-
-        //Ringfinger geschlossen
-        if(d015 > d016 && !fingerThreeClosed) {
-            closed.add(3)
-            fingerThreeClosed = true
-            Log.i(TAG2, "FInger 3 closed")
-        }
-
-        //Kleiner Finger geschlossen
-        if(d19 > d20 && !fingerFourClosed) {
-            closed.add(4)
-            fingerFourClosed = true
-            Log.i(TAG2, "FInger 4 closed")
-        }
-
-        // Wenn alle Finger geschlossen sind, wird der Counter für die Anzahl an Wiederholungen hochgezählt
-        if(closed.size == 4 && !allFingersClosed) {
-            counter++
-            Log.i(TAG2, "Wiederholungen: $counterRepetition")
-            allFingersClosed = true
-            closed.clear()
-        }
-
-        //Wenn die Hand wieder geöffnet ist, werden die Werte zurückgesetzt
-        if(gestureRecognizer.gestures().first()[0].categoryName() == "Open_Palm"){
-            fingerOneClosed = false
-            fingerTwoClosed = false
-            fingerThreeClosed = false
-            fingerFourClosed = false
-            allFingersClosed = false
-        }
-    }
-
-    private fun detectOrientation(x9: Float, x0: Float, y9: Float, y0: Float) {
-        //Berechnung der Ausrichtung der offenen Hand
-        val m: Float = if (abs(x9 - x0) < 0.05)
-            1000000000f
-        else
-            abs((y9 - y0)/(x9 - x0))
-
-        if (m in 0.0..1.0) {
-            orientationHand = if (x9 > x0) {
-                "RIGHT"
-            } else "LEFT"
-        }
-
-        if (m>1) {
-            orientationHand = if (y9 < y0) "UP"
-            else "DOWN"
-        }
-    }
-
-    private fun detectSpreadLittleFinger (d1620: Float) {
+    private fun littleFingerSpread (d1620: Float) {
 
         //Maximum
-        if(d1620 > distLittleFingerSpreadMax) {
-            distLittleFingerSpreadMax = d1620
-            Log.i(TAG3, "Maximale Distanz kleiner finger: $distLittleFingerSpreadMax")
+        if(d1620 > littleFingerSpreadMax) {
+            Max = d1620
+            littleFingerSpreadMax = d1620
+            Log.i(TAG3, "Maximale Distanz kleiner finger: $Max")
         }
 
         //Minimum
-        if(d1620 < distLittleFingerSpreadMin) {
-            distLittleFingerSpreadMin = d1620
-            Log.i(TAG3, "Minimale Distanz kleiner finger: $distLittleFingerSpreadMin")
+        if(d1620 < littleFingerSpreadMin) {
+            Min = d1620
+            littleFingerSpreadMin = d1620
+            Log.i(TAG3, "Minimale Distanz kleiner finger: $Min")
         }
 
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
-        val distMinMax = distLittleFingerSpreadMax - distLittleFingerSpreadMin
+        val distMinMax = littleFingerSpreadMax - littleFingerSpreadMin
         Log.i(TAG3, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d1620 > (distLittleFingerSpreadMin + distMinMax/2)) {
+        if(d1620 > (littleFingerSpreadMin + distMinMax/divideFactor)) {
             if(!littleFingerSpread) {
-                counter++
                 Log.i(TAG3, "Finger Spread counter: $fingersSpreadCounter")
                 littleFingerSpread = true
             }
         }
 
-        if(d1620 < ((distLittleFingerSpreadMin + distMinMax/2))) {
+        if(d1620 < ((littleFingerSpreadMin + distMinMax/divideFactor))) {
             if(littleFingerSpread) {
+                counter++
                 littleFingerSpread = false
             }
         }
     }
 
-    private fun detectThumbSpread (d0408: Float) {
+    private fun thumbSpread (d0408: Float) {
 
         //Maximum
-        if(d0408 > distThumbSpreadMax) {
-            distThumbSpreadMax = d0408
-            Log.i(TAG4, "Maximale Distanz daumen: $distThumbSpreadMax")
+        if(d0408 > thumbSpreadMax) {
+            Max = d0408
+            thumbSpreadMax = d0408
+            Log.i(TAG4, "Maximale Distanz daumen: $Max")
         }
 
         //Minimum
-        if(d0408 < distThumbSpreadMin) {
-            distThumbSpreadMin = d0408
-            Log.i(TAG4, "Minimale Distanz daumen: $distThumbSpreadMin")
+        if(d0408 < thumbSpreadMin) {
+            Min = d0408
+            thumbSpreadMin = d0408
+            Log.i(TAG4, "Minimale Distanz daumen: $Min")
         }
 
-        dist0408Before = d0408
 
         //Berechnung der Maximalen Distanz
-        val distMinMax = distThumbSpreadMax - distThumbSpreadMin
+        val distMinMax = thumbSpreadMax - thumbSpreadMin
         Log.i(TAG4, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d0408 > (distThumbSpreadMin + distMinMax/2)) {
+        if(d0408 > (thumbSpreadMin + distMinMax/divideFactor)) {
             if(!thumbSpread) {
-                counter++
                 Log.i(TAG4, "Thumb Spread counter: $thumbSpreadCounter")
                 thumbSpread = true
             }
         }
 
-        if(d0408 < ((distThumbSpreadMin + distMinMax/2))) {
+        if(d0408 < ((thumbSpreadMin + distMinMax/divideFactor))) {
             if(thumbSpread) {
+                counter++
                 thumbSpread = false
             }
         }
     }
 
-    private fun detectMiddleFingerSpread (d1216: Float) {
+    private fun middleFingerSpread (d1216: Float) {
 
 
         //Maximum
-        if(d1216 > distMiddleFingerSpreadMax) {
-            distMiddleFingerSpreadMax = d1216
-            Log.i(TAG5, "Maximale Distanz Mittel-und Ringfinger: $distMiddleFingerSpreadMax")
+        if(d1216 > middleFingerSpreadMax) {
+            Max = d1216
+            middleFingerSpreadMax = d1216
+            Log.i(TAG5, "Maximale Distanz Mittel-und Ringfinger: $Max")
         }
 
         //Minimum
-        if(d1216 < distMiddleFingerSpreadMin) {
-            distMiddleFingerSpreadMin = d1216
-            Log.i(TAG5, "Minimale Distanz daumen: $distMiddleFingerSpreadMin")
+        if(d1216 < middleFingerSpreadMin) {
+            Min = d1216
+            middleFingerSpreadMin = d1216
+            Log.i(TAG5, "Minimale Distanz daumen: $Min")
         }
 
-        dist1216Before = d1216
-
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
-        val distMinMax = distMiddleFingerSpreadMax - distMiddleFingerSpreadMin
+        val distMinMax = middleFingerSpreadMax - middleFingerSpreadMin
         Log.i(TAG5, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d1216 > (distMiddleFingerSpreadMin + distMinMax/2)) {
+        if(d1216 > (middleFingerSpreadMin + distMinMax/divideFactor)) {
             if(!middleFingerSpread) {
-                Log.i(TAG5, "MiddleFinger Spread counter: $middleFingerSpreadCounter")
                 middleFingerSpread = true
             }
         }
 
-        if(d1216 < ((distMiddleFingerSpreadMin + distMinMax/2))) {
+        if(d1216 < ((middleFingerSpreadMin + distMinMax/divideFactor))) {
             if(middleFingerSpread) {
                 counter++
                 middleFingerSpread = false
@@ -782,210 +761,296 @@ class CameraFragment : Fragment(),
         }
     }
 
-    private fun detectAllFingersSpread () {
+    private fun allFingersSpread () {
+        Log.i(TAG6, "Alle Finger offen: thumb: $thumbSpread, middle: $middleFingerSpread, little: $littleFingerSpread,pointing: $pointingFingerSpread")
 
         if(thumbSpread && middleFingerSpread && littleFingerSpread && pointingFingerSpread) {
             if(!allFingersSpread){
                 counterAllFingersSpread++
             }
             allFingersSpread = true
-            Log.i(TAG6, "Alle Finger offen")
         }
         else {
             allFingersSpread = false
         }
     }
 
-    //Öffnen und Schließen des Zeigefingers
-    private fun pointingFinger (dist08: Float, dist07: Float, dist06: Float, dist05: Float, gestureRecognizer: GestureRecognizerResult) {
 
-        if(dist08 < pointingFingerMin) {
-            pointingFingerMin = dist08
-            Log.i(TAG8, "Zeigefinger Min: $pointingFingerMin")
+    ///------------------------------------------------------------------------------//
+    ///------------------------------------------------------------------------------//
+    /// --------------------- Schließen/Öffnen der Finger -------------------------- //
+    ///------------------------------------------------------------------------------//
+    ///------------------------------------------------------------------------------//
+
+    //Öffnen und Schließen des Zeigefingers
+    private fun pointingFingerOpenClose (dist08: Float, dist07: Float, dist06: Float, dist05: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist08 < Min) {
+            Min = dist08
+            Log.i(TAG8, "Zeigefinger Min: $Min")
+            // Start offener Finger -> min wert wird gespeichert
         }
 
-        if(dist08 > pointingFingerMax) {
-            pointingFingerMax = dist08
-            Log.i(TAG8, "Zeigefinger Max: $pointingFingerMax")
+        if(dist08 > Max) {
+            Max = dist08
+            Log.i(TAG8, "Zeigefinger Max: $Max")
             //Sie können ihren FInger schon weiter als das letzte mal öffnen
+            //Start geschlossener Finger -> max wert wird gespeichert
         }
 
         //Phase 1
         if(dist08 > dist07) {
             Log.i(TAG8, "ZeigeFinger offen")
             pointingFingerOpen = true
-        } else pointingFingerOpen = false
+            pointingFingerHalfClosed = false
+        }
 
         //Phase 2
         if(dist08 < dist07) {
 
+            if(!pointingFingerHalfClosed) {
+                counterHalfClosed++
+            }
+            pointingFingerHalfClosed = true
+
             //Phase 3
             if(dist08 < dist06) {
+
 
                 if(dist08 < dist05) {
                     Log.i(TAG8, "ZeigeFinger geschlossen")
 
-                    if(!pointingFingerClosed) {
+                    if(pointingFingerOpen) {
                         counter++
                     }
+                    pointingFingerOpen = false
+                    pointingFingerHalfOpen = false
                     pointingFingerClosed = true
-                    pointingFingerHalfClosed = false
                 } else {
                     Log.i(TAG8, "ZeigeFinger fast geschlossen, Phase 3")
                     pointingFingerClosed = false
-                    pointingFingerHalfClosed = true
                 }
             } else {
-                pointingFingerHalfClosed = true
                 Log.i(TAG8, "ZeigeFinger halb geschlossen, Phase 2")
+
+                if(!pointingFingerHalfOpen) {
+                    counterHalfOpen++
+                }
+                pointingFingerHalfOpen = true
+
             }
-        } else pointingFingerHalfClosed = false
+        }
 
         //Distanz zwischen Fingerspitze und Grundgelenk speichern (d08)
     }
 
-    //Öffnen und SChließen des Mittelfingers
-    private fun middleFinger (dist09: Float, dist010: Float, dist011: Float, dist012: Float, gestureRecognizer: GestureRecognizerResult) {
 
-        if(dist012 < middleFingerMin) {
-            middleFingerMin = dist012
-            Log.i(TAG8, "Min Mittelfinger: $middleFingerMin")
+    //Öffnen und SChließen des Mittelfingers
+    private fun middleFingerOpenClose (dist09: Float, dist010: Float, dist011: Float, dist012: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist012 < Min) {
+            Min = dist012
+            Log.i(TAG8, "Min Mittelfinger: $Min")
         }
 
-        if(dist012 > middleFingerMax) {
-            middleFingerMax = dist012
-            Log.i(TAG8, "Max Mittelfinger: $middleFingerMax")
+        if(dist012 > Max) {
+            Max = dist012
+            Log.i(TAG8, "Max Mittelfinger: $Max")
             //Sie können ihren FInger schon weiter als das letzte mal öffnen
         }
 
         //Phase 1
         if(dist012 > dist011) {
             middleFingerOpen = true
+            middleFingerHalfClosed = false
             Log.i(TAG8, "MittelFinger offen")
-        } else middleFingerOpen = false
+        }
 
         //Phase 2
         if(dist012 < dist011) {
+
+            if(!middleFingerHalfClosed) {
+                counterHalfClosed++
+            }
+            middleFingerHalfClosed = true
 
             //Phase 3
             if(dist012 < dist010) {
 
                 if(dist012 < dist09) {
 
-                    if(!middleFingerClosed){
+                    if(middleFingerOpen) {
                         counter++
                     }
+                    middleFingerOpen = false
+                    middleFingerHalfOpen = false
                     middleFingerClosed = true
-                    middleFingerHalfClosed = false
                     Log.i(TAG8, "MittelFinger geschlossen")
                 } else {
-                    middleFingerHalfClosed = true
                     middleFingerClosed = false
                     Log.i(TAG8, "MittelFinger fast geschlossen, Phase 3")
-                }
 
-            } else {
-                middleFingerHalfClosed = true
-                Log.i(TAG8, "MittelFinger halb geschlossen, Phase 2")
+                    if(!middleFingerHalfOpen) {
+                        counterHalfOpen++
+                    }
+                    middleFingerHalfOpen= true
+                }
             }
-        } else middleFingerHalfClosed = false
+        }
     }
 
     //Öffnen und Schließen des Ringfingers
-    private fun ringFinger (dist013: Float, dist014: Float, dist015: Float, dist016: Float, gestureRecognizer: GestureRecognizerResult) {
+    private fun ringFingerOpenClose (dist013: Float, dist014: Float, dist015: Float, dist016: Float, gestureRecognizer: GestureRecognizerResult) {
 
-        if(dist016 < ringFingerMin) {
-            ringFingerMin = dist016
-            Log.i(TAG8, "Min ringfinger: $ringFingerMin")
+        if(dist016 < Min) {
+            Min = dist016
+            Log.i(TAG8, "Min ringfinger: $Min")
         }
 
-        if(dist016 > ringFingerMax) {
-            ringFingerMax = dist016
-            Log.i(TAG8, "Max ringfinger: $ringFingerMax")
+        if(dist016 > Max) {
+            Max = dist016
+            Log.i(TAG8, "Max ringfinger: $Max")
             //Sie können ihren FInger schon weiter als das letzte mal öffnen
         }
 
         //Phase 1
         if(dist016 > dist015) {
             ringFingerOpen = true
+            ringFingerHalfClosed = false
             Log.i(TAG8, "ring Finger offen")
-        } else ringFingerOpen = false
+        }
 
         //Phase 2
         if(dist016 < dist015) {
+
+            if(!ringFingerHalfClosed) {
+                counterHalfClosed++
+            }
+            ringFingerHalfClosed = true
 
             //Phase 3
             if(dist016 < dist014) {
 
                 if(dist016 < dist013) {
 
-                    if(!ringFingerClosed){
+                    if(!ringFingerOpen){
                         counter++
                     }
+                    ringFingerOpen = false
+
                     ringFingerClosed = true
-                    ringFingerHalfClosed = false
+                    ringFingerHalfOpen = false
                     Log.i(TAG8, "ringFinger geschlossen")
                 } else {
+
+                    if(!ringFingerHalfOpen) {
+                        counterHalfOpen++
+                    }
+                    ringFingerHalfOpen = true
+
                     ringFingerClosed = false
-                    ringFingerHalfClosed = true
                     Log.i(TAG8, "ringFinger fast geschlossen, Phase 3")
                 }
 
-            } else {
-                ringFingerHalfClosed = true
-                Log.i(TAG8, "ringFinger halb geschlossen, Phase 2")
             }
-        } else ringFingerHalfClosed = false
+        }
     }
 
-    //Öffnen und Schließen des kleinen Finger
-    private fun littleFinger (dist017: Float, dist018: Float, dist019: Float, dist020: Float, gestureRecognizer: GestureRecognizerResult) {
 
-        if(dist020 < littleFingerMin) {
-            littleFingerMin = dist020
-            Log.i(TAG8, "Min little finger: $littleFingerMin")
+
+    //Öffnen und Schließen des kleinen Finger
+    private fun littleFingerOpenClose (dist017: Float, dist018: Float, dist019: Float, dist020: Float, gestureRecognizer: GestureRecognizerResult) {
+
+        if(dist020 < Min) {
+            Min = dist020
+            Log.i(TAG8, "Min little finger: $Min")
         }
 
-        if(dist020 > littleFingerMax) {
-            littleFingerMax = dist020
-            Log.i(TAG8, "Max little finger: $littleFingerMax")
+        if(dist020 > Max) {
+            Max = dist020
+            Log.i(TAG8, "Max little finger: $Max")
             //Sie können ihren FInger schon weiter als das letzte mal öffnen
         }
 
         //Phase 1
         if(dist020 > dist019) {
             littleFingerOpen = true
+            littleFingerHalfClosed = false
             Log.i(TAG8, "little Finger offen")
-        } else littleFingerOpen = false
+        }
 
         //Phase 2
         if(dist020 < dist019) {
+
+            if(!littleFingerHalfClosed) {
+                counterHalfClosed++
+            }
+            littleFingerHalfClosed = true
 
             //Phase 3
             if(dist020 < dist018) {
 
                 if(dist020 < dist017) {
-                    if(!littleFingerClosed){
+                    if(!littleFingerOpen){
                         counter++
                     }
+                    littleFingerOpen = false
+
                     littleFingerClosed = true
-                    littleFingerHalfClosed = false
+                    littleFingerHalfOpen = false
                     Log.i(TAG8, "little Finger geschlossen")
                 } else {
+
+                    if(!littleFingerHalfOpen) {
+                        counterHalfOpen++
+                    }
+                    littleFingerHalfOpen = true
+
                     littleFingerClosed = false
-                    littleFingerHalfClosed = true
                     Log.i(TAG8, "little Finger fast geschlossen, Phase 3")
                 }
-
-            } else {
-                littleFingerHalfClosed = true
-                Log.i(TAG8, "little Finger halb geschlossen, Phase 2")
             }
-        } else littleFingerHalfClosed = false
+        }
     }
 
+    // schließen und öffnen aller Finger erkennen
+    private fun allFingersCloseOpen () {
+
+
+        allFingersClosed = thumbClosed && pointingFingerClosed && ringFingerClosed && middleFingerClosed && littleFingerClosed
+
+        allFingershalfClosed = thumbHalfClosed && pointingFingerHalfClosed && ringFingerHalfClosed && littleFingerHalfClosed && middleFingerHalfClosed
+
+        //allFingersOpen = thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen
+
+        Log.i("Alle Finger open", "Alle Finger: thumb: $thumbOpen, pointin: $pointingFingerOpen, middle: $middleFingerOpen, ring: $ringFingerOpen, little: $littleFingerOpen")
+
+
+        Log.i("Alle Finger", "Alle Finger: open: $allFingersOpen, closed: $allFingersClosed, half closed: $allFingershalfClosed")
+
+
+        if(thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen) {
+            allFingersOpen = true
+        }
+        else {
+            if(allFingersOpen){
+                counterAllFingersOpenClose++
+            }
+            allFingersOpen = false
+        }
+
+    }
+
+
+
+    ///------------------------------------------------------------------------------//
+    ///------------------------------------------------------------------------------//
+    /// ---------------------- Extra Aufgaben --- ---------------------------------- //
+    ///------------------------------------------------------------------------------//
+    ///------------------------------------------------------------------------------//
+
     // Daumen zur HandinnenFläche und wieder nach außen bewegen
-    private fun movingThumb (gestureRecognizer: GestureRecognizerResult) {
+    private fun thumbToPalm (gestureRecognizer: GestureRecognizerResult) {
 
         // Normalisierte Landmarks
         val x4Normalized = gestureRecognizer.landmarks()[0][4].x()
@@ -996,12 +1061,7 @@ class CameraFragment : Fragment(),
         //Verwenden der x-Koordinaten
         //Log.i(TAG9, "x4: $x4Normalized, x5: $x5Normalized, x9: $x9Normalized, x13: $x13Normalized")
 
-        if(x4Normalized < x5Normalized) {
-            if(thumbSpread) {
-                thumbHalfClosed = false
-                thumbOpen = true
-            } else thumbOpen = false
-        }
+        thumbOpen = x4Normalized < x5Normalized
 
         if (orientationHand == "UP") {
             //Phase 1
@@ -1025,7 +1085,7 @@ class CameraFragment : Fragment(),
                     thumbHalfClosed = true
                     Log.i(TAG9, "Daumen überkreuzt Zeigefinger")
                 }
-            }
+            } else thumbHalfClosed = false
         } else Log.i(TAG9, "Ändern sie die Orientation ihrer Hand")
     }
 
@@ -1057,18 +1117,25 @@ class CameraFragment : Fragment(),
         }
     }
 
-    // schließen und öffnen aller Finger erkennen
-    private fun openToClosedFingers () {
+    private fun detectOrientation(x9: Float, x0: Float, y9: Float, y0: Float) {
+        //Berechnung der Ausrichtung der offenen Hand
+        val m: Float = if (abs(x9 - x0) < 0.05)
+            1000000000f
+        else
+            abs((y9 - y0)/(x9 - x0))
 
+        if (m in 0.0..1.0) {
+            orientationHand = if (x9 > x0) {
+                "RIGHT"
+            } else "LEFT"
+        }
 
-        allFingersClosed = thumbClosed && pointingFingerClosed && ringFingerClosed && middleFingerClosed && littleFingerClosed
-
-        allFingershalfClosed = thumbHalfClosed && pointingFingerHalfClosed && ringFingerHalfClosed && littleFingerHalfClosed && middleFingerHalfClosed
-
-        allFingersOpen = thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen
-
-        Log.i("Alle Finger", "Alle Finger: open: $allFingersOpen, closed: $allFingersClosed, half closed: $allFingershalfClosed")
+        if (m>1) {
+            orientationHand = if (y9 < y0) "UP"
+            else "DOWN"
+        }
     }
+
 
 
     private fun calculateDistance (gestureRecognizer: GestureRecognizerResult) {
@@ -1110,7 +1177,7 @@ class CameraFragment : Fragment(),
        val y11 = gestureRecognizer.worldLandmarks()[0][11].y()
 
        val x12 = gestureRecognizer.worldLandmarks()[0][12].x()
-       val y12 = gestureRecognizer.worldLandmarks()[0][12].y()
+        val y12 = gestureRecognizer.worldLandmarks()[0][12].y()
 
        val x13 = gestureRecognizer.worldLandmarks()[0][13].x()
        val y13 = gestureRecognizer.worldLandmarks()[0][13].y()
@@ -1137,7 +1204,7 @@ class CameraFragment : Fragment(),
        val y20 = gestureRecognizer.worldLandmarks()[0][20].y()
 
 
-       //Berechnung der Distanz Fingerspitze - Grundgelenk und Mittelgelenk Finger - Grundgelenk
+        //Berechnung der Distanz Fingerspitze - Grundgelenk und Mittelgelenk Finger - Grundgelenk
        val d08 = dist(x0, y0, x8, y8)
        val d07 = dist(x0, y0, x7, y7)
        val d06 = dist(x0, y0, x6, y6)
@@ -1160,11 +1227,12 @@ class CameraFragment : Fragment(),
        val d19 = dist(x0, y0, x19, y19)
 
        //Distanz zwischen Zeige- und Mittelfingerspitze
-       var d0812 = dist(x8, y8, x12, y12)
+        var d0812 = dist(x8, y8, x12, y12)
+
 
        //Runden der Dezimalzahl auf 3 Nachkommastellen
        val bd0812 = BigDecimal(d0812.toDouble())
-       d0812 = bd0812.setScale(4, RoundingMode.DOWN).toFloat()
+        d0812 = bd0812.setScale(4, RoundingMode.DOWN).toFloat()
 
        //Distanz zwischen Ringfingerspitze und der Spitze des kleinen Fingers
        var d1620 = dist(x16, y16, x20, y20)
@@ -1187,26 +1255,74 @@ class CameraFragment : Fragment(),
        val bd0408 = BigDecimal(d0408.toDouble())
        d0408 = bd0408.setScale(4, RoundingMode.DOWN).toFloat()
 
+        val x8Normalized = gestureRecognizer.landmarks()[0][8].x()
+        val x12Normalized = gestureRecognizer.landmarks()[0][12].x()
+        val x16Normalized = gestureRecognizer.landmarks()[0][16].x()
+        val x20Normalized = gestureRecognizer.landmarks()[0][20].x()
+
+        //x-Abstand zwischen den Koordinaten
+        var dx1620 = x20Normalized - x16Normalized
+        val bdx1620 = BigDecimal(dx1620.toDouble())
+        dx1620 = bdx1620.setScale(4, RoundingMode.DOWN).toFloat()
+
+
+        //x-Abstand zwischen den Koordinaten
+        var dx1216 = x16Normalized - x12Normalized
+        val bdx1612 = BigDecimal(dx1216.toDouble())
+        dx1216 = bdx1612.setScale(4, RoundingMode.DOWN).toFloat()
+
+
+        //x-Abstand zwischen den Koordinaten
+        var dx812 = x12Normalized - x8Normalized
+        val bdx812 = BigDecimal(dx812.toDouble())
+        dx812 = bdx812.setScale(4, RoundingMode.DOWN).toFloat()
+        Log.i(TAG6, viewModel.getSelectedExercise()?.id.toString() )
+
+
         when(viewModel.getSelectedExercise()?.id) {
             1 -> {
-                detectSpreadLittleFinger(d1620)
-                detectMiddleFingerSpread(d1216)
-                detectSpreadPointingFinger(d0812)
-                detectThumbSpread(d0408)
-                detectAllFingersSpread()
+                //Alle Finger spreizen
+                Log.i(TAG6, "alle finger")
+                littleFingerSpread(dx1620)
+                middleFingerSpread(dx1216)
+                pointingFingerSpread(dx812)
+                thumbSpread(d0408)
+                allFingersSpread()
             }
-            2 -> detectSpreadLittleFinger(d1620)
-            3 -> detectMiddleFingerSpread(d1216)
-            4 -> detectSpreadPointingFinger(d0812)
-            5 -> detectThumbSpread(d0408)
-            6 -> tiltHandJoint(x9, x0, y9, y0)
-            7 -> detectClosedFingers(d07, d08, d011, d012, d015, d016, d19, d20, gestureRecognizer)
-            8 -> pointingFinger(d08, d07, d06, d05, gestureRecognizer)
-            9 -> middleFinger(d09, d010, d011, d012, gestureRecognizer)
-            10 -> ringFinger(d013, d014, d015, d016, gestureRecognizer)
-            11 -> littleFinger(d017, d018, d19, d20, gestureRecognizer)
-            12 -> movingThumb(gestureRecognizer)
-            13 -> openToClosedFingers()
+            2 -> {
+                //Kleiner Finger spreizen
+                littleFingerSpread(dx1620)
+            }
+            3 -> {
+                //Mittelfinger spreizen
+                middleFingerSpread(dx1216)
+            }
+            4 -> {
+                //Zeigefinger spreizen
+                pointingFingerSpread(dx812)
+            }
+            5 -> {
+                //Daumen spreizen
+                thumbSpread(d0408)
+            }
+            6 -> tiltHandJoint(x9, x0, y9, y0) // Handgelenk neigen
+            8 -> pointingFingerOpenClose(d08, d07, d06, d05, gestureRecognizer) //ZeigeFinger schließen/öffnen
+            9 -> middleFingerOpenClose(d09, d010, d011, d012, gestureRecognizer) //Mittelfingerschließen/öffnen
+            10 -> ringFingerOpenClose(d013, d014, d015, d016, gestureRecognizer) //Ringfinger schließen/öffnen
+            11 -> littleFingerOpenClose(d017, d018, d19, d20, gestureRecognizer) //Kleinen finger schließen/öffnen
+            12 -> thumbToPalm(gestureRecognizer) // Daumen zur Handinnenflächen bewegen
+            13 -> {
+                pointingFingerOpenClose(d08, d07, d06, d05, gestureRecognizer)
+                middleFingerOpenClose(d09, d010, d011, d012, gestureRecognizer)
+                ringFingerOpenClose(d013, d014, d015, d016, gestureRecognizer)
+                littleFingerOpenClose(d017, d018, d19, d20, gestureRecognizer)
+                thumbToPalm(gestureRecognizer)
+                allFingersCloseOpen()
+            } //Alle Finger schließen/öffnen
+            14 -> pointingFingerOpenClose(d08, d07, d06, d05, gestureRecognizer) //Zeigefinger halb schließen/öffnen
+            15 -> littleFingerOpenClose(d017, d018, d19, d20, gestureRecognizer) //Zeigefinger halb schließen/öffnen
+            16 -> middleFingerOpenClose(d09, d010, d011, d012, gestureRecognizer) //Mittelfinger halb schließen/öffnen
+            17 -> ringFingerOpenClose(d013, d014, d015, d016, gestureRecognizer) //Ringfinger halb schließen/öffnen
             else -> {
                 //Nothing
             }
@@ -1232,12 +1348,6 @@ class CameraFragment : Fragment(),
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
             gestureRecognizerResultAdapter.updateResults(emptyList())
-
-            if (errorCode == GestureRecognizerHelper.GPU_ERROR) {
-                fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.setSelection(
-                    GestureRecognizerHelper.DELEGATE_CPU, false
-                )
-            }
         }
     }
 }
