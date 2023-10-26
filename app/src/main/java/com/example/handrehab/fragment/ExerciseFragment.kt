@@ -94,12 +94,12 @@ class ExerciseFragment : Fragment() {
                 // Überprüfen, welcher Button ausgewählt wurde
                 when (checkedId) {
                     R.id.button1 -> {
-                        viewModel.setStartModus("open")
+                        viewModel.setStartModus(getString(R.string.start_mode_open))
                         Log.i("ToggleButton", "Button 1 checked")
                     }
 
                     R.id.button2 -> {
-                        viewModel.setStartModus("closed")
+                        viewModel.setStartModus(getString(R.string.start_mode_close))
                         Log.i("ToggleButton", "Button 2 checked")
                     }
                 }
@@ -116,12 +116,12 @@ class ExerciseFragment : Fragment() {
                 // Überprüfen, welcher Button ausgewählt wurde
                 when (checkedId) {
                     R.id.buttonRight -> {
-                        viewModel.setSelectedHandSide("right")
+                        viewModel.setSelectedHandSide(getString(R.string.selected_hand_right))
                         Log.i("ToggleButton", "Button 1 checked")
                     }
 
                     R.id.buttonLeft -> {
-                        viewModel.setSelectedHandSide("left")
+                        viewModel.setSelectedHandSide(getString(R.string.selected_hand_left))
                         Log.i("ToggleButton", "Button 2 checked")
                     }
                 }

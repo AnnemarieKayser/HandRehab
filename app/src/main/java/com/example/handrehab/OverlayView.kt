@@ -37,6 +37,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var pointPaint = Paint()
     private var numberPaint = Paint()
     private var counterPaint = Paint()
+    private var boxPaint = Paint()
 
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
@@ -47,8 +48,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var sets: Int? = 0
     private var setsCompleted = 0
     private var exerciseCompleted = false
-
-
+    private var exerciseName = ""
+    private var showInfo = true
+    private var selectedHandSide = ""
+    private var startPositionHand = ""
 
     init {
         initPaints()
@@ -58,6 +61,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         results = null
         linePaint.reset()
         pointPaint.reset()
+        boxPaint.reset()
+        counterPaint.reset()
         invalidate()
         initPaints()
     }
@@ -71,19 +76,36 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         pointPaint.color = Color.YELLOW
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
+
     }
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
         var i = 0
-        counterPaint.color = Color.WHITE
-        counterPaint.setTextSize(50F)
-        if(exerciseCompleted){
-            canvas.drawText("Übung abgeschlossen", 100F, 100F, counterPaint)
+        boxPaint.style = Paint.Style.FILL
+        counterPaint.color = resources.getColor(R.color.md_theme_light_onPrimaryContainer)
+
+        boxPaint.color = resources.getColor(R.color.md_theme_light_primaryContainer)
+        counterPaint.setTextSize(20F)
+        if (exerciseCompleted) {
+            counterPaint.setTextSize(30F)
+            canvas.drawRoundRect(30f, 20f, 400f, 70f, 20f, 20f, boxPaint)
+            canvas.drawText("Übung abgeschlossen", 50F, 55F, counterPaint)
         } else {
-            canvas.drawText("Wiederholungen: $counterFinger / $repetitions", 100F, 100F, counterPaint)
-            canvas.drawText("Sets: $setsCompleted / $sets", 100F, 200F, counterPaint)
+            canvas.drawRoundRect(30f, 20f, 400f, 60f, 20f, 20f, boxPaint)
+            canvas.drawText("Wiederholungen: $counterFinger / $repetitions, Sets: $setsCompleted / $sets", 50F, 45F, counterPaint)
         }
+
+        if(showInfo) {
+            counterPaint.setTextSize(20F)
+            canvas.drawRoundRect(30f, 80f, 500f, 190f, 20f, 20f, boxPaint)
+            canvas.drawText("Übung: $exerciseName", 50F, 110F, counterPaint)
+            canvas.drawText("Ausgewählte Hand: $selectedHandSide", 50F, 140F, counterPaint)
+            if(startPositionHand != "") {
+                canvas.drawText("Startposition: $startPositionHand", 50F, 170F, counterPaint)
+            }
+        }
+
         results?.let { gestureRecognizerResult ->
             for(landmark in gestureRecognizerResult.landmarks()) {
                 for(normalizedLandmark in landmark) {
@@ -109,14 +131,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                         gestureRecognizerResult.landmarks().get(0).get(it.end()).y() * imageHeight * scaleFactor,
                         linePaint)
                 }
-                /*HandLandmarker.HAND_CONNECTIONS.forEach {
-                    canvas.drawLine(
-                        gestureRecognizerResult.landmarks().get(0).get(8).x() * imageWidth * scaleFactor,
-                        gestureRecognizerResult.landmarks().get(0).get(8).y() * imageHeight * scaleFactor,
-                        gestureRecognizerResult.landmarks().get(0).get(12).x() * imageWidth * scaleFactor,
-                        gestureRecognizerResult.landmarks().get(0).get(12).y() * imageHeight * scaleFactor,
-                        linePaint)
-                }*/
             }
             i = 0
         }
@@ -131,7 +145,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         setsCompleted1: Int,
         repetitions1: Int?,
         sets1: Int?,
-        statusExercise: Boolean
+        statusExercise: Boolean,
+        name: String,
+        info: Boolean,
+        selectedHand: String,
+        startPosition: String
     ) {
 
         repetitions = repetitions1
@@ -140,6 +158,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         results = gestureRecognizerResult
         setsCompleted = setsCompleted1
         exerciseCompleted = statusExercise
+        exerciseName = name
+        showInfo = info
+        selectedHandSide = selectedHand
+        startPositionHand = startPosition
 
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth

@@ -135,6 +135,9 @@
     <string name="button_medium">Mittel</string>
     <string name="button_hard">Schwer</string>
     <string name="toggle_button_show_info">Info ausblenden</string>
-
+    <string name="start_mode_open">offen</string>
+    <string name="start_mode_close">geschlossen</string>
+    <string name="selected_hand_right">rechts</string>
+    <string name="selected_hand_left">links</string>
 
 </resources>

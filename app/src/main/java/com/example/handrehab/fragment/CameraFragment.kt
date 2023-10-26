@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ekn.gruzer.gaugelibrary.Range
 import com.example.handrehab.Data
 import com.example.handrehab.DataMinMax
 import com.example.handrehab.MainViewModel
@@ -46,6 +47,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
+import android.graphics.Color
+import android.opengl.Visibility
+import android.view.View.GONE
+import android.view.View.VISIBLE
 
 
 class CameraFragment : Fragment(),
@@ -237,10 +242,19 @@ class CameraFragment : Fragment(),
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        with(fragmentCameraBinding.recyclerviewResults) {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = gestureRecognizerResultAdapter
-        }
+
+
+        //set min max and current value
+        //set min max and current value
+        fragmentCameraBinding.halfGauge.minValue = 0.0
+        fragmentCameraBinding.halfGauge.maxValue = 100.0
+        fragmentCameraBinding.halfGauge.value = 0.0
+
+        fragmentCameraBinding.halfGauge.setNeedleColor(Color.DKGRAY)
+        fragmentCameraBinding.halfGauge.valueColor = Color.BLUE
+        fragmentCameraBinding.halfGauge.minValueTextColor = Color.RED
+        fragmentCameraBinding.halfGauge.maxValueTextColor = Color.GREEN
+
         setHasOptionsMenu(true)
 
         loadMinMax()
@@ -258,7 +272,7 @@ class CameraFragment : Fragment(),
 
         val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
 
-        view.visibility = View.GONE
+        view.visibility = GONE
 
 
         // Create the Hand Gesture Recognition Helper that will handle the
@@ -279,8 +293,10 @@ class CameraFragment : Fragment(),
 
         // Attach listeners to UI control widgets
         initBottomSheetControls()
-
-
+        val id = viewModel.getSelectedExercise()?.id
+        if( id == 1 || id == 6 || id == 13) {
+            fragmentCameraBinding.halfGauge.visibility = GONE
+        }
     }
 
     private fun initBottomSheetControls() {
@@ -304,6 +320,9 @@ class CameraFragment : Fragment(),
             R.id.app_bar_switch -> {
                 showInfo = !showInfo
                 Log.i("InfoToggleButton", showInfo.toString())
+
+                if(showInfo) fragmentCameraBinding.halfGauge.visibility = VISIBLE
+                else fragmentCameraBinding.halfGauge.visibility = GONE
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -436,7 +455,7 @@ class CameraFragment : Fragment(),
                 var id = viewModel.getSelectedExercise()?.id
 
                 if(id == 14 || id == 15 ||id == 16 ||id == 17 ) {
-                    if(viewModel.getStartModus() == "open") {
+                    if(viewModel.getStartModus() == getString(R.string.start_mode_open)) {
                         counter = counterHalfClosed
                     } else counter = counterHalfOpen
                 }
@@ -608,6 +627,31 @@ class CameraFragment : Fragment(),
             }
     }
 
+    private fun setGaugeValues(distance: Float, threshold: Double) {
+
+        val id = viewModel.getSelectedExercise()?.id
+        if( id == 1 || id == 6 || id == 13) {
+            //Nothing
+        }else {
+
+            fragmentCameraBinding.halfGauge.value = ((distance-Min) / (Max-Min) * 100).toDouble()
+
+            val range = Range()
+            range.color = Color.RED
+            range.from = 0.0
+            range.to = (((Max-Min)/divideFactor)/ (Max-Min))* 100
+
+            val range2 = Range()
+            range2.color = Color.GREEN
+            range2.from = (((Max-Min)/divideFactor)/ (Max-Min))* 100
+            range2.to = 100.0
+
+            fragmentCameraBinding.halfGauge.addRange(range)
+            fragmentCameraBinding.halfGauge.addRange(range2)
+        }
+
+    }
+
 
     ///------------------------------------------------------------------------------//
     ///------------------------------------------------------------------------------//
@@ -632,10 +676,11 @@ class CameraFragment : Fragment(),
 
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
         val distMinMax = pointingFingerSpreadMax - pointingFingerSpreadMin
+        val threshold = pointingFingerSpreadMin + distMinMax/divideFactor
         Log.i(TAG2, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d0812 > (pointingFingerSpreadMin + distMinMax/divideFactor)) {
+        if(d0812 > threshold) {
             Log.i(TAG2, "factor: $divideFactor, distMinMAx: $distMinMax, ergebnis: ${distMinMax/divideFactor}")
             if(!pointingFingerSpread) {
                 Log.i(TAG2, "Finger Spread counter: $fingersSpreadCounter")
@@ -643,16 +688,19 @@ class CameraFragment : Fragment(),
             }
         }
 
-        if(d0812 < ((pointingFingerSpreadMin + distMinMax/divideFactor))) {
+        if(d0812 < threshold) {
             if(pointingFingerSpread) {
                 counter++
                 pointingFingerSpread = false
             }
         }
 
+        setGaugeValues(d0812, threshold)
+
     }
 
     private fun littleFingerSpread (d1620: Float) {
+
 
         //Maximum
         if(d1620 > littleFingerSpreadMax) {
@@ -671,21 +719,24 @@ class CameraFragment : Fragment(),
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
         val distMinMax = littleFingerSpreadMax - littleFingerSpreadMin
         Log.i(TAG3, "Maximale Distanz: $distMinMax")
+        val threshold = littleFingerSpreadMin + distMinMax/divideFactor
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d1620 > (littleFingerSpreadMin + distMinMax/divideFactor)) {
+        if(d1620 > threshold) {
             if(!littleFingerSpread) {
                 Log.i(TAG3, "Finger Spread counter: $fingersSpreadCounter")
                 littleFingerSpread = true
             }
         }
 
-        if(d1620 < ((littleFingerSpreadMin + distMinMax/divideFactor))) {
+        if(d1620 < threshold) {
             if(littleFingerSpread) {
                 counter++
                 littleFingerSpread = false
             }
         }
+
+        setGaugeValues(d1620, threshold)
     }
 
     private fun thumbSpread (d0408: Float) {
@@ -707,22 +758,25 @@ class CameraFragment : Fragment(),
 
         //Berechnung der Maximalen Distanz
         val distMinMax = thumbSpreadMax - thumbSpreadMin
+        val threshold = thumbSpreadMin + distMinMax/divideFactor
         Log.i(TAG4, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d0408 > (thumbSpreadMin + distMinMax/divideFactor)) {
+        if(d0408 > threshold ) {
             if(!thumbSpread) {
                 Log.i(TAG4, "Thumb Spread counter: $thumbSpreadCounter")
                 thumbSpread = true
             }
         }
 
-        if(d0408 < ((thumbSpreadMin + distMinMax/divideFactor))) {
+        if(d0408 < threshold) {
             if(thumbSpread) {
                 counter++
                 thumbSpread = false
             }
         }
+
+        setGaugeValues(d0408, threshold)
     }
 
     private fun middleFingerSpread (d1216: Float) {
@@ -744,21 +798,24 @@ class CameraFragment : Fragment(),
 
         //Berechnung der Maximalen Distanz zwischen Mittel- und Zeigefinger
         val distMinMax = middleFingerSpreadMax - middleFingerSpreadMin
+        val threshold = middleFingerSpreadMin + distMinMax/divideFactor
         Log.i(TAG5, "Maximale Distanz: $distMinMax")
 
         //Hochzählen des Counters, wenn Mitte zwischen Maximalem und Minimalem Wert überschritten wurde
-        if(d1216 > (middleFingerSpreadMin + distMinMax/divideFactor)) {
+        if(d1216 > threshold) {
             if(!middleFingerSpread) {
                 middleFingerSpread = true
             }
         }
 
-        if(d1216 < ((middleFingerSpreadMin + distMinMax/divideFactor))) {
+        if(d1216 < threshold) {
             if(middleFingerSpread) {
                 counter++
                 middleFingerSpread = false
             }
         }
+
+        setGaugeValues(d1216, threshold)
     }
 
     private fun allFingersSpread () {
@@ -781,6 +838,36 @@ class CameraFragment : Fragment(),
     /// --------------------- Schließen/Öffnen der Finger -------------------------- //
     ///------------------------------------------------------------------------------//
     ///------------------------------------------------------------------------------//
+
+    private fun setGaugeValuesOpenClose(distance: Float) {
+
+
+        if(viewModel.getStartModus() == getString(R.string.start_mode_open)) {
+            fragmentCameraBinding.halfGauge.value = ((Max-distance)/(Max-Min) * 100).toDouble()
+        } else {
+            fragmentCameraBinding.halfGauge.value = ((distance-Min)/(Max-Min) * 100).toDouble()
+        }
+
+        val range = Range()
+        range.color = Color.RED
+        range.from = 0.0
+        range.to = 33.0
+
+        val range3 = Range()
+        range3.color = Color.YELLOW
+        range3.from = 33.0
+        range3.to = 66.0
+
+        val range2 = Range()
+        range2.color = Color.GREEN
+        range2.from = 66.0
+        range2.to = 100.0
+
+        fragmentCameraBinding.halfGauge.addRange(range)
+        fragmentCameraBinding.halfGauge.addRange(range2)
+        fragmentCameraBinding.halfGauge.addRange(range3)
+
+    }
 
     //Öffnen und Schließen des Zeigefingers
     private fun pointingFingerOpenClose (dist08: Float, dist07: Float, dist06: Float, dist05: Float, gestureRecognizer: GestureRecognizerResult) {
@@ -841,6 +928,8 @@ class CameraFragment : Fragment(),
             }
         }
 
+        setGaugeValuesOpenClose(dist08)
+
         //Distanz zwischen Fingerspitze und Grundgelenk speichern (d08)
     }
 
@@ -897,6 +986,9 @@ class CameraFragment : Fragment(),
                 }
             }
         }
+
+        setGaugeValuesOpenClose(dist012)
+
     }
 
     //Öffnen und Schließen des Ringfingers
@@ -954,6 +1046,8 @@ class CameraFragment : Fragment(),
 
             }
         }
+
+        setGaugeValuesOpenClose(dist016)
     }
 
 
@@ -1011,22 +1105,18 @@ class CameraFragment : Fragment(),
                 }
             }
         }
+
+        setGaugeValuesOpenClose(dist020)
     }
 
     // schließen und öffnen aller Finger erkennen
     private fun allFingersCloseOpen () {
-
 
         allFingersClosed = thumbClosed && pointingFingerClosed && ringFingerClosed && middleFingerClosed && littleFingerClosed
 
         allFingershalfClosed = thumbHalfClosed && pointingFingerHalfClosed && ringFingerHalfClosed && littleFingerHalfClosed && middleFingerHalfClosed
 
         //allFingersOpen = thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen
-
-        Log.i("Alle Finger open", "Alle Finger: thumb: $thumbOpen, pointin: $pointingFingerOpen, middle: $middleFingerOpen, ring: $ringFingerOpen, little: $littleFingerOpen")
-
-
-        Log.i("Alle Finger", "Alle Finger: open: $allFingersOpen, closed: $allFingersClosed, half closed: $allFingershalfClosed")
 
 
         if(thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen) {
@@ -1053,13 +1143,26 @@ class CameraFragment : Fragment(),
     private fun thumbToPalm (gestureRecognizer: GestureRecognizerResult) {
 
         // Normalisierte Landmarks
+        val x4Worldmark = gestureRecognizer.worldLandmarks()[0][4].x()
         val x4Normalized = gestureRecognizer.landmarks()[0][4].x()
         val x5Normalized = gestureRecognizer.landmarks()[0][5].x()
         val x9Normalized = gestureRecognizer.landmarks()[0][9].x()
         val x13Normalized = gestureRecognizer.landmarks()[0][13].x()
 
+
         //Verwenden der x-Koordinaten
         //Log.i(TAG9, "x4: $x4Normalized, x5: $x5Normalized, x9: $x9Normalized, x13: $x13Normalized")
+        if(x4Normalized < Min) {
+            Min = x4Normalized
+            Log.i(TAG8, "Min little finger: $Min")
+        }
+
+        if(x13Normalized > Max) {
+            Max = x13Normalized
+            Log.i(TAG8, "Max little finger: $Max")
+            //Sie können ihren FInger schon weiter als das letzte mal öffnen
+        }
+
 
         thumbOpen = x4Normalized < x5Normalized
 
@@ -1087,6 +1190,27 @@ class CameraFragment : Fragment(),
                 }
             } else thumbHalfClosed = false
         } else Log.i(TAG9, "Ändern sie die Orientation ihrer Hand")
+
+        fragmentCameraBinding.halfGauge.value = (((x4Normalized-Min)/(Max- Min)) * 100).toDouble()
+
+        val range = Range()
+        range.color = Color.RED
+        range.from = 0.0
+        range.to = 33.0
+
+        val range3 = Range()
+        range3.color = Color.YELLOW
+        range3.from = 33.0
+        range3.to = 66.0
+
+        val range2 = Range()
+        range2.color = Color.GREEN
+        range2.from = 66.0
+        range2.to = 100.0
+
+        fragmentCameraBinding.halfGauge.addRange(range)
+        fragmentCameraBinding.halfGauge.addRange(range2)
+        fragmentCameraBinding.halfGauge.addRange(range3)
     }
 
     private fun tiltHandJoint (x9: Float, x0: Float, y9:Float, y0: Float) {
@@ -1115,8 +1239,13 @@ class CameraFragment : Fragment(),
                 Log.i("Hand Joint Right","Right: $handJointMaxAngleRight" )
             }
         }
+
     }
 
+    fun convert(number: Int, original: IntRange, target: IntRange): Int {
+        val ratio = (number - original.first).toFloat() / (original.last - original.first)
+        return (ratio * (target.last - target.first)).toInt()
+    }
     private fun detectOrientation(x9: Float, x0: Float, y9: Float, y0: Float) {
         //Berechnung der Ausrichtung der offenen Hand
         val m: Float = if (abs(x9 - x0) < 0.05)

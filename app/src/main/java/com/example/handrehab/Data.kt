@@ -13,10 +13,10 @@ class Data {
     private var exerciseName = ""
     private var exerciseId = 0
     private var dayOfWeek = 1
-    private var selectedHandSide = "right"
+    private var selectedHandSide = ""
     private var max = 0f
     private var min = 0f
-    private var startMode = "open"
+    private var startMode = ""
     // serverTimestamp soll automatisch vom Server gesetzt werden
     @ServerTimestamp
     private var serverTimestamp: Timestamp? = null
