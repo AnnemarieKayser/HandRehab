@@ -139,5 +139,8 @@
     <string name="start_mode_close">geschlossen</string>
     <string name="selected_hand_right">rechts</string>
     <string name="selected_hand_left">links</string>
+    <string name="title_change_hand">Hand wechseln</string>
+    <string name="supporting_text_change_hand_right">Bitte halte die rechte Hand in die Kamera oder wählen Sie auf der vorherigen Seite die andere Handseite aus.</string>
+    <string name="supporting_text_change_hand_left">Bitte halte die linke Hand in die Kamera oder wählen Sie auf der vorherigen Seite die andere Handseite aus.</string>
 
 </resources>

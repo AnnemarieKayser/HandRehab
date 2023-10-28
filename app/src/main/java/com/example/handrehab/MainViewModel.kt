@@ -57,8 +57,8 @@ class MainViewModel: ViewModel() {
         _repetitions.value = 0
         _sets.value = 0
         _littleFingerCounter.value = 0
-        _handOpenOrClosed.value = ""
-        _selectedHandSide.value = ""
+        _handOpenOrClosed.value = "offen"
+        _selectedHandSide.value = "rechts"
         _divideFactor.value = 2.0
     }
 
