@@ -18,10 +18,6 @@
         android:id="@+id/exerciseListFragment"
         android:icon="@drawable/ic_hand_outlined"
         android:title="@string/title_exercise"/>
-    <item
-        android:id="@+id/settingFragment"
-        android:icon="@drawable/ic_settings"
-        android:title="@string/title_setting"/>
 
 
 
