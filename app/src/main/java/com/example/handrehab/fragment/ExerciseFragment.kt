@@ -1,34 +1,45 @@
 package com.example.handrehab.fragment
 
+import android.content.ContentValues
 import android.graphics.Color
 import android.net.Uri
-import android.opengl.Visibility
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.INVISIBLE
 import android.view.ViewGroup
 import android.widget.MediaController
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.handrehab.Data
 import com.example.handrehab.MainViewModel
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentExerciseBinding
-import com.example.handrehab.item.Datasource
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import org.json.JSONObject
-import java.text.DateFormat
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Date
+import com.google.firebase.firestore.QuerySnapshot
 import splitties.toast.toast
-
+import java.lang.String.format
+import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
 
 class ExerciseFragment : Fragment() {
@@ -47,6 +58,24 @@ class ExerciseFragment : Fragment() {
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private var counterExercise = 0
 
+    // === Graph === //
+    private lateinit var dateMonday: String
+    private lateinit var dateThuesday: String
+    private var arrayDays = arrayOf("", "", "", "", "", "", "")
+    private var counterWeeksMonday = 0
+    private var arrayWeekDays = arrayOfNulls<Any>(7)
+    private var dbList = ArrayList <Data> ()
+    private var values = arrayListOf<Float>()
+    private var valuesDate = arrayOf<String>()
+    private var listValuesDate = arrayListOf<String>()
+    private var categoriesString = ""
+
+    // === Line Graph === //
+    private var valueSeries : ArrayList<Entry> = ArrayList()
+    @RequiresApi(Build.VERSION_CODES.O)
+    private val baseTimestamp = LocalDateTime.now()
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +85,7 @@ class ExerciseFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -69,7 +99,6 @@ class ExerciseFragment : Fragment() {
 
             binding.toggleButton.visibility = GONE
         }
-
 
         binding.buttonStartExercise.setOnClickListener {
             binding.editTextRepetition.text.toString().toIntOrNull()
@@ -88,6 +117,7 @@ class ExerciseFragment : Fragment() {
 
         // --- Änderung des Status des toggle-Buttons --- //
         // Einstellung der Start Position der Hand
+        binding.toggleButton.check(if(viewModel.getStartModus() == getString(R.string.start_mode_open)) R.id.button1 else R.id.button2)
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
@@ -96,11 +126,15 @@ class ExerciseFragment : Fragment() {
                     R.id.button1 -> {
                         viewModel.setStartModus(getString(R.string.start_mode_open))
                         Log.i("ToggleButton", "Button 1 checked")
+                        dbList.clear()
+                        loadDbData()
                     }
 
                     R.id.button2 -> {
                         viewModel.setStartModus(getString(R.string.start_mode_close))
                         Log.i("ToggleButton", "Button 2 checked")
+                        dbList.clear()
+                        loadDbData()
                     }
                 }
             }
@@ -110,6 +144,7 @@ class ExerciseFragment : Fragment() {
 
         // --- Änderung des Status des toggle-Buttons --- //
         //Einstellung, welche Hand verwendet wird
+        binding.toggleButtonHandSide.check(if(viewModel.getSelectedHandSide() == getString(R.string.selected_hand_right)) R.id.buttonRight else R.id.buttonLeft)
         binding.toggleButtonHandSide.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
@@ -118,11 +153,15 @@ class ExerciseFragment : Fragment() {
                     R.id.buttonRight -> {
                         viewModel.setSelectedHandSide(getString(R.string.selected_hand_right))
                         Log.i("ToggleButton", "Button 1 checked")
+                        dbList.clear()
+                        loadDbData()
                     }
 
                     R.id.buttonLeft -> {
                         viewModel.setSelectedHandSide(getString(R.string.selected_hand_left))
                         Log.i("ToggleButton", "Button 2 checked")
+                        dbList.clear()
+                        loadDbData()
                     }
                 }
             }
@@ -131,6 +170,16 @@ class ExerciseFragment : Fragment() {
 
         // --- Änderung des Status des toggle-Buttons --- //
         // Einstellung der Start Position der Hand
+
+        var buttonId = when(viewModel.getDivideFactor()) {
+            1.5 -> R.id.buttonEasy
+            2.0 -> R.id.buttonMedium
+            3.0 -> R.id.buttonHard
+            else -> R.id.buttonMedium
+        }
+
+        binding.toggleButtonLevel.check(buttonId)
+
         binding.toggleButtonLevel.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
@@ -139,7 +188,6 @@ class ExerciseFragment : Fragment() {
                     R.id.buttonEasy -> {
                         viewModel.setDivideFactor(3.0)
                     }
-
                     R.id.buttonMedium -> {
                         viewModel.setDivideFactor(2.0)
                     }
@@ -148,7 +196,6 @@ class ExerciseFragment : Fragment() {
                     }
                 }
             }
-
         }
 
 
@@ -173,34 +220,131 @@ class ExerciseFragment : Fragment() {
         binding.videoViewExercise.seekTo(1)
         //binding.videoViewExercise.start()
 
+        dbList.clear()
+        loadDbData()
+
     }
 
-    private fun insertDataInDb(counter: Int) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun configGraph(arr: ArrayList<String>) {
 
-        // Weather Objekt mit Daten befüllen (ID wird automatisch ergänzt)
-        val data = Data()
-        data.setCounterExercises(counter)
+        Log.i("arrLength", arr.size.toString())
 
-        // Wandle String date (im Format yyyy-MM-dd !!!) um in ein Date Objekt
-        /*val dateFormat: DateFormat = SimpleDateFormat("yyyy-MM-dd")
-        var datetimestamp: Date? = null
-        try {
-            datetimestamp = dateFormat.parse("")
-        } catch (e: ParseException) {
-            e.printStackTrace()
-        }*/
-        //data.setDateTimestamp(datetimestamp)
 
-        // Schreibe Daten als Document in die Collection Messungen in DB;
-        // Eine id als Document Name wird automatisch vergeben
-        // Implementiere auch onSuccess und onFailure Listender
+        val formatter: ValueFormatter = object : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase): String {
+                Log.i("FloatValue", value.toString())
+                return if(value.toInt() < arr.size && value.toInt() >= 0) arr[value.toInt()]
+                else "0"
+            }
+        }
+
+
+        //Beschreibung
+        binding.lineChart.description.isEnabled = false
+
+        //linke y-Achse
+        val yAxis : YAxis = binding.lineChart.axisLeft
+        yAxis.axisMinimum = 0f
+        yAxis.axisMaximum = 0.4f
+        yAxis.gridColor = Color.LTGRAY
+
+
+        //rechte y-Achse
+        binding.lineChart.axisRight.isEnabled = false
+
+        //x-Achse
+        val xAxis : XAxis = binding.lineChart.xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.valueFormatter = formatter
+        xAxis.labelRotationAngle = -45f
+        xAxis.gridColor = Color.LTGRAY
+        xAxis.isGranularityEnabled = true
+        xAxis.granularity = 1f
+        xAxis.mLabelRotatedHeight = 60
+
+        //enable scrolling and scaling
+        binding.lineChart.isDragEnabled = true
+        binding.lineChart.setScaleEnabled(true)
+    }
+
+
+
+
+
+    // === loadDbData === //
+    // Einlesen der Daten aus der Datenbank
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadDbData() {
+
+
+        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("Daten")
-            .add(data)
-            .addOnSuccessListener { documentReference ->
+            .whereEqualTo("exerciseId", viewModel.getSelectedExercise()!!.id)
+            .whereEqualTo("selectedHandSide", viewModel.getSelectedHandSide())
+            .whereEqualTo("startMode", viewModel.getStartModus())
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Datenbankantwort in Objektvariable speichern
+                    updateListView(task)
+                } else {
+                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
+                }
             }
-            .addOnFailureListener { e ->
-            }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateListView(task: Task<QuerySnapshot>) {
+        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+
+        // Diese for schleife durchläuft alle Documents der Abfrage
+        for (document in task.result!!) {
+            (dbList).add(document.toObject(Data::class.java))
+            Log.d("Daten", document.id + " => " + document.data)
+        }
+
+        dataToGraph(dbList)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun dataToGraph(data: ArrayList<Data>) {
+
+        Log.i("arrLength", data.size.toString())
+
+
+        val yourList: List<Data> = data
+        val yourSortedList: List<Data> = yourList.sortedBy { it.getDate() }
+
+        var counter = 0f
+        val dataArray = arrayListOf<String>()
+        valueSeries.clear()
+        var calender = Calendar.getInstance()
+        val zeitformat = SimpleDateFormat("MM-dd-kk-mm", Locale.GERMANY)
+        val year = SimpleDateFormat("yyyy")
+
+      //  valueSeries.add(Entry(0f, 0f))
+       // dataArray.add("0")
+
+
+        for (i in yourSortedList) {
+                val dateFormat = zeitformat.format(i.getDate()!!)
+                valueSeries.add(Entry(counter, i.getMax()))
+                dataArray.add(dateFormat)
+                counter++
+        }
+
+        binding.editTextRepetition.setText(if(data.size != 0) (data.last().getRepetitions()+2).toString() else "2")
+        binding.editTextSets.setText(if(data.size != 0) (data.last().getSets()+1).toString() else "2")
+
+        val lineDataSet = LineDataSet(valueSeries, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Rechte Hand" else "Messwerte Linke Hand")
+        binding.lineChart.data = LineData(lineDataSet)
+        binding.textViewTitleGraph.text = if(data.size != 0) year.format(data.last().getDate()!!) else ""
+        configGraph(dataArray)
+        binding.lineChart.invalidate()
+
     }
 
     override fun onDestroyView() {
