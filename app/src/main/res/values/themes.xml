@@ -53,4 +53,13 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="ImageView.Corner" parent="">
+        <item name="cornerSizeTopRight">10dp</item>
+        <item name="cornerSizeTopLeft">10dp</item>
+        <item name="cornerSizeBottomLeft">10dp</item>
+        <item name="cornerSizeBottomRight">10dp</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+
+
 </resources>

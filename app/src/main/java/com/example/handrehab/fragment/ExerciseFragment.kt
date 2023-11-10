@@ -1,10 +1,12 @@
 package com.example.handrehab.fragment
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +14,7 @@ import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -32,12 +35,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import splitties.toast.toast
-import java.lang.String.format
 import java.text.SimpleDateFormat
-import java.time.Duration
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Locale
 
@@ -85,22 +85,34 @@ class ExerciseFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("ResourceAsColor")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.textViewDescription.text = getString(viewModel.getSelectedExercise()!!.descriptionItem)
+
+
         val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
 
-        view.visibility = View.VISIBLE
+        (activity as AppCompatActivity).supportActionBar?.title = viewModel.getSelectedExercise()!!.textItem
+
+        binding.videoViewExercise.clipToOutline = true
+
+        view.visibility = GONE
 
         val id = viewModel.getSelectedExercise()!!.id
 
-        if(id == 1 || id == 2 || id==3 || id==4 || id==5) {
+        if(id == 6 || id == 2 || id==3 || id==4 || id==5) {
 
             binding.toggleButton.visibility = GONE
+            binding.textView4.visibility = GONE
+            viewModel.setStartModus("")
         }
 
-        binding.buttonStartExercise.setOnClickListener {
+
+
+        binding.extendedFab.setOnClickListener {
             binding.editTextRepetition.text.toString().toIntOrNull()
                 ?.let { it1 -> viewModel.setRepetitions(it1) }
             binding.editTextSets.text.toString().toIntOrNull()
@@ -117,7 +129,7 @@ class ExerciseFragment : Fragment() {
 
         // --- Änderung des Status des toggle-Buttons --- //
         // Einstellung der Start Position der Hand
-        binding.toggleButton.check(if(viewModel.getStartModus() == getString(R.string.start_mode_open)) R.id.button1 else R.id.button2)
+        binding.toggleButton.check(R.id.button2)
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
@@ -199,16 +211,12 @@ class ExerciseFragment : Fragment() {
         }
 
 
-
-        binding.textViewTitle.text = viewModel.getSelectedExercise()?.textItem
-
         // --- Initialisierung MediaController --- //
         if (mediaController == null) {
             mediaController = MediaController(activity)
             mediaController!!.setAnchorView(binding.videoViewExercise)
         }
         binding.videoViewExercise.setMediaController(mediaController)
-        binding.textViewDescription.text = viewModel.getSelectedExercise()?.descriptionItem?.let { getString(it) }
 
         //  Uri-Adresse einlesen
         val uri: Uri = Uri.parse("android.resource://" + activity?.packageName  + "/" + viewModel.getSelectedExercise()?.videoItem)

@@ -55,7 +55,7 @@ class RecyclerAdapter(val listItems: List<Exercises>) :
 
         fun bindItemText(itemText: Exercises) {
             this.itemText = itemText.textItem
-            textView.text = itemText.textItem
+            textView.text = itemText.textItem.split(":")[0]
             imageView.setImageResource(itemText.imageItem)
         }
 

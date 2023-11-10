@@ -1664,7 +1664,7 @@ class CameraFragment : Fragment(),
 
 
         when (viewModel.getSelectedExercise()?.id) {
-            1 -> {
+            2 -> {
                 //Alle Finger spreizen
                 Log.i(TAG6, "alle finger")
                 littleFingerSpread(dx1620)
@@ -1674,23 +1674,23 @@ class CameraFragment : Fragment(),
                 allFingersSpread()
             }
 
-            2 -> { //Kleiner Finger spreizen
+            3 -> { //Kleiner Finger spreizen
                 littleFingerSpread(dx1620)
             }
 
-            3 -> { //Mittelfinger spreizen
+            4 -> { //Mittelfinger spreizen
                 middleFingerSpread(dx1216)
             }
 
-            4 -> { //Zeigefinger spreizen
+            5 -> { //Zeigefinger spreizen
                 pointingFingerSpread(dx812)
             }
 
-            5 -> { //Daumen spreizen
+            6 -> { //Daumen spreizen
                 thumbSpread(d0408)
             }
 
-            6 -> tiltHandJoint(x9, x0, y9, y0) // Handgelenk neigen
+            20 -> tiltHandJoint(x9, x0, y9, y0) // Handgelenk neigen
             8 -> {
                 pointingFingerOpenClose(d08, d07, d06, d05, gestureRecognizer )
                 pointingFingerOpenCloseNew(dy08)
@@ -1717,10 +1717,10 @@ class CameraFragment : Fragment(),
                 thumbToPalm(gestureRecognizer)
                 allFingersCloseOpen()
             } //Alle Finger schließen/öffnen
-            14 -> pointingFingerOpenClose(d08, d07, d06, d05, gestureRecognizer) //Zeigefinger halb schließen/öffnen
-            15 -> littleFingerOpenClose(d017, d018, d19, d20, gestureRecognizer) //Zeigefinger halb schließen/öffnen
-            16 -> middleFingerOpenClose(d09, d010, d011, d012, gestureRecognizer) //Mittelfinger halb schließen/öffnen
-            17 -> ringFingerOpenClose(d013, d014, d015, d016, gestureRecognizer) //Ringfinger halb schließen/öffnen
+            15 -> pointingFingerOpenClose(d08, d07, d06, d05, gestureRecognizer) //Zeigefinger halb schließen/öffnen
+            16 -> littleFingerOpenClose(d017, d018, d19, d20, gestureRecognizer) //Zeigefinger halb schließen/öffnen
+            17 -> middleFingerOpenClose(d09, d010, d011, d012, gestureRecognizer) //Mittelfinger halb schließen/öffnen
+            18 -> ringFingerOpenClose(d013, d014, d015, d016, gestureRecognizer) //Ringfinger halb schließen/öffnen
             else -> {
                 //Nothing
             }
