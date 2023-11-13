@@ -10,7 +10,7 @@ import com.example.handrehab.item.Exercises
 import com.example.handrehab.R
 
 
-class RecyclerAdapter(val listItems: List<Exercises>) :
+class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
 
     RecyclerView.Adapter<RecyclerAdapter.TextHolder>() {
     var itemClickListener: AdapterItemClickListener? = null
@@ -20,10 +20,17 @@ class RecyclerAdapter(val listItems: List<Exercises>) :
 
         // Hier wird das Layout eingebunden, wie jede einzelne Zeile der Liste aussehen soll
         // Diese Datei (recycler_row.xml) anlegen mittels layout->new->layout ressource file
-        return TextHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.recyclerview_row, parent, false)
-        )
+        return if(layout == "Main"){
+            TextHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.recyclerview_row_main, parent, false)
+            )
+        } else {
+            TextHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.recyclerview_row, parent, false)
+            )
+        }
     }
 
     override fun getItemCount(): Int {

@@ -43,13 +43,14 @@ class ExerciseListFragment : Fragment() {
 
         val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
         view.visibility = View.VISIBLE
+
         layoutManager = LinearLayoutManager(activity)
         binding.recyclerView.layoutManager = layoutManager
 
         val myDataset = Datasource().loadItems()
 
 
-        adapter = RecyclerAdapter(myDataset)
+        adapter = RecyclerAdapter(myDataset, "Exercise")
         binding.recyclerView.adapter = adapter
 
 

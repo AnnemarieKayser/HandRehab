@@ -16,7 +16,7 @@ class Datasource {
             Exercises(9, "Mittelfinger: Schließen und Öffnen", R.drawable.open_middle_finger, R.string.description_middle_finger_open_close, R.raw.middle_finger_open_vid),
             Exercises(10, "Ringfinger: Schließen und Öffnen", R.drawable.ring_finger_open, R.string.description_ring_finger_open_close, R.raw.ring_finger_open_vid),
             Exercises(11, "Kleinen Finger: Schließen und Öffnen", R.drawable.little_finger_open, R.string.description_little_finger_open_close, R.raw.little_finger_open_vid),
-            Exercises(12, "Daumen zur Handinnenfläche bewegen", R.drawable.thumb_to_palm, R.string.description_thumb_to_palm, R.raw.thumb_to_palm_vid),
+            Exercises(12, "Daumen zur Handinnenfläche", R.drawable.thumb_to_palm, R.string.description_thumb_to_palm, R.raw.thumb_to_palm_vid),
             Exercises(13, "Alle Finger: Schließen und Öffnen", R.drawable.all_fingers_open, R.string.description_all_finger_open_close, R.raw.open_close_all_fingers_vid),
             Exercises(14, "Halbes Öffnen und Schließen der einzelnen Finger", R.drawable.ic_arrow, R.string.description_pause,0),
             Exercises(15, "Zeigefinger: halb Schließen und Öffnen", R.drawable.pointing_finger_half, R.string.description_pointing_finger_half_open_close, R.raw.pointing_finger_half_vid),

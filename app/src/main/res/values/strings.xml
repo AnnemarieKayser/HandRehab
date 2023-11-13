@@ -93,32 +93,31 @@
 
 
     <!-- Beschreibung der Übungen-->
-    <string name="description_pause">Wenn Sie eine Pause einlegen möchten, nehmen Sie einfach Ihre Hand aus dem Kamerabild und die Übung wird pausiert. Sobald Sie Ihre Hand wieder vor die Kamera halten, wird die Übung an der Stelle fortgeführt.</string>
-    <string name="description_repeat">Wiederholen Sie die Bewegung so oft bis die festgelegte Anzahl erreicht ist. </string>
-    <string name="description_all_fingers_spread">Öffnen Sie die Handfläche. Spreizen Sie anschließend die Finger auseinander und wieder zusammen.Versuchen Sie die Finger so weit wie möglich zu öffnen.</string>
-    <string name="description_little_finger_spread">Öffnen Sie die Handfläche. Spreizen Sie den kleinen Finger vom Ringfinger weg und ziehen diese anschließend wieder zusammen.</string>
-    <string name="description_middle_finger_spread">Öffnen Sie die Handfläche. Spreizen Sie den Mittelfinger und den Ringfinger auseinander und anschließend wieder zusammen. </string>
-    <string name="description_thumb_spread">Öffnen Sie die Handfläche. Spreizen Sie den Daumen vom Zeigefinger weg und ziehen sie diese anschließend wieder zusammen. </string>
-    <string name="description_pointing_finger_spread">Öffnen Sie die Handfläche. Spreizen Sie den Zeigefinger vom Mittelfinger weg und ziehen diese anschließend wieder zusammen. </string>
-    <string name="description_pointing_finger_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren Zeigefinger so weit wie möglich. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_middle_finger_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren Mittelfinger so weit wie möglich. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_ring_finger_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren Ringfinger so weit wie möglich. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_little_finger_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren kleinen Finger so weit wie möglich. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_thumb_to_palm">Führen Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust durch. Spreizen Sie den Daumen von der Handfläche weg und bewegen Sie diesen anschließend so weit wie möglich zu Ihrer Handinnenfläche hin.</string>
-    <string name="description_all_finger_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie alle Finger so weit wie möglich.</string>
-    <string name="description_little_finger_half_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren kleinen Finger bis zur Hälfte. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_pointing_finger_half_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren Zeigefinger bis zur Hälfte. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_middle_finger_half_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren Mittelfinger bis zur Hälfte. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_ring_finger_half_open_close">Starten Sie die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffnen oder schließen Sie Ihren Ringfinger bis zur Hälfte. Die restlichen Finger können
-    Sie ebenfalls mit Öffnen/Schließen falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
-    <string name="description_tilt_hand_joint">Halten Sie ihre geöffnete Hand um 90 grad gedreht vor die Kamera. Neigen Sie anschließend ihr Handgelenk vor und zurück. Versuchen Sie dabei Ihre Finger gestreckt zulassen.</string>
+    <string name="description_pause">Wenn du eine Pause einlegen möchtest, nimm deine Hand einfach aus dem Kamerabild und die Übung wird pausiert. Sobald du deine Hand wieder vor die Kamera hälst, wird die Übung an der Stelle fortgeführt.</string>
+    <string name="description_repeat">Wiederhole die Bewegung so oft bis die festgelegte Anzahl erreicht ist. </string>
+    <string name="description_all_fingers_spread">Öffne die Handfläche. Spreize anschließend die Finger auseinander und wieder zusammen.Versuche die Finger so weit wie möglich zu öffnen.</string>
+    <string name="description_little_finger_spread">Öffne die Handfläche. Spreize den kleinen Finger vom Ringfinger weg und ziehe diese anschließend wieder zusammen.</string>
+    <string name="description_middle_finger_spread">Öffne die Handfläche. Spreize den Mittelfinger und den Ringfinger auseinander und anschließend wieder zusammen. </string>
+    <string name="description_thumb_spread">Öffne die Handfläche. Spreize den Daumen vom Zeigefinger weg und ziehe diese anschließend wieder zusammen. </string>
+    <string name="description_pointing_finger_spread">Öffne die Handfläche. Spreize den Zeigefinger vom Mittelfinger weg und ziehe diese anschließend wieder zusammen. </string>
+    <string name="description_pointing_finger_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Zeigefinger so weit wie möglich. Die restlichen Finger können ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_middle_finger_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Mittelfinger so weit wie möglich. Die restlichen Finger können
+    ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_ring_finger_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Ringfinger so weit wie möglich. Die restlichen Finger können
+     ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_little_finger_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den kleinen Finger so weit wie möglich. Die restlichen Finger können
+     ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_thumb_to_palm">Führe die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust durch. Spreize den Daumen von der Handfläche weg und bewege diesen anschließend so weit wie möglich zur Handinnenfläche hin.</string>
+    <string name="description_all_finger_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe alle Finger so weit wie möglich.</string>
+    <string name="description_little_finger_half_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den kleinen Finger bis zur Hälfte. Die restlichen Finger können
+    ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_pointing_finger_half_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Zeigefinger bis zur Hälfte. Die restlichen Finger können
+    ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_middle_finger_half_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Mittelfinger bis zur Hälfte. Die restlichen Finger können
+    ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_ring_finger_half_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Ringfinger bis zur Hälfte. Die restlichen Finger können
+    ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
+    <string name="description_tilt_hand_joint">Halte die geöffnete Hand um 90 grad gedreht vor die Kamera. Neige anschließend das Handgelenk vor und zurück. Versuche dabei die Finger gestreckt zulassen.</string>
     <string name="title_data">Daten\n</string>
     <string name="save">Daten gespeichert</string>
     <string name="not_save">Daten nicht gespeichert</string>
@@ -129,8 +128,8 @@
     <string name="button_closed">geschlossen</string>
     <string name="title_welcome">in der HandRehab-App!</string>
     <string name="title_home_start_exercise">Starte eine neue Übungseinheit</string>
-    <string name="button_go_to_exercise_list">Neue Übungseinheit starten</string>
-    <string name="title_go_to_data">Sehe dir deine Fortschritte der letzten Wochen an: </string>
+    <string name="button_go_to_exercise_list">Neue Übung starten</string>
+    <string name="title_go_to_data">Sieh dir deine Fortschritte der letzten Wochen an</string>
     <string name="button_go_to_data">Übungsdaten einsehen</string>
     <string name="title_go_to_settings">Stelle App schnell und einfach auf deine individuellen Bedürfnisse ein</string>
     <string name="button_go_to_settings">Zu Einstellungen wechseln</string>
@@ -151,12 +150,21 @@
     <string name="selected_hand_right">rechts</string>
     <string name="selected_hand_left">links</string>
     <string name="title_change_hand">Hand wechseln</string>
-    <string name="supporting_text_change_hand_right">Bitte halte die rechte Hand in die Kamera oder wählen Sie auf der vorherigen Seite die andere Handseite aus.</string>
-    <string name="supporting_text_change_hand_left">Bitte halte die linke Hand in die Kamera oder wählen Sie auf der vorherigen Seite die andere Handseite aus.</string>
+    <string name="supporting_text_change_hand_right">Bitte halte die rechte Hand in die Kamera oder wähle auf der vorherigen Seite die andere Handseite aus.</string>
+    <string name="supporting_text_change_hand_left">Bitte halte die linke Hand in die Kamera oder wähle auf der vorherigen Seite die andere Handseite aus.</string>
     <string name="text_view_sets">Anzahl an Sätzen:</string>
     <string name="text_view_repetitions">Anzahl an Wiederholungen:</string>
     <string name="text_view_title_description">Beschreibung</string>
-    <string name="text_view_hand_side">Wählen Sie die Handseite aus, die Sie trainieren möchten:</string>
-    <string name="text_view_level">Wählen Sie eine Schwierigkeitsstufe aus:</string>
+    <string name="text_view_hand_side">Wähle die Handseite aus, die du trainieren möchtest:</string>
+    <string name="text_view_level">Wähle eine Schwierigkeitsstufe aus:</string>
+    <string name="tv_overview_data">Dein Wochenverlauf</string>
+    <string name="text_view_set_goal">Setze dir eine wöchentliche Anzahl an Übungen, die du erreichen möchtest: </string>
+    <string name="edit_text_set_goal_hint">Anzahl an Übungen</string>
+    <string name="text_view_current_number">Aktuelles Ziel: %1$d</string>
+    <string name="text_view_exercises_done">Abgeschlossene Übungen: %1$d</string>
+    <string name="button_set_goal">Speichern</string>
+    <string name="text_view_goal_main">%1$d/%2$d</string>
+    <string name="text_view_intro">Diese App dient als Unterstützung in der Handrehabilitation mit einer Auswahl an verschiedenen Übungen für die rechte als auch für die linke Hand.</string>
+    <string name="text_view_week_plan">Auf dem heutigen Plan</string>
 
 </resources>
