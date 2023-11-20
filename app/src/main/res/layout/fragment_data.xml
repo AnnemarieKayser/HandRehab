@@ -12,75 +12,69 @@
         android:padding="16dp">
 
 
-        <ImageButton
-            android:id="@+id/imageButtonBefore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="23dp"
-            android:src="@drawable/ic_before"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/listViewData"
-            app:layout_constraintVertical_bias="1.0" />
-
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Daten"
+            android:text="@string/tv_overview_data"
+            android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/imageButtonCalender"
-            android:layout_width="59dp"
-            android:layout_height="58dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="44dp"
-            android:src="@drawable/ic_calender"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textViewDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="TextView"
-            app:layout_constraintStart_toEndOf="@+id/imageButtonCalender"
-            app:layout_constraintTop_toTopOf="@+id/imageButtonCalender" />
 
         <ListView
+            android:nestedScrollingEnabled="true"
             android:id="@+id/listViewData"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="200dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:background="#FFFBFF"
+            android:backgroundTint="#FFFBFF"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageButtonCalender" />
+            app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/materialCardView5"
             android:layout_width="0dp"
-            android:layout_height="280dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="24dp"
-            app:cardCornerRadius="15dp"
 
+            app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageButtonBefore"
+            app:layout_constraintTop_toBottomOf="@+id/listViewData"
             app:strokeWidth="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/imageButtonBefore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/ic_before"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/imageButtonAfter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:src="@drawable/ic_after"
+                    app:layout_constraintStart_toEndOf="@+id/imageButtonBefore"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
                     android:id="@+id/chartView"
@@ -92,33 +86,99 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/imageButtonBefore" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
 
-        <Button
-            android:id="@+id/buttonGetData"
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/materialCardViewSetGoal"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
-            android:text="@string/btn_get_data"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.492"
-            app:layout_constraintStart_toEndOf="@+id/textViewDate"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/materialCardView5"
+            app:strokeWidth="0dp">
 
-        <ImageButton
-            android:id="@+id/imageButtonAfter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:src="@drawable/ic_after"
-            app:layout_constraintStart_toEndOf="@+id/imageButtonBefore"
-            app:layout_constraintTop_toBottomOf="@+id/listViewData" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textViewSetGoal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/text_view_set_goal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/EditTextSetGoal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/edit_text_set_goal_hint"
+                    android:inputType="number"
+                    android:textAlignment="center"
+                    app:layout_constraintStart_toStartOf="@+id/textViewSetGoal"
+                    app:layout_constraintTop_toBottomOf="@id/textViewSetGoal" />
+
+
+                <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                    android:id="@+id/circularProgressBarData"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="50dp"
+                    app:cpb_background_progressbar_color="#b6bbd8"
+                    app:cpb_background_progressbar_width="5dp"
+                    app:cpb_progress_direction="to_right"
+                    app:cpb_progressbar_color="#3f51b5"
+                    app:cpb_progressbar_width="10dp"
+                    app:cpb_round_border="false"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imageButtonSave" />
+
+                <TextView
+                    android:id="@+id/textViewExercises"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/text_view_exercises_done"
+                    android:textAlignment="center"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/circularProgressBarData"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/EditTextSetGoal" />
+
+                <ImageButton
+                    android:id="@+id/imageButtonSave"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:background="#FFFBFF"
+                    android:backgroundTint="#FFFBFF"
+                    android:src="@drawable/ic_save"
+                    app:layout_constraintStart_toEndOf="@+id/EditTextSetGoal"
+                    app:layout_constraintTop_toTopOf="@+id/EditTextSetGoal" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

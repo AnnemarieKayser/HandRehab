@@ -1,5 +1,6 @@
 package com.example.handrehab.fragment
 import android.content.ContentValues
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,7 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.handrehab.Data
+import com.example.handrehab.DataGoal
+import com.example.handrehab.DataMinMax
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentDataBinding
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
@@ -23,7 +27,9 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import splitties.toast.toast
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -38,7 +44,7 @@ class DataFragment : Fragment() {
     private var date = ""
 
     // ListView
-    private var dbList = ArrayList <Data> ()
+    private var dbList = ArrayList <Any> ()
     private lateinit var adapter : ArrayAdapter<String>
 
     // === Firebase database === //
@@ -65,6 +71,12 @@ class DataFragment : Fragment() {
     private lateinit var dateThuesday: String
     private var arrayDays = arrayOf("", "", "", "", "", "", "")
 
+    // === Circular-Progress-Bar === //
+    private var maxProgressBar = 0F
+    private var progress: Float = 0F
+
+    private var goal = 0f
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,9 +89,6 @@ class DataFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonGetData.setOnClickListener {
-            loadDbData()
-        }
 
         binding.imageButtonBefore.setOnClickListener {
             counterWeeksMonday+= 7
@@ -97,40 +106,46 @@ class DataFragment : Fragment() {
             }
         }
 
+        binding.imageButtonSave.setOnClickListener {
 
-        binding.imageButtonCalender.setOnClickListener {
-            // Nur zurückliegende Daten können ausgewählt werden
-            val constraintsBuilder = CalendarConstraints.Builder().setValidator(
-                DateValidatorPointBackward.now())
-
-            // Aufbau des DatePickers
-            val datePicker =
-                MaterialDatePicker.Builder.datePicker()
-                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                    .setCalendarConstraints(constraintsBuilder.build())
-                    .setTitleText(getString(R.string.date_picker_title))
-                    .build()
-
-            datePicker.show(parentFragmentManager, "tag")
-
-            datePicker.addOnPositiveButtonClickListener {
-                // Klick auf positiven Button
-                // ausgewähltes Datum formatieren
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = datePicker.selection!!
-                val format = SimpleDateFormat("yyyy-MM-dd")
-                date = format.format(calendar.time)
-
-                binding.textViewDate.text = date
-
-                // Daten zu dem ausgewählten Tag werden geladen und angezeigt
-               // loadDbData(date)
+            goal = binding.EditTextSetGoal.text.toString().toFloatOrNull()!!
+            binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, goal.toInt())
+            // Aktualisierung der Anzeige
+            // https://github.com/lopspower/CircularProgressBar
+            binding.circularProgressBarData.apply {
+                progressMax = goal
             }
-            datePicker.addOnNegativeButtonClickListener {
-                // Klick auf negativen Button
-                // datePicker wird geschlossen
-            }
+            saveGoal()
         }
+
+        // --- Konfiguration CircularProgressBar --- //
+        // Anzeige des Fortschritts mit gerader Haltung
+        // https://github.com/lopspower/CircularProgressBar
+        binding.circularProgressBarData.apply {
+            // Progress Max
+            progressMax = maxProgressBar
+
+            // ProgressBar Farbe
+            progressBarColorStart = Color.parseColor("#924275")
+            progressBarColorEnd = Color.parseColor("#3C002C")
+
+            // Farbgradient
+            progressBarColorDirection = CircularProgressBar.GradientDirection.RIGHT_TO_LEFT
+
+            // Hintergrundfarbe
+            backgroundProgressBarColor = Color.GRAY
+            backgroundProgressBarColorDirection = CircularProgressBar.GradientDirection.TOP_TO_BOTTOM
+
+            // Weite der ProgressBar
+            progressBarWidth = 10f
+            backgroundProgressBarWidth = 4f
+
+            roundBorder = true
+
+            progressDirection = CircularProgressBar.ProgressDirection.TO_RIGHT
+        }
+
+
 
         // --- Initialisierung und Konfiguration des Graphen --- //
         val calendar = Calendar.getInstance()
@@ -159,7 +174,69 @@ class DataFragment : Fragment() {
 
         setUpAAChartView()
 
+        loadDbData()
+
     }
+    private fun saveGoal() {
+
+        //Data Objekt mit Daten befüllen (ID wird automatisch ergänzt)
+        val data = DataGoal()
+
+        data.setGoalExercises(goal)
+
+
+        // Schreibe Daten als Document in die Collection Messungen in DB;
+        // Eine id als Document Name wird automatisch vergeben
+        // Implementiere auch onSuccess und onFailure Listender
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DatenGoal")
+            .document("Ziel")
+            .set(data)
+            .addOnSuccessListener { documentReference ->
+                toast(getString(R.string.save))
+            }
+            .addOnFailureListener { e ->
+                toast(getString(R.string.not_save))
+            }
+    }
+
+    // === loadMinMax === //
+    // Einlesen der Daten aus der Datenbank
+    private fun loadGoal() {
+
+        var data: DataGoal?
+
+        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DatenGoal")
+            .document("Ziel")
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Datenbankantwort in Objektvariable speichern
+                    data = task.result!!.toObject(DataGoal::class.java)
+
+                    if (data != null) {
+                        goal = data!!.getGoalExercises()
+                        // Aktualisierung der Anzeige
+                        // https://github.com/lopspower/CircularProgressBar
+                        binding.circularProgressBarData.apply {
+                            progressMax = goal
+                        }
+
+                        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, goal.toInt())
+                    } else {
+                        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, 0)
+                    }
+                } else {
+                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
+                }
+            }
+
+    }
+
+
+
 
     // === setUpAAChartView === //
     // https://github.com/AAChartModel/AAChartCore-Kotlin
@@ -217,6 +294,14 @@ class DataFragment : Fragment() {
     // Einlesen der Daten aus der Datenbank
     private fun loadDbData() {
 
+        dbList.clear()
+
+        monday = 0; thuesday = 0; wednesday = 0; thursday = 0; friday = 0; saturday = 0; sunday = 0;
+
+        for (i in 0 until 7) {
+            arrayWeekDays[i] = 0
+        }
+
         val seriesArr = configureChartSeriesArray()
         binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
 
@@ -244,15 +329,12 @@ class DataFragment : Fragment() {
 
         }
 
-
-        dateThuesday = format.format(calendar.time)
-
         setUpAAChartView()
 
-
-        calendar.add(Calendar.DAY_OF_WEEK, + 6)
+        calendar.add(Calendar.DAY_OF_WEEK, - 1)
 
         val dateSunday: Date = calendar.time
+
 
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
@@ -273,12 +355,24 @@ class DataFragment : Fragment() {
 
     private fun updateListView(task: Task<QuerySnapshot>) {
         // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+        val zeitformat = SimpleDateFormat("dd.MMMM yyyy")
+
+        if(task.result!!.size() > 0 ) {
+            date = zeitformat.format(task.result!!.first().toObject(Data::class.java).getDate()!!)
+            dbList.add("$date:")
+        }
 
         // Diese for schleife durchläuft alle Documents der Abfrage
         for (document in task.result!!) {
-            (dbList as ArrayList<Data>).add(document.toObject(Data::class.java))
+
+            if(zeitformat.format(document.toObject(Data::class.java).getDate()!!) > date) {
+                dbList.add("Datum: ${zeitformat.format(document.toObject(Data::class.java).getDate()!!)}")
+            }
+
+            (dbList).add(document.toObject(Data::class.java))
              Log.d("Daten", document.id + " => " + document.data)
         }
+
         // jetzt liegt die vollständige Liste vor und
         // kann im ListView angezeigt werden
 
@@ -289,43 +383,55 @@ class DataFragment : Fragment() {
 
         binding.listViewData.adapter = adapter
 
+        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, goal.toInt())
+
+        // Aktualisierung der Anzeige
+        // https://github.com/lopspower/CircularProgressBar
+        binding.circularProgressBarData.progress = dbList.size.toFloat()
+
         dataToGraph(dbList)
     }
 
-    private fun dataToGraph(data: ArrayList<Data>) {
+    private fun dataToGraph(data: ArrayList<Any>) {
+
+
 
         for(i in data){
 
-            when(i.getDayOfWeek()) {
-                0 -> {
-                    monday++
-                }
 
-                1 -> {
-                    thuesday++
-                }
+            if(i::class.simpleName != "String") {
 
-                2 -> {
-                    wednesday++
-                }
+                when ((i as Data).getDayOfWeek()) {
+                    0 -> {
+                        monday++
+                    }
 
-                3 -> {
-                    thursday++
-                }
+                    1 -> {
+                        thuesday++
+                    }
 
-                4 -> {
-                    friday++
-                }
+                    2 -> {
+                        wednesday++
+                    }
 
-                5 -> {
-                    saturday++
-                }
+                    3 -> {
+                        thursday++
+                    }
 
-                6 -> {
-                    sunday++
-                }
+                    4 -> {
+                        friday++
+                    }
 
-                else -> {}
+                    5 -> {
+                        saturday++
+                    }
+
+                    6 -> {
+                        sunday++
+                    }
+
+                    else -> {}
+                }
             }
         }
 
@@ -340,13 +446,7 @@ class DataFragment : Fragment() {
         val seriesArr = configureChartSeriesArray()
         binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
 
-        monday = 0; thuesday = 0; wednesday = 0; thursday = 0; friday = 0; saturday = 0; sunday = 0;
-
-        for (i in 0 until 7) {
-            arrayWeekDays[i] = 0
-        }
-
-        dbList.clear()
+        loadGoal()
     }
 
     override fun onDestroyView() {
