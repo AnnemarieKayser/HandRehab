@@ -266,13 +266,11 @@ class CameraFragment : Fragment(),
         fragmentCameraBinding.halfGauge.value = 0.0
 
         fragmentCameraBinding.halfGauge.setNeedleColor(Color.DKGRAY)
-        fragmentCameraBinding.halfGauge.valueColor = Color.BLUE
+        fragmentCameraBinding.halfGauge.valueColor = Color.TRANSPARENT
         fragmentCameraBinding.halfGauge.minValueTextColor = Color.RED
         fragmentCameraBinding.halfGauge.maxValueTextColor = Color.GREEN
 
         setHasOptionsMenu(true)
-
-        loadMinMax()
 
         divideFactor = viewModel.getDivideFactor()!!
 
@@ -311,7 +309,7 @@ class CameraFragment : Fragment(),
         // Attach listeners to UI control widgets
         initBottomSheetControls()
         val id = viewModel.getSelectedExercise()?.id
-        if (id == 1 || id == 6 || id == 13) {
+        if (id == 2 || id == 20 || id == 13) {
             fragmentCameraBinding.halfGauge.visibility = GONE
         }
     }
@@ -513,7 +511,7 @@ class CameraFragment : Fragment(),
                 }
 
 
-                if (viewModel.getSelectedExercise()?.id == 1) {
+                if (viewModel.getSelectedExercise()?.id == 2) {
                     counter = counterAllFingersSpread
                 }
 
@@ -523,7 +521,7 @@ class CameraFragment : Fragment(),
 
                 var id = viewModel.getSelectedExercise()?.id
 
-                if (id == 14 || id == 15 || id == 16 || id == 17) {
+                if (id == 18 || id == 15 || id == 16 || id == 17) {
                     if (viewModel.getStartModus() == getString(R.string.start_mode_open)) {
                         counter = counterHalfClosed
                     } else counter = counterHalfOpen
@@ -542,8 +540,12 @@ class CameraFragment : Fragment(),
                         exerciseCompleted = true
 
                         //Speichern der Übung in der Datenbank
+                        if(viewModel.getSelectedExercise()!!.id == 2){
+                            saveMinMax()
+                        }
+
                         saveExercise()
-                        saveMinMax()
+
                         viewModel.setSets(0)
                         viewModel.setRepetitions(0)
 
@@ -575,45 +577,14 @@ class CameraFragment : Fragment(),
     }
 
 
-    // === loadMinMax === //
-    // Einlesen der Daten aus der Datenbank
-    private fun loadMinMax() {
-
-        var data: DataMinMax? = null
-
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
-        val uid = mFirebaseAuth.currentUser!!.uid
-        db.collection("users").document(uid).collection("DatenMinMax")
-            .document(viewModel.getSelectedExercise()!!.textItem)
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Datenbankantwort in Objektvariable speichern
-                    data = task.result!!.toObject(DataMinMax::class.java)
-
-                    if (data != null) {
-                        Min = data!!.getMin()
-                        Max = data!!.getMax()
-                        toast("daten empfangen: Min : $Min und Max: $Max")
-
-                    }
-                } else {
-                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
-                }
-            }
-
-    }
-
+    @SuppressLint("SimpleDateFormat")
     private fun saveMinMax() {
 
 
         // Einlesen des aktuellen Datums
         val kalender: Calendar = Calendar.getInstance()
-        val zeitformat = SimpleDateFormat("yyyy-MM-dd-hh-mm")
-        val hourFormat = SimpleDateFormat("hh-mm-ss")
+        val zeitformat = SimpleDateFormat("yyyy-MM-dd-kk-mm-ss")
         val date = zeitformat.format(kalender.time)
-        val hour = hourFormat.format(kalender.time)
-        val day = kalender.get(Calendar.DAY_OF_WEEK) - 2
 
         var datetimestamp: Date? = null
         try {
@@ -622,14 +593,18 @@ class CameraFragment : Fragment(),
             e.printStackTrace()
         }
 
-
         //Data Objekt mit Daten befüllen (ID wird automatisch ergänzt)
         val data = DataMinMax()
-        data.setMin(Min)
-        data.setMax(Max)
+        data.setMaxLittleFinger(littleFingerSpreadMax)
+        data.setMaxPointingLFinger(pointingFingerSpreadMax)
+        data.setMaxMiddleFinger(middleFingerSpreadMax)
+        data.setMaxThumbFinger(thumbSpreadMax)
         data.setExerciseName(viewModel.getSelectedExercise()!!.textItem)
         data.setDate(datetimestamp!!)
         data.setExerciseId(viewModel.getSelectedExercise()!!.id)
+        data.setRepetitions(viewModel.getRepetitions()!!)
+        data.setSets(viewModel.getSets()!!)
+        data.setSelectedHandSide(viewModel.getSelectedHandSide()!!)
 
 
         // Schreibe Daten als Document in die Collection Messungen in DB;
@@ -637,11 +612,9 @@ class CameraFragment : Fragment(),
         // Implementiere auch onSuccess und onFailure Listender
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenMinMax")
-            .document(viewModel.getSelectedExercise()!!.textItem)
-            .set(data)
+            .add(data)
             .addOnSuccessListener { documentReference ->
                 toast(getString(R.string.save))
-                findNavController().navigate(R.id.action_CameraFragment_to_exerciseFragment)
             }
             .addOnFailureListener { e ->
                 toast(getString(R.string.not_save))
@@ -653,7 +626,7 @@ class CameraFragment : Fragment(),
 
         // Einlesen des aktuellen Datums
         val kalender: Calendar = Calendar.getInstance()
-        val zeitformat = SimpleDateFormat("yyyy-MM-dd-kk-mm", Locale.GERMANY)
+        val zeitformat = SimpleDateFormat("yyyy-MM-dd-kk-mm-ss", Locale.GERMANY)
         val date = zeitformat.format(kalender.time)
         val day = kalender.get(Calendar.DAY_OF_WEEK) - 2
 
@@ -662,6 +635,11 @@ class CameraFragment : Fragment(),
             datetimestamp = zeitformat.parse(date)
         } catch (e: ParseException) {
             e.printStackTrace()
+        }
+
+
+        if(viewModel.getSelectedExercise()!!.id == 2) {
+            Max = (pointingFingerSpreadMax + littleFingerSpreadMax + middleFingerSpreadMax + thumbSpreadMax)/4
         }
 
 
@@ -688,7 +666,7 @@ class CameraFragment : Fragment(),
             .add(data)
             .addOnSuccessListener { documentReference ->
                 toast(getString(R.string.save))
-
+                findNavController().navigate(R.id.action_CameraFragment_to_exerciseFragment)
             }
             .addOnFailureListener { e ->
                 toast(getString(R.string.not_save))
@@ -698,7 +676,7 @@ class CameraFragment : Fragment(),
     private fun setGaugeValues(distance: Float, threshold: Double, Min: Float, Max: Float) {
 
         val id = viewModel.getSelectedExercise()?.id
-        if (id == 1 || id == 6 || id == 13) {
+        if (id == 2 || id == 20 || id == 13) {
             //Nothing
         } else {
 
@@ -1611,10 +1589,16 @@ class CameraFragment : Fragment(),
         val bd0408 = BigDecimal(d0408.toDouble())
         d0408 = bd0408.setScale(4, RoundingMode.DOWN).toFloat()
 
+        val x4Normalized = gestureRecognizer.landmarks()[0][4].x()
         val x8Normalized = gestureRecognizer.landmarks()[0][8].x()
         val x12Normalized = gestureRecognizer.landmarks()[0][12].x()
         val x16Normalized = gestureRecognizer.landmarks()[0][16].x()
         val x20Normalized = gestureRecognizer.landmarks()[0][20].x()
+
+        //x-Abstand zwischen den Koordinaten Rechte Hand
+        var dx0408 = if (selectedHandSide == getString(R.string.selected_hand_right)) x8Normalized - x4Normalized else x4Normalized - x8Normalized
+        val bdx0408 = BigDecimal(dx0408.toDouble())
+        dx0408 = bdx0408.setScale(4, RoundingMode.DOWN).toFloat()
 
         //x-Abstand zwischen den Koordinaten Rechte Hand
         var dx1620 = if (selectedHandSide == getString(R.string.selected_hand_right)) x20Normalized - x16Normalized else x16Normalized - x20Normalized
@@ -1670,7 +1654,7 @@ class CameraFragment : Fragment(),
                 littleFingerSpread(dx1620)
                 middleFingerSpread(dx1216)
                 pointingFingerSpread(dx812)
-                thumbSpread(d0408)
+                thumbSpread(dx0408)
                 allFingersSpread()
             }
 

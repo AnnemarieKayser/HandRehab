@@ -2,10 +2,12 @@ package com.example.handrehab
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class Data {
-
+    private var zeitformat = SimpleDateFormat("yyyy-MM-dd-kk-mm")
     private var counterExercises = 0
     private var dateTimestamp: Date? = null
     private var repetitions = 0
@@ -120,18 +122,13 @@ class Data {
     }
 
     override fun toString(): String {
-        return "Data{" +
-                ", Name=" + exerciseName +
-                ", dateTimestamp=" + dateTimestamp +
-                ", counterExercises=" + counterExercises +
-                ", Repetitions=" + repetitions +
-                ", Sets=" + sets +
-                ", Min=" + min +
-                ", Max=" + max +
-                ", SelectedHand=" + selectedHandSide +
-                ", StartMode=" + startMode +
-                ", ExerciseId=" + exerciseId +
-                '}'
+        return  "Übung: " + exerciseName +
+                ", Uhrzeit: " + zeitformat.format(dateTimestamp) +
+                ", Wiederholungen: " + repetitions +
+                ", Sätze: " + sets +
+                ", Maximale Distanz: " + max +
+                ", Trainierte Hand: " + selectedHandSide +
+                ", Startposition: " + startMode
     }
 
 }

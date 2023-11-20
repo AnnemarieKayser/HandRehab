@@ -8,14 +8,42 @@ class DataMinMax {
 
     private var dateTimestamp: Date? = null
     private var exerciseName = ""
-    private var max = 0f
-    private var min = 0f
+    private var maxPointingFinger = 0f
+    private var maxlittleFinger = 0f
+    private var maxMiddleFinger = 0f
+    private var maxThumb = 0f
+    private var selectedHandSide = ""
+    private var repetitions = 0
+    private var sets = 0
     // serverTimestamp soll automatisch vom Server gesetzt werden
     @ServerTimestamp
     private var serverTimestamp: Timestamp? = null
     private var exerciseId = 0
 
 
+    fun getRepetitions(): Int {
+        return repetitions
+    }
+
+    fun setRepetitions(rep: Int) {
+        this.repetitions = rep
+    }
+
+    fun getSets(): Int {
+        return sets
+    }
+
+    fun setSets(set: Int) {
+        this.sets = set
+    }
+
+    fun getSelectedHandSide(): String {
+        return selectedHandSide
+    }
+
+    fun setSelectedHandSide(side: String) {
+        this.selectedHandSide = side
+    }
 
     fun getExerciseId(): Int {
         return exerciseId
@@ -42,20 +70,36 @@ class DataMinMax {
         this.dateTimestamp = Date
     }
 
-    fun getMax(): Float {
-        return max
+    fun getMaxLittleFinger(): Float {
+        return maxlittleFinger
     }
 
-    fun setMax(Max: Float) {
-        this.max = Max
+    fun setMaxLittleFinger(Max: Float) {
+        this.maxlittleFinger = Max
     }
 
-    fun getMin(): Float {
-        return min
+    fun getMaxPointingFinger(): Float {
+        return maxPointingFinger
     }
 
-    fun setMin(Min: Float) {
-        this.min = Min
+    fun setMaxPointingLFinger(Max: Float) {
+        this.maxPointingFinger = Max
+    }
+
+    fun getMaxMiddleFinger(): Float {
+        return maxMiddleFinger
+    }
+
+    fun setMaxMiddleFinger(Max: Float) {
+        this.maxMiddleFinger = Max
+    }
+
+    fun getMaxThumbFinger(): Float {
+        return maxThumb
+    }
+
+    fun setMaxThumbFinger(Max: Float) {
+        this.maxThumb = Max
     }
 
     fun getServerTimestamp(): Timestamp? {
@@ -70,9 +114,6 @@ class DataMinMax {
         return "DataMinMax{" +
                 ", Name=" + exerciseName +
                 ", dateTimestamp=" + dateTimestamp +
-                ", Min=" + min +
-                ", Max=" + max +
-                ", ExerciseId=" + exerciseId +
                 '}'
     }
 
