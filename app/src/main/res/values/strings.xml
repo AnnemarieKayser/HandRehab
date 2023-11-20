@@ -93,8 +93,9 @@
 
 
     <!-- Beschreibung der Übungen-->
+    <string name="note_exercise">Versuche den Abstand zwischen deiner Hand und dem Bildschirm bei den verschiedenen Übungen möglichst gleich zuhalten.</string>
     <string name="description_pause">Wenn du eine Pause einlegen möchtest, nimm deine Hand einfach aus dem Kamerabild und die Übung wird pausiert. Sobald du deine Hand wieder vor die Kamera hälst, wird die Übung an der Stelle fortgeführt.</string>
-    <string name="description_repeat">Wiederhole die Bewegung so oft bis die festgelegte Anzahl erreicht ist. </string>
+    <string name="description_repeat">Wiederhole die Bewegung so oft bis die festgelegte Anzahl erreicht ist. Zwischen den Sätzen kann eine Pause eingelegt werden. </string>
     <string name="description_all_fingers_spread">Öffne die Handfläche. Spreize anschließend die Finger auseinander und wieder zusammen.Versuche die Finger so weit wie möglich zu öffnen.</string>
     <string name="description_little_finger_spread">Öffne die Handfläche. Spreize den kleinen Finger vom Ringfinger weg und ziehe diese anschließend wieder zusammen.</string>
     <string name="description_middle_finger_spread">Öffne die Handfläche. Spreize den Mittelfinger und den Ringfinger auseinander und anschließend wieder zusammen. </string>
@@ -161,10 +162,23 @@
     <string name="text_view_set_goal">Setze dir eine wöchentliche Anzahl an Übungen, die du erreichen möchtest: </string>
     <string name="edit_text_set_goal_hint">Anzahl an Übungen</string>
     <string name="text_view_current_number">Aktuelles Ziel: %1$d</string>
-    <string name="text_view_exercises_done">Abgeschlossene Übungen: %1$d</string>
+    <string name="text_view_exercises_done">Bisher durchgeführt: %1$d/%2$d</string>
     <string name="button_set_goal">Speichern</string>
     <string name="text_view_goal_main">%1$d/%2$d</string>
     <string name="text_view_intro">Diese App dient als Unterstützung in der Handrehabilitation mit einer Auswahl an verschiedenen Übungen für die rechte als auch für die linke Hand.</string>
     <string name="text_view_week_plan">Auf dem heutigen Plan</string>
+    <string name="planner_monday">Montag</string>
+    <string name="dialog_cancel">Abbrechen</string>
+    <string name="dialog_OK">Speichern</string>
+    <string name="btn_plan_week">Wochenplan erstellen</string>
+    <string name="planner_tuesday">Dienstag</string>
+    <string name="save_list">Auswahl speichern</string>
+    <string name="dialog_select_exercise">Wähle Übungen aus</string>
+    <string name="fragment_planner_title">Wochenplan</string>
+    <string name="planner_wednesday">Mittwoch</string>
+    <string name="planner_thursday">Donnerstag</string>
+    <string name="planner_friday">Freitag</string>
+    <string name="planner_saturday">Samstag</string>
+    <string name="planner_sunday">Sonntag</string>
 
 </resources>

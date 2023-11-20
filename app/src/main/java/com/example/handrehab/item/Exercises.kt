@@ -7,5 +7,5 @@ data class Exercises(
     val textItem: String,
     @DrawableRes val imageItem: Int,
     val descriptionItem: Int,
-    val videoItem: Int,
+    var checked : Boolean
     )

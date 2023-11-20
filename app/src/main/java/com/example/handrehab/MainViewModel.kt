@@ -22,9 +22,16 @@ class MainViewModel: ViewModel() {
     private var _handOpenOrClosed =  MutableLiveData<String>()
     private var _selectedHandSide = MutableLiveData<String>()
     private var _divideFactor = MutableLiveData<Double>()
-
+    private var _selectedDay = MutableLiveData<String>()
+    private var _listDay = MutableLiveData<List<Exercises>>()
     //Kleiner Finger
-    private var _littleFingerCounter = MutableLiveData<Int>()
+
+
+    val listDay: LiveData<List<Exercises>>
+        get() = _listDay
+
+    val selectedDay: LiveData<String>
+        get() = _selectedDay
 
 
     val handOpenOrClosed: LiveData<String>
@@ -45,30 +52,34 @@ class MainViewModel: ViewModel() {
     val sets: LiveData<Int>
         get() = _sets
 
-    val counter: LiveData<Int>
-        get() = _littleFingerCounter
-
-    fun littleFingerCounter() {
-        _littleFingerCounter.value = (_littleFingerCounter.value ?: 0) + 1
-    }
-
     init {
         _selectedExercise.value = null
         _repetitions.value = 0
         _sets.value = 0
-        _littleFingerCounter.value = 0
         _handOpenOrClosed.value = "geschlossen"
         _selectedHandSide.value = "rechts"
         _divideFactor.value = 2.0
+        _selectedDay.value = "monday"
+        _listDay.value = arrayListOf()
     }
 
-    fun getCounterLittleFinger(): Int? {
-        return _littleFingerCounter.value
+    fun getListDay(): List<Exercises>? {
+        return _listDay.value
     }
 
-    fun setCounterLittleFinger(counter: Int){
-        _littleFingerCounter.value = counter
+    fun setListDay(list: List<Exercises>){
+        _listDay.value = list
     }
+
+    fun getSelectedDay(): String? {
+        return _selectedDay.value
+    }
+
+    fun setSelectedDay(day: String) {
+        _selectedDay.value = day
+    }
+
+
     fun getRepetitions(): Int? {
         return _repetitions.value
     }

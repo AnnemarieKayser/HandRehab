@@ -59,7 +59,6 @@ class MainFragment : Fragment() {
     private var goal = 0f
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -93,6 +92,10 @@ class MainFragment : Fragment() {
 
         binding.buttonToExerciseList.setOnClickListener {
             findNavController().navigate(R.id.action_MainFragment_to_exerciseListFragment)
+        }
+
+        binding.buttonWeekplan.setOnClickListener {
+            findNavController().navigate(R.id.action_MainFragment_to_plannerFragment)
         }
 
 

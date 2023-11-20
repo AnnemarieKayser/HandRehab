@@ -15,13 +15,13 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/item_image"
-            app:shapeAppearanceOverlay="@style/ImageView.Corner"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:importantForAccessibility="no"
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ImageView.Corner" />
 
         <TextView
             android:id="@+id/textViewItem"
@@ -35,7 +35,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_image"
             app:layout_constraintTop_toTopOf="parent" />
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

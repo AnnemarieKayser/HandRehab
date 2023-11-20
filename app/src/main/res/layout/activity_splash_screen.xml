@@ -31,8 +31,6 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginBottom="16dp"
-        android:background="@color/md_theme_dark_primaryContainer"
-        android:backgroundTint="@color/md_theme_dark_primaryContainer"
         android:elevation="10dp"
         app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"

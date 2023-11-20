@@ -1,13 +1,14 @@
 package com.example.handrehab
 
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.example.handrehab.item.Exercises
-import com.example.handrehab.R
 
 
 class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
@@ -37,15 +38,18 @@ class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
         return listItems.count()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: TextHolder, position: Int) {
         val listItem = listItems[position]
         this.itemClickListener = itemClickListener;
         holder.bindItemText(listItem)
-        holder.itemView.setOnClickListener { v ->
-            itemClickListener!!.onItemClickListener(
-                listItem,
-                position
-            )
+        if(layout != "Main") {
+            holder.itemView.setOnClickListener { v ->
+                itemClickListener!!.onItemClickListener(
+                    listItem,
+                    position
+                )
+            }
         }
     }
 
@@ -53,13 +57,13 @@ class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
         private val textView: TextView = v.findViewById(R.id.textViewItem)
         private var imageView: ImageView = v.findViewById(R.id.item_image)
 
-
         private var view: View = v
         private var itemText: String = ""
 
         // Die Elemente des Views füllen
         // Im Beispiel nur ein einfacher TextView
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun bindItemText(itemText: Exercises) {
             this.itemText = itemText.textItem
             textView.text = itemText.textItem.split(":")[0]
@@ -68,7 +72,6 @@ class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
 
         override fun onClick(v: View?) {
             TODO("Not yet implemented")
-
         }
 
     }

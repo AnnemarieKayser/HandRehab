@@ -284,7 +284,7 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/text_view_week_plan"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@+id/buttonWeekplan" />
 
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -298,6 +298,16 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textViewWeekPlan"
                     tools:listitem="@layout/recyclerview_row" />
+
+                <Button
+                    android:id="@+id/buttonWeekplan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/btn_plan_week"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
