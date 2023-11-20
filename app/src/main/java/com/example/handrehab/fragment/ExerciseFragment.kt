@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.CalendarContract
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,11 +16,15 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.handrehab.Data
+import com.example.handrehab.DataMinMax
 import com.example.handrehab.MainViewModel
+import com.example.handrehab.PermissionsFragment
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentExerciseBinding
+import com.example.handrehab.item.Datasource
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
@@ -29,6 +32,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -37,8 +41,6 @@ import com.google.firebase.firestore.QuerySnapshot
 import splitties.toast.toast
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.format.TextStyle
-import java.util.Calendar
 import java.util.Locale
 
 
@@ -65,6 +67,7 @@ class ExerciseFragment : Fragment() {
     private var counterWeeksMonday = 0
     private var arrayWeekDays = arrayOfNulls<Any>(7)
     private var dbList = ArrayList <Data> ()
+    private var dbListMinMax = ArrayList <DataMinMax> ()
     private var values = arrayListOf<Float>()
     private var valuesDate = arrayOf<String>()
     private var listValuesDate = arrayListOf<String>()
@@ -72,6 +75,11 @@ class ExerciseFragment : Fragment() {
 
     // === Line Graph === //
     private var valueSeries : ArrayList<Entry> = ArrayList()
+    private var valueSeriesLittleFinger : ArrayList<Entry> = ArrayList()
+    private var valueSeriesMiddleFinger : ArrayList<Entry> = ArrayList()
+    private var valueSeriesPointingFinger : ArrayList<Entry> = ArrayList()
+    private var valueSeriesThumb : ArrayList<Entry> = ArrayList()
+
     @RequiresApi(Build.VERSION_CODES.O)
     private val baseTimestamp = LocalDateTime.now()
 
@@ -111,7 +119,6 @@ class ExerciseFragment : Fragment() {
         }
 
 
-
         binding.extendedFab.setOnClickListener {
             binding.editTextRepetition.text.toString().toIntOrNull()
                 ?.let { it1 -> viewModel.setRepetitions(it1) }
@@ -129,7 +136,7 @@ class ExerciseFragment : Fragment() {
 
         // --- Änderung des Status des toggle-Buttons --- //
         // Einstellung der Start Position der Hand
-        binding.toggleButton.check(R.id.button2)
+        binding.toggleButton.check(if(viewModel.getStartModus() == "geschlossen") R.id.button2 else R.id.button1)
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
@@ -166,14 +173,20 @@ class ExerciseFragment : Fragment() {
                         viewModel.setSelectedHandSide(getString(R.string.selected_hand_right))
                         Log.i("ToggleButton", "Button 1 checked")
                         dbList.clear()
-                        loadDbData()
+                        dbListMinMax.clear()
+                        if(viewModel.getSelectedExercise()!!.id == 2){
+                            loadDbDataAllFingers()
+                        } else loadDbData()
                     }
 
                     R.id.buttonLeft -> {
                         viewModel.setSelectedHandSide(getString(R.string.selected_hand_left))
                         Log.i("ToggleButton", "Button 2 checked")
                         dbList.clear()
-                        loadDbData()
+                        dbListMinMax.clear()
+                        if(viewModel.getSelectedExercise()!!.id == 2){
+                            loadDbDataAllFingers()
+                        } else loadDbData()
                     }
                 }
             }
@@ -218,8 +231,9 @@ class ExerciseFragment : Fragment() {
         }
         binding.videoViewExercise.setMediaController(mediaController)
 
+
         //  Uri-Adresse einlesen
-        val uri: Uri = Uri.parse("android.resource://" + activity?.packageName  + "/" + viewModel.getSelectedExercise()?.videoItem)
+        val uri: Uri = Uri.parse("android.resource://" + activity?.packageName  + "/" + Datasource().getVideo(viewModel.getSelectedExercise()!!.id))
 
         binding.videoViewExercise.setVideoURI(uri)
 
@@ -229,7 +243,10 @@ class ExerciseFragment : Fragment() {
         //binding.videoViewExercise.start()
 
         dbList.clear()
-        loadDbData()
+        dbListMinMax.clear()
+        if(viewModel.getSelectedExercise()!!.id == 2){
+            loadDbDataAllFingers()
+        } else loadDbData()
 
     }
 
@@ -254,7 +271,6 @@ class ExerciseFragment : Fragment() {
         //linke y-Achse
         val yAxis : YAxis = binding.lineChart.axisLeft
         yAxis.axisMinimum = 0f
-        yAxis.axisMaximum = 0.4f
         yAxis.gridColor = Color.LTGRAY
 
 
@@ -285,7 +301,6 @@ class ExerciseFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun loadDbData() {
 
-
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("Daten")
@@ -304,9 +319,116 @@ class ExerciseFragment : Fragment() {
 
     }
 
+
+    // === loadDbData === //
+    // Einlesen der Daten aus der Datenbank
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadDbDataAllFingers() {
+
+
+        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DatenMinMax")
+            .whereEqualTo("selectedHandSide", viewModel.getSelectedHandSide())
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Datenbankantwort in Objektvariable speichern
+                    updateGraphAllFingers(task)
+                } else {
+                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
+                }
+            }
+    }
+
+    @SuppressLint("SetTextI18n")
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateGraphAllFingers(task: Task<QuerySnapshot>) {
+        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+
+
+        // Diese for schleife durchläuft alle Documents der Abfrage
+        for (document in task.result!!) {
+            (dbListMinMax).add(document.toObject(DataMinMax::class.java))
+            Log.d("Daten", document.id + " => " + document.data)
+        }
+
+        val yourList: List<DataMinMax> = dbListMinMax
+        val yourSortedList: List<DataMinMax> = yourList.sortedBy { it.getDate() }
+
+        var counter = 0f
+        val dataArray = arrayListOf<String>()
+
+        valueSeriesLittleFinger.clear()
+        valueSeriesMiddleFinger.clear()
+        valueSeriesPointingFinger.clear()
+        valueSeriesThumb.clear()
+
+        val zeitformat = SimpleDateFormat("MM-dd-kk-mm", Locale.GERMANY)
+        val year = SimpleDateFormat("yyyy")
+
+
+
+        for (i in yourSortedList) {
+            val dateFormat = zeitformat.format(i.getDate()!!)
+
+            valueSeriesLittleFinger.add(Entry(counter, i.getMaxLittleFinger()))
+            valueSeriesPointingFinger.add(Entry(counter, i.getMaxPointingFinger()))
+            valueSeriesMiddleFinger.add(Entry(counter, i.getMaxMiddleFinger()))
+            valueSeriesThumb.add(Entry(counter, i.getMaxThumbFinger()))
+
+            dataArray.add(dateFormat)
+            counter++
+        }
+
+        if(dbListMinMax.size != 0) {
+            if(dbListMinMax.last().getRepetitions() >= 10) {
+                binding.editTextRepetition.setText("5")
+                binding.editTextSets.setText((yourSortedList.last().getSets()+1).toString())
+            } else {
+                binding.editTextRepetition.setText((yourSortedList.last().getRepetitions()+1).toString())
+                binding.editTextSets.setText("2")
+            }
+        } else {
+            binding.editTextRepetition.setText("2")
+            binding.editTextSets.setText("2")
+        }
+
+
+        val lineDataSetLittleFinger = LineDataSet(valueSeriesLittleFinger, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte kleiner Finger rechts" else "Messwerte kleiner Finger links")
+        lineDataSetLittleFinger.setColors(Color.MAGENTA)
+        lineDataSetLittleFinger.setCircleColor(Color.MAGENTA)
+        val lineDataSetMiddleFinger = LineDataSet(valueSeriesMiddleFinger, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Mittelfinger rechts" else "Messwerte Mittelfinger links")
+        lineDataSetMiddleFinger.setColors(Color.CYAN)
+        lineDataSetMiddleFinger.setCircleColor(Color.CYAN)
+        val lineDataSetPointingFinger = LineDataSet(valueSeriesPointingFinger, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Zeigefinger rechts" else "Messwerte Zeigefinger links")
+        lineDataSetPointingFinger.color = Color.BLUE
+        lineDataSetPointingFinger.setCircleColor(Color.BLUE)
+        val lineDataSetThumb = LineDataSet(valueSeriesThumb, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Daumen rechts" else "Messwerte Daumen links")
+        lineDataSetThumb.color = Color.DKGRAY
+        lineDataSetThumb.setCircleColor(Color.DKGRAY)
+
+        val dataSets = ArrayList <ILineDataSet>()
+        dataSets.add(lineDataSetLittleFinger)
+        dataSets.add(lineDataSetMiddleFinger)
+        dataSets.add(lineDataSetPointingFinger)
+        dataSets.add(lineDataSetThumb)
+
+
+        binding.lineChart.data = LineData(dataSets)
+
+        binding.textViewTitleGraph.text = if(dbListMinMax.size != 0) year.format(dbListMinMax.last().getDate()!!) else ""
+        configGraph(dataArray)
+        binding.lineChart.invalidate()
+
+
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateListView(task: Task<QuerySnapshot>) {
         // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+
 
         // Diese for schleife durchläuft alle Documents der Abfrage
         for (document in task.result!!) {
@@ -317,10 +439,9 @@ class ExerciseFragment : Fragment() {
         dataToGraph(dbList)
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.O)
     private fun dataToGraph(data: ArrayList<Data>) {
-
-        Log.i("arrLength", data.size.toString())
 
 
         val yourList: List<Data> = data
@@ -329,26 +450,37 @@ class ExerciseFragment : Fragment() {
         var counter = 0f
         val dataArray = arrayListOf<String>()
         valueSeries.clear()
-        var calender = Calendar.getInstance()
         val zeitformat = SimpleDateFormat("MM-dd-kk-mm", Locale.GERMANY)
         val year = SimpleDateFormat("yyyy")
 
-      //  valueSeries.add(Entry(0f, 0f))
-       // dataArray.add("0")
 
 
         for (i in yourSortedList) {
-                val dateFormat = zeitformat.format(i.getDate()!!)
-                valueSeries.add(Entry(counter, i.getMax()))
-                dataArray.add(dateFormat)
-                counter++
+            Log.i("ValuesNew", i.toString())
+            val dateFormat = zeitformat.format(i.getDate()!!)
+            valueSeries.add(Entry(counter, i.getMax()))
+            dataArray.add(dateFormat)
+            counter++
         }
 
-        binding.editTextRepetition.setText(if(data.size != 0) (data.last().getRepetitions()+2).toString() else "2")
-        binding.editTextSets.setText(if(data.size != 0) (data.last().getSets()+1).toString() else "2")
+        if(data.size != 0) {
+            if(data.last().getRepetitions() >= 10) {
+                binding.editTextRepetition.setText("5")
+                binding.editTextSets.setText((yourSortedList.last().getSets()+1).toString())
+            } else {
+                binding.editTextRepetition.setText((yourSortedList.last().getRepetitions()+1).toString())
+                binding.editTextSets.setText("2")
+            }
+        } else {
+            binding.editTextRepetition.setText("2")
+            binding.editTextSets.setText("2")
+        }
+
 
         val lineDataSet = LineDataSet(valueSeries, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Rechte Hand" else "Messwerte Linke Hand")
         binding.lineChart.data = LineData(lineDataSet)
+
+
         binding.textViewTitleGraph.text = if(data.size != 0) year.format(data.last().getDate()!!) else ""
         configGraph(dataArray)
         binding.lineChart.invalidate()
@@ -359,4 +491,13 @@ class ExerciseFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
+    override fun onResume() {
+        super.onResume()
+        dbList.clear()
+        dbListMinMax.clear()
+    }
+
+
 }

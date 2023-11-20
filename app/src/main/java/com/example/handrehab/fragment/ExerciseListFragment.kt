@@ -1,7 +1,5 @@
 package com.example.handrehab.fragment
 
-
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -20,12 +18,14 @@ import com.example.handrehab.item.Exercises
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
+
 class ExerciseListFragment : Fragment() {
 
     private var _binding: FragmentExerciseListBinding? = null
     private val binding get() = _binding!!
     private lateinit var layoutManager : LinearLayoutManager
     private lateinit var adapter : RecyclerAdapter
+
 
     // === Viewmodel === //
     private val viewModel: MainViewModel by activityViewModels()
@@ -41,6 +41,7 @@ class ExerciseListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
         view.visibility = View.VISIBLE
 
@@ -48,7 +49,6 @@ class ExerciseListFragment : Fragment() {
         binding.recyclerView.layoutManager = layoutManager
 
         val myDataset = Datasource().loadItems()
-
 
         adapter = RecyclerAdapter(myDataset, "Exercise")
         binding.recyclerView.adapter = adapter
@@ -60,18 +60,25 @@ class ExerciseListFragment : Fragment() {
                 if(exercises.id == 1 || exercises.id == 7 || exercises.id == 14 || exercises.id == 19) {
                     //do nothing
                 } else {
-                    viewModel.setSelectedExercise(exercises)
-                    Log.i("Selected Exercise", exercises.toString())
-                    findNavController().navigate(R.id.action_exerciseListFragment_to_exerciseFragment)
-                }
+                        viewModel.setSelectedExercise(exercises)
+                        val id = viewModel.getSelectedExercise()!!.id
+                        Log.i("Selected Exercise", exercises.toString())
+                        if (id != 2 && id != 3 && id != 4 && id != 5 && id != 6) {
+                            viewModel.setStartModus("geschlossen")
+                        }
+                        findNavController().navigate(R.id.action_exerciseListFragment_to_exerciseFragment)
+                    }
             }
         })
-
     }
+
+
 
     fun onItemClickListener(exercises: Exercises, position: Int) {
         //update or another job
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
