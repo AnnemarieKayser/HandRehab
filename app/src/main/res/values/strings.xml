@@ -36,7 +36,7 @@
         Threshold</string>
     <string name="label_delegate">Delegate</string>
     <string name="main_fragment">Hauptmenü</string>
-    <string name="camera_fragment">Kamera\n</string>
+    <string name="camera_fragment"></string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
@@ -52,15 +52,15 @@
     <string name="hint_name">Benutzername</string>
     <string name="tv_login">Login</string>
     <string name="tv_signin">Registrieren</string>
-    <string name="tv_login_register">Logge dich ein oder registriere dich!</string>
+    <string name="tv_login_register">Registriere dich zunächst und logge dich anschließend ein!</string>
     <string name="btn_register">Registrieren</string>
     <string name="required">erforderlich</string>
-    <string name="verify_mail">Bestätigen Sie ihre Email-Adresse!</string>
+    <string name="verify_mail">Sie erhalten nun eine E-mail, in der die Email-Adresse einmal bestätigt werden muss!</string>
     <string name="login_success">Einloggen erfolgreich!</string>
     <string name="reminder_verify">Bestätigen Sie ihre Email-Adresse!</string>
     <string name="reset_pw">Passwort zurückgesetzt</string>
     <string name="forgotPw_title">Passwort vergessen</string>
-    <string name="forgotPw_msg">Setzen Sie ihr Passwort zurück</string>
+    <string name="forgotPw_msg">Gib deine E-mail Adresse an. Du erhälst anschließend eine Mail, in der du dein Passwort zurück setzen kannst</string>
     <string name="button_cancel">Abbrechen</string>
     <string name="fill_out">Email eintragen</string>
     <string name="btn_log_out">Ausloggen</string>
@@ -93,9 +93,9 @@
 
 
     <!-- Beschreibung der Übungen-->
-    <string name="note_exercise">Versuche den Abstand zwischen deiner Hand und dem Bildschirm bei den verschiedenen Übungen möglichst gleich zuhalten.</string>
+    <string name="note_exercise">Stelle dein Smartphone angelehnt gegen einen Gegenstand, sodass deine Hand gut sichtbar in der Kamera ist. Optional: Stütze deinen Ellenbogen auf einem Tisch als zusätzliche Hilfestellung ab.</string>
     <string name="description_pause">Wenn du eine Pause einlegen möchtest, nimm deine Hand einfach aus dem Kamerabild und die Übung wird pausiert. Sobald du deine Hand wieder vor die Kamera hälst, wird die Übung an der Stelle fortgeführt.</string>
-    <string name="description_repeat">Wiederhole die Bewegung so oft bis die festgelegte Anzahl erreicht ist. Zwischen den Sätzen kann eine Pause eingelegt werden. </string>
+    <string name="description_repeat">Wiederhole die Bewegung so oft bis die festgelegte Anzahl erreicht ist. Zwischen den Durchführungen kann eine Pause eingelegt werden. </string>
     <string name="description_all_fingers_spread">Öffne die Handfläche. Spreize anschließend die Finger auseinander und wieder zusammen.Versuche die Finger so weit wie möglich zu öffnen.</string>
     <string name="description_little_finger_spread">Öffne die Handfläche. Spreize den kleinen Finger vom Ringfinger weg und ziehe diese anschließend wieder zusammen.</string>
     <string name="description_middle_finger_spread">Öffne die Handfläche. Spreize den Mittelfinger und den Ringfinger auseinander und anschließend wieder zusammen. </string>
@@ -119,7 +119,7 @@
     <string name="description_ring_finger_half_open_close">Starte die Übung entweder mit einer geöffneten Handfläche oder einer geschlossenen Faust. Basierend auf der gewählten Startposition, öffne oder schließe den Ringfinger bis zur Hälfte. Die restlichen Finger können
     ebenfalls mit geöffnet/geschlossen werden, falls die Übung dadurch leichter fällt und besser durchgeführt werden kann.</string>
     <string name="description_tilt_hand_joint">Halte die geöffnete Hand um 90 grad gedreht vor die Kamera. Neige anschließend das Handgelenk vor und zurück. Versuche dabei die Finger gestreckt zulassen.</string>
-    <string name="title_data">Daten\n</string>
+    <string name="title_data">Daten</string>
     <string name="save">Daten gespeichert</string>
     <string name="not_save">Daten nicht gespeichert</string>
     <string name="date_picker_title">Wähle ein Datum aus</string>
@@ -134,12 +134,12 @@
     <string name="button_go_to_data">Übungsdaten einsehen</string>
     <string name="title_go_to_settings">Stelle App schnell und einfach auf deine individuellen Bedürfnisse ein</string>
     <string name="button_go_to_settings">Zu Einstellungen wechseln</string>
-    <string name="textView_number_of_exercises">Anzahl der bereits durchgeführten Übungen diese Woche:</string>
+    <string name="textView_number_of_exercises">Anzahl der bereits durchgeführten Übungen heute:</string>
     <string name="textViewNumber">Anzahl</string>
     <string name="tv_register">Erstelle einen neuen Account:</string>
     <string name="title_welcome_short">Willkommen</string>
-    <string name="tv_hand_open_or_closed">Möchten Sie die Übung mit einer geschlossenen oder bereits geöffneten Hand starten?</string>
-    <string name="tv_data_last_exercise">Daten ihrer letzten Übung:</string>
+    <string name="tv_hand_open_or_closed">Möchtest du die Übung mit einer geschlossenen oder bereits geöffneten Hand starten?</string>
+    <string name="tv_data_last_exercise">Daten ihrer letzten Übung</string>
     <string name="tv_right_hand">Rechte Hand</string>
     <string name="tv_left_hand">Linke Hand</string>
     <string name="button_easy">Leicht</string>
@@ -153,19 +153,19 @@
     <string name="title_change_hand">Hand wechseln</string>
     <string name="supporting_text_change_hand_right">Bitte halte die rechte Hand in die Kamera oder wähle auf der vorherigen Seite die andere Handseite aus.</string>
     <string name="supporting_text_change_hand_left">Bitte halte die linke Hand in die Kamera oder wähle auf der vorherigen Seite die andere Handseite aus.</string>
-    <string name="text_view_sets">Anzahl an Sätzen:</string>
-    <string name="text_view_repetitions">Anzahl an Wiederholungen:</string>
+    <string name="text_view_sets">Anzahl an Durchführungen:</string>
+    <string name="text_view_repetitions">Anzahl an Wiederholungen pro Durchführung:</string>
     <string name="text_view_title_description">Beschreibung</string>
     <string name="text_view_hand_side">Wähle die Handseite aus, die du trainieren möchtest:</string>
     <string name="text_view_level">Wähle eine Schwierigkeitsstufe aus:</string>
     <string name="tv_overview_data">Dein Wochenverlauf</string>
-    <string name="text_view_set_goal">Setze dir eine wöchentliche Anzahl an Übungen, die du erreichen möchtest: </string>
+    <string name="text_view_set_goal">Setze dir eine Anzahl an Übungen, die du täglich erreichen möchtest: </string>
     <string name="edit_text_set_goal_hint">Anzahl an Übungen</string>
     <string name="text_view_current_number">Aktuelles Ziel: %1$d</string>
     <string name="text_view_exercises_done">Bisher durchgeführt: %1$d/%2$d</string>
     <string name="button_set_goal">Speichern</string>
     <string name="text_view_goal_main">%1$d/%2$d</string>
-    <string name="text_view_intro">Diese App dient als Unterstützung in der Handrehabilitation mit einer Auswahl an verschiedenen Übungen für die rechte als auch für die linke Hand.</string>
+    <string name="text_view_intro">Diese App dient als Unterstützung in der Handrehabilitation nach einem Schlaganfall. Es wird eine Auswahl an verschiedenen Übungen für die rechte als auch für die linke Hand zur Verfügung gestellt.</string>
     <string name="text_view_week_plan">Auf dem heutigen Plan</string>
     <string name="planner_monday">Montag</string>
     <string name="dialog_cancel">Abbrechen</string>
@@ -180,5 +180,44 @@
     <string name="planner_friday">Freitag</string>
     <string name="planner_saturday">Samstag</string>
     <string name="planner_sunday">Sonntag</string>
-
+    <string name="btn_start_day">Übungseinheit starten</string>
+    <string name="button_start_day">Übungseinheit starten</string>
+    <string name="right">rechts</string>
+    <string name="values_right_hand_cm">Messwerte Rechte Hand</string>
+    <string name="values_left_hand_cm">Messwerte Linke Hand</string>
+    <string name="values_right_little_finger_cm">Messwerte kleiner Finger rechts</string>
+    <string name="values_left_little_finger_cm">Messwerte kleiner Finger links</string>
+    <string name="values_right_pointing_finger_cm">Messwerte Zeigefinger rechts</string>
+    <string name="values_left_pointing_finger_cm">Messwerte Zeigefinger links</string>
+    <string name="values_right_middle_finger_cm">Messwerte Mittelfinger rechts</string>
+    <string name="values_left_middle_finger_cm">Messwerte Mittelfinger links</string>
+    <string name="values_right_ring_finger_cm">Messwerte Ringfinger rechts</string>
+    <string name="values_left_ring_finger_cm">Messwerte Ringfinger links</string>
+    <string name="values_right_thumb_cm">Messwerte Daumen rechts</string>
+    <string name="values_left_thumb_cm">Messwerte Daumen links</string>
+    <string name="closed">geschlossen</string>
+    <string name="toast_enter_number">Trage bitte eine Anzahl ein</string>
+    <string name="title_alert_dialog_info_graph">Info</string>
+    <string name="supporting_text_info_graph_spread_finger">Im Graphen wird der maximale Abstand zwischen dem gespreizten Finger und dem benachbarten Finger angezeigt.</string>
+    <string name="supporting_text_info_graph_open_fingers">Im Graphen wird der minimale Abstand zwischen der Fingerspitze und dem Handgrundgelenk angezeigt.</string>
+    <string name="supporting_text_info_graph_close_fingers">Im Graphen wird der maximale Abstand zwischen der Fingerspitze und dem Handgrundgelenk angezeigt.</string>
+    <string name="title_counter_exercises">Noch %1$d Übungen</string>
+    <string name="title_done">Alle Übungen geschafft!</string>
+    <string name="tv_change_week">Woche wechseln</string>
+    <string name="tv_goal">Ziel setzen</string>
+    <string name="tv_details">Details</string>
+    <string name="tv_planner">Erstelle einen individuellen Übungsplan für deine Woche</string>
+    <string name="chart_title_y">Anzahl</string>
+    <string name="chart_title_goals">Tagesziel</string>
+    <string name="tv_phase">Erreichte Phase in der letzten Übung: %1$s</string>
+    <string name="no_data">Keine Daten vorhanden</string>
+    <string name="button_half_close_open">Halb</string>
+    <string name="button_open_close">Ganz</string>
+    <string name="text_open_close_all_fingers">Wie weit möchtest du die Finger schließen/öffnen?</string>
+    <string name="no_exercises_selected">Es wurde noch kein Plan für den heutigen Tag erstellt.</string>
+    <string name="currentDate">Aktuelles Datum</string>
+    <string name="btn_save">Speichern</string>
+    <string name="tv_gauge_meter">Auf der unteren Hälfte des Bildschirms ist eine Messanzeige. Diese zeigt dir, wie weit du deinen Finger noch bewegen musst, damit eine Wiederholung gezählt wird.</string>
+    <string name="tv_log_in">Logge dich nun mit deiner E-mail und deinem Passwort ein:</string>
+    <string name="tv_video">Videoanleitung</string>
 </resources>

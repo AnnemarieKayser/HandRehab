@@ -102,4 +102,5 @@
     <color name="md_theme_dark_outlineVariant">#4F4349</color>
     <color name="md_theme_dark_scrim">#000000</color>
     <color name="light_pink">#FFF2E7EF</color>
+    <color name="background">#FEFAFE</color>
 </resources>
