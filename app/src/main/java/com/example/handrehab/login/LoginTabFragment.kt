@@ -12,6 +12,7 @@ import com.example.handrehab.R
 import com.example.handrehab.databinding.LoginTabFragmentBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
+import splitties.toast.toast
 
 class LoginTabFragment: Fragment() {
 
@@ -119,15 +120,15 @@ class LoginTabFragment: Fragment() {
                 if (it.isSuccessful) {
                     // User wird eingeloggt, wenn E-Mail bestätigt wurde
                     if (mFirebaseAuth.currentUser!!.isEmailVerified) {
-                        //toast(R.string.login_success)
+                         toast(R.string.login_success)
                         // Starten der MainActivity
                         val intent = Intent (getActivity(), MainActivity::class.java)
                         getActivity()?.startActivity(intent)
                     } else {
-                        //toast(R.string.reminder_verify)
+                        toast(R.string.reminder_verify)
                     }
                 } else {
-                    //toast(it.exception!!.message.toString())
+                    toast(it.exception!!.message.toString())
                 }
             }
     }
@@ -147,8 +148,7 @@ class LoginTabFragment: Fragment() {
                 .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
                     val mail = editTextView.text.toString().trim()
                     if (mail.isEmpty()) {
-                        //toast(R.string.fill_out)
-                        //it.dismiss()
+                        toast(R.string.fill_out)
                     } else {
                         sendMail(mail)
                     }
@@ -165,9 +165,9 @@ class LoginTabFragment: Fragment() {
         mFirebaseAuth.sendPasswordResetEmail(mail)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    //toast(R.string.reset_pw)
+                    toast(R.string.reset_pw)
                 } else {
-                    //toast(it.exception!!.message.toString())
+                    toast(it.exception!!.message.toString())
                 }
             }
     }

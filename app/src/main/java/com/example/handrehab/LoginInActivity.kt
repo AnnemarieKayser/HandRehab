@@ -36,8 +36,8 @@ class LoginInActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewPager)
 
         // --- Überschrift der Tabs --- //
-        tabLayout!!.addTab(tabLayout!!.newTab().setText(R.string.tv_login))
         tabLayout!!.addTab(tabLayout!!.newTab().setText(R.string.tv_signin))
+        tabLayout!!.addTab(tabLayout!!.newTab().setText(R.string.tv_login))
         tabLayout!!.tabGravity = TabLayout.GRAVITY_FILL
 
         // --- Anbindung des Adapters --- //

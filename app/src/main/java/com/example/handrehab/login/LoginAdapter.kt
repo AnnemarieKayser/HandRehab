@@ -13,10 +13,10 @@ class MyAdapter(private val myContext: Context, fm: FragmentManager, internal va
     override fun getItem(position: Int): Fragment {
         when (position) {
             0 -> {
-                return LoginTabFragment()
+                return SigninTabFragment()
             }
             1 -> {
-                return SigninTabFragment()
+                return LoginTabFragment()
             }
 
             else -> return LoginTabFragment()

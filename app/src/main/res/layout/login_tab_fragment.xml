@@ -72,10 +72,13 @@
 
     <TextView
         android:id="@+id/textViewLogin"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
-        android:text="@string/tv_login_register"
+        android:layout_marginEnd="8dp"
+        android:text="@string/tv_log_in"
+        android:textAlignment="center"
         android:textSize="16sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"

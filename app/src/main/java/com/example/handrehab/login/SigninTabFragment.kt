@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import com.example.handrehab.R
 import com.example.handrehab.databinding.SigninTabFragmentBinding
 import com.google.firebase.auth.FirebaseAuth
+import splitties.toast.longToast
+import splitties.toast.toast
 
 class SigninTabFragment: Fragment() {
 
@@ -54,9 +56,9 @@ class SigninTabFragment: Fragment() {
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
                             FirebaseAuth.getInstance().signOut()
-                            //toast(R.string.verify_mail)
+                            longToast(R.string.verify_mail)
                         } else {
-                            //toast(it.exception!!.message.toString())
+                            toast(it.exception!!.message.toString())
                         }
                     }
             }
