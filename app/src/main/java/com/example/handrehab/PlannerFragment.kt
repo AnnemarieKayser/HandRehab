@@ -24,6 +24,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 
 class PlannerFragment : Fragment() {
@@ -42,6 +43,7 @@ class PlannerFragment : Fragment() {
 
     private lateinit var adapter : RecyclerAdapter
 
+    private var listExercises = arrayListOf<Exercises>()
     private var listExercisesMonday = arrayListOf<Exercises>()
     private var listExercisesTuesday = arrayListOf<Exercises>()
     private var listExercisesWednesay = arrayListOf<Exercises>()
@@ -55,12 +57,6 @@ class PlannerFragment : Fragment() {
 
     private val listSelected = arrayListOf<Int>()
     private val listStringSelected = arrayListOf<String>()
-    private var listMondayString = arrayListOf<String>()
-    private var listTuesdayString = arrayListOf<String>()
-    private var listWednesdayString = arrayListOf<String>()
-    private var listFridayString = arrayListOf<String>()
-    private var listSaturdayString = arrayListOf<String>()
-    private var listSundayString = arrayListOf<String>()
 
 
     private val viewModel: MainViewModel by activityViewModels()
@@ -112,13 +108,14 @@ class PlannerFragment : Fragment() {
 
         binding.imageButtonMonday.setOnClickListener {
 
+
             items.clear()
             viewModel.setSelectedDay("monday")
             checkedItems = BooleanArray(Datasource().loadItems().size)
             listStringSelected.clear()
 
             for((counter,i) in Datasource().loadItems().withIndex()){
-                items.add(i.textItem)
+                if(!(i.checked)) items.add(i.textItem)
                 for(k in listExercisesMonday){
                     if(k == i) {
                         checkedItems[counter] = true
@@ -150,7 +147,7 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesMonday, "Main")
+                        adapter = RecyclerAdapter(listExercisesMonday, "Main", viewModel.getExerciseListMode()!!)
                         binding.recyclerViewMonday.adapter = adapter
                         saveList()
 
@@ -200,7 +197,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
 
-                        adapter = RecyclerAdapter(listExercisesTuesday, "Main")
+                        adapter = RecyclerAdapter(listExercisesTuesday, "Main", viewModel.getExerciseListMode()!!)
                         binding.recyclerViewTuesday.adapter = adapter
                         saveList()
 
@@ -249,7 +246,7 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesWednesay, "Main")
+                        adapter = RecyclerAdapter(listExercisesWednesay, "Main", viewModel.getExerciseListMode()!!)
                         binding.recyclerViewWednesday.adapter = adapter
                         saveList()
 
@@ -298,7 +295,7 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesThursday, "Main")
+                        adapter = RecyclerAdapter(listExercisesThursday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewThursday.adapter = adapter
                         saveList()
 
@@ -347,7 +344,7 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesFriday, "Main")
+                        adapter = RecyclerAdapter(listExercisesFriday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewFriday.adapter = adapter
                         saveList()
 
@@ -396,7 +393,7 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesSaturday, "Main")
+                        adapter = RecyclerAdapter(listExercisesSaturday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewSaturday.adapter = adapter
                         saveList()
 
@@ -445,7 +442,7 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesSunday, "Main")
+                        adapter = RecyclerAdapter(listExercisesSunday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewSunday.adapter = adapter
                         saveList()
 
@@ -466,6 +463,15 @@ class PlannerFragment : Fragment() {
 
         dbList.clear()
         listSelected.clear()
+        listExercisesSunday.clear()
+        listExercisesFriday.clear()
+        listExercisesSaturday.clear()
+        listExercisesWednesay.clear()
+        listExercisesMonday.clear()
+        listExercisesTuesday.clear()
+        listExercisesThursday.clear()
+        listExercises.clear()
+
 
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
@@ -491,12 +497,34 @@ class PlannerFragment : Fragment() {
             Log.d("Daten", document.id + " => " + document.data)
         }
 
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("EEEE", Locale.ENGLISH)
+
+        val day = format.format(calendar.time).lowercase()
+
+        for(i in dbList) {
+            when (i.getDay()) {
+                day -> {
+
+                    for (j in Datasource().loadItems()) {
+
+                        for (k in i.getListExercises()) {
+                            if (k == j.id) {
+                                listExercises.add(j)
+                            }
+                        }
+                    }
+
+                    viewModel.setListDay(listExercises)
+                }
+            }
+        }
+
 
 
         for(i in dbList){
 
             when(i.getDay()){
-
                 "monday" -> {
                     for( j in Datasource().loadItems()){
 
@@ -507,7 +535,7 @@ class PlannerFragment : Fragment() {
                         }
                     }
 
-                    adapter = RecyclerAdapter(listExercisesMonday, "Main")
+                    adapter = RecyclerAdapter(listExercisesMonday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewMonday.adapter = adapter
                 }
                 "tuesday" -> {
@@ -519,7 +547,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesTuesday, "Main")
+                    adapter = RecyclerAdapter(listExercisesTuesday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewTuesday.adapter = adapter
                 }
                 "wednesday" -> {
@@ -531,7 +559,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesWednesay, "Main")
+                    adapter = RecyclerAdapter(listExercisesWednesay, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewWednesday.adapter = adapter
                 }
                 "thursday" -> {
@@ -543,7 +571,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesThursday, "Main")
+                    adapter = RecyclerAdapter(listExercisesThursday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewThursday.adapter = adapter
                 }
                 "friday" -> {
@@ -555,7 +583,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesFriday, "Main")
+                    adapter = RecyclerAdapter(listExercisesFriday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewFriday.adapter = adapter
                 }
                 "saturday" -> {
@@ -567,7 +595,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesSaturday, "Main")
+                    adapter = RecyclerAdapter(listExercisesSaturday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewSaturday.adapter = adapter
                 }
                 "sunday" -> {
@@ -579,7 +607,7 @@ class PlannerFragment : Fragment() {
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesSunday, "Main")
+                    adapter = RecyclerAdapter(listExercisesSunday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewSunday.adapter = adapter
                 }
 

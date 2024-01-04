@@ -11,19 +11,26 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.handrehab.Data
 import com.example.handrehab.DataGoal
+import com.example.handrehab.DataWeekPlanner
 import com.example.handrehab.LoginInActivity
+import com.example.handrehab.MainViewModel
 import com.example.handrehab.R
 import com.example.handrehab.RecyclerAdapter
 import com.example.handrehab.databinding.FragmentMainBinding
 import com.example.handrehab.item.Datasource
+import com.example.handrehab.item.Exercises
 import com.google.android.gms.tasks.Task
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
@@ -31,10 +38,8 @@ import splitties.toast.toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
 class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
@@ -52,11 +57,15 @@ class MainFragment : Fragment() {
     // === ListView === //
     private lateinit var layoutManager : LinearLayoutManager
     private lateinit var adapter : RecyclerAdapter
+    private var listExercises = arrayListOf<Exercises>()
 
     // === Circular-Progress-Bar === //
     private var timeMaxProgressBar = 20F
     private var progressTime: Float = 0F
     private var goal = 0f
+
+    private val viewModel: MainViewModel by activityViewModels()
+
 
 
     override fun onCreateView(
@@ -76,12 +85,7 @@ class MainFragment : Fragment() {
         layoutManager.orientation = LinearLayoutManager.HORIZONTAL
         binding.recyclerView.layoutManager = layoutManager
 
-        val myDataset = Datasource().loadItems()
-
-
-        adapter = RecyclerAdapter(myDataset, "Main")
-        binding.recyclerView.adapter = adapter
-
+        viewModel.setExercisesListMode(1)
         setHasOptionsMenu(true)
 
 
@@ -99,10 +103,10 @@ class MainFragment : Fragment() {
         }
 
 
-        binding.buttonLogOut.setOnClickListener {
-            mFirebaseAuth.signOut()
-            val intent = Intent(activity, LoginInActivity::class.java)
-            activity?.startActivity(intent)
+
+        binding.buttonStartPlan.setOnClickListener {
+            viewModel.setExercisesListMode(2)
+            findNavController().navigate(R.id.action_MainFragment_to_exerciseListFragment)
         }
 
         // --- Konfiguration CircularProgressBar --- //
@@ -114,7 +118,7 @@ class MainFragment : Fragment() {
 
             // ProgressBar Farbe
             progressBarColorStart = Color.parseColor("#924275")
-            progressBarColorEnd = Color.parseColor("#3C002C")
+            progressBarColorEnd = Color.parseColor("#5A1144")
 
             // Farbgradient
             progressBarColorDirection = CircularProgressBar.GradientDirection.RIGHT_TO_LEFT
@@ -131,6 +135,8 @@ class MainFragment : Fragment() {
 
             progressDirection = CircularProgressBar.ProgressDirection.TO_RIGHT
         }
+
+        binding.circularProgressBar.progress = 0f
 
 
         loadDbData()
@@ -169,11 +175,11 @@ class MainFragment : Fragment() {
         dbList.clear()
 
         val calendar = Calendar.getInstance()
-        val format = SimpleDateFormat("yyyy-MM-dd")
+        val format = SimpleDateFormat("dd.MM.yyyy")
 
-        val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
+       // val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
 
-        calendar.add(Calendar.DAY_OF_WEEK, - day)
+       // calendar.add(Calendar.DAY_OF_WEEK, - day)
 
         dateMonday = format.format(calendar.time)
 
@@ -187,7 +193,6 @@ class MainFragment : Fragment() {
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("Daten")
             .whereGreaterThanOrEqualTo("date", dateMondayNew) // abrufen
-            .whereLessThanOrEqualTo("date", dateSunday)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -207,10 +212,16 @@ class MainFragment : Fragment() {
 
         var data: DataGoal?
 
+        // --- Initialisierung und Konfiguration des Graphen --- //
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("dd.MM.yyyy")
+        val date = format.format(calendar.time)
+
+
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenGoal")
-            .document("Ziel")
+            .document(date)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -229,6 +240,7 @@ class MainFragment : Fragment() {
                     } else {
                         binding.textViewNumber.text = getString(R.string.text_view_goal_main, dbList.size, 0)
                     }
+                    loadDbWeekPlan()
                 } else {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
@@ -252,9 +264,62 @@ class MainFragment : Fragment() {
 
     }
 
+    // === loadDbData === //
+    // Einlesen der Daten aus der Datenbank
+    private fun loadDbWeekPlan() {
+
+        listExercises.clear()
+
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("EEEE", Locale.ENGLISH)
+
+        val day = format.format(calendar.time).lowercase()
+
+        Log.i("InfoTag", day)
+
+        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DataWeekPlanner").document(day)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Datenbankantwort in Objektvariable speichern
+                    if(task.result != null) updateListViewWeekPlanner(task)
+                } else {
+                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
+                }
+            }
+    }
+
+    private fun updateListViewWeekPlanner(task: Task<DocumentSnapshot>) {
+        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+        val result = task.result!!.toObject(DataWeekPlanner::class.java)
+
+        if(result != null) {
+
+            for (j in Datasource().loadItems()) {
+
+                for (k in result.getListExercises()) {
+                    if (k == j.id) {
+                        listExercises.add(j)
+                    }
+                }
+            }
+        }
+
+        if(listExercises.isEmpty()){
+            binding.textViewNoData.text = getString(R.string.no_exercises_selected)
+        } else binding.textViewNoData.visibility = GONE
+
+        viewModel.setListDay(listExercises)
+
+        adapter = RecyclerAdapter(listExercises, "Main",  viewModel.getExerciseListMode()!!)
+        binding.recyclerView.adapter = adapter
+    }
 
 
-    override fun onDestroyView() {
+
+        override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }

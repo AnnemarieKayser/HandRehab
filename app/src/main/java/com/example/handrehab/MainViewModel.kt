@@ -22,9 +22,10 @@ class MainViewModel: ViewModel() {
     private var _handOpenOrClosed =  MutableLiveData<String>()
     private var _selectedHandSide = MutableLiveData<String>()
     private var _divideFactor = MutableLiveData<Double>()
+    private var _exerciseListMode = MutableLiveData<Int>()
     private var _selectedDay = MutableLiveData<String>()
     private var _listDay = MutableLiveData<List<Exercises>>()
-    //Kleiner Finger
+    private var _allFingersOpenOrClose = MutableLiveData<Int>()
 
 
     val listDay: LiveData<List<Exercises>>
@@ -32,7 +33,11 @@ class MainViewModel: ViewModel() {
 
     val selectedDay: LiveData<String>
         get() = _selectedDay
+    val exerciseListMode: LiveData<Int>
+        get() = _exerciseListMode
 
+    val allFingersOpenOrClose: LiveData<Int>
+        get() = _allFingersOpenOrClose
 
     val handOpenOrClosed: LiveData<String>
         get() = _handOpenOrClosed
@@ -52,6 +57,7 @@ class MainViewModel: ViewModel() {
     val sets: LiveData<Int>
         get() = _sets
 
+
     init {
         _selectedExercise.value = null
         _repetitions.value = 0
@@ -59,10 +65,19 @@ class MainViewModel: ViewModel() {
         _handOpenOrClosed.value = "geschlossen"
         _selectedHandSide.value = "rechts"
         _divideFactor.value = 2.0
+        _exerciseListMode.value = 1
         _selectedDay.value = "monday"
         _listDay.value = arrayListOf()
+        _allFingersOpenOrClose.value = 1
     }
 
+    fun getAllFingersOpenOrClose(): Int? {
+        return _allFingersOpenOrClose.value
+    }
+
+    fun setAllFingersOpenOrClose(allFingers: Int){
+        _allFingersOpenOrClose.value = allFingers
+    }
     fun getListDay(): List<Exercises>? {
         return _listDay.value
     }
@@ -77,6 +92,14 @@ class MainViewModel: ViewModel() {
 
     fun setSelectedDay(day: String) {
         _selectedDay.value = day
+    }
+
+    fun getExerciseListMode(): Int? {
+        return _exerciseListMode.value
+    }
+
+    fun setExercisesListMode(value: Int){
+        _exerciseListMode.value = value
     }
 
 

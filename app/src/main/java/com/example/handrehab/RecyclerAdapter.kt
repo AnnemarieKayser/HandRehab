@@ -7,14 +7,16 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.example.handrehab.item.Exercises
 
 
-class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
+class RecyclerAdapter(val listItems: List<Exercises>, val layout: String, val exerciseListMode: Int) :
 
     RecyclerView.Adapter<RecyclerAdapter.TextHolder>() {
     var itemClickListener: AdapterItemClickListener? = null
+
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextHolder {
@@ -42,7 +44,7 @@ class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
     override fun onBindViewHolder(holder: TextHolder, position: Int) {
         val listItem = listItems[position]
         this.itemClickListener = itemClickListener;
-        holder.bindItemText(listItem)
+        holder.bindItemText(listItem, layout, exerciseListMode)
         if(layout != "Main") {
             holder.itemView.setOnClickListener { v ->
                 itemClickListener!!.onItemClickListener(
@@ -64,9 +66,12 @@ class RecyclerAdapter(val listItems: List<Exercises>, val layout: String) :
         // Im Beispiel nur ein einfacher TextView
 
         @RequiresApi(Build.VERSION_CODES.O)
-        fun bindItemText(itemText: Exercises) {
+        fun bindItemText(itemText: Exercises, layout: String, listMode: Int) {
             this.itemText = itemText.textItem
+            if(layout != "Main" && listMode != 2) {
             textView.text = itemText.textItem.split(":")[0]
+            } else textView.text = itemText.textItem
+
             imageView.setImageResource(itemText.imageItem)
         }
 

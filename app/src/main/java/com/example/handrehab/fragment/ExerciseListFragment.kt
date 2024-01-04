@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,18 +43,35 @@ class ExerciseListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // This callback will only be called when MyFragment is at least Started.
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            // Handle the back button event
+            val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+            view.visibility = View.VISIBLE
+            findNavController().navigate(R.id.action_exerciseListFragment_to_MainFragment)
+        }
 
         val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
-        view.visibility = View.VISIBLE
+
+
 
         layoutManager = LinearLayoutManager(activity)
         binding.recyclerView.layoutManager = layoutManager
 
         val myDataset = Datasource().loadItems()
+        if(viewModel.getListDay()!!.isEmpty()) viewModel.setExercisesListMode(1)
 
-        adapter = RecyclerAdapter(myDataset, "Exercise")
-        binding.recyclerView.adapter = adapter
+        if(viewModel.getExerciseListMode() == 2){
+            (activity as AppCompatActivity).supportActionBar?.title = if(viewModel.getListDay()!!.isEmpty()) getString(R.string.title_done) else getString(R.string.title_counter_exercises, viewModel.getListDay()!!.size)
+            adapter = RecyclerAdapter(viewModel.getListDay()!!, "Exercise", viewModel.getExerciseListMode()!!)
+            binding.recyclerView.adapter = adapter
+            view.visibility = View.INVISIBLE
 
+        } else {
+            view.visibility = View.VISIBLE
+            adapter = RecyclerAdapter(myDataset, "Exercise", viewModel.getExerciseListMode()!!)
+            binding.recyclerView.adapter = adapter
+        }
 
         // Applying OnClickListener to our Adapter
         adapter.setOnClickListener(object : RecyclerAdapter.AdapterItemClickListener {
