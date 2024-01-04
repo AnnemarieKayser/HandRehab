@@ -8,10 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.example.handrehab.Data
 import com.example.handrehab.DataGoal
-import com.example.handrehab.DataMinMax
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentDataBinding
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
@@ -21,15 +19,11 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAScrollablePlotArea
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.google.android.gms.tasks.Task
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.DateValidatorPointBackward
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import splitties.toast.toast
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -45,6 +39,7 @@ class DataFragment : Fragment() {
 
     // ListView
     private var dbList = ArrayList <Any> ()
+    private var dbListGoals = ArrayList <Any> ()
     private lateinit var adapter : ArrayAdapter<String>
 
     // === Firebase database === //
@@ -55,6 +50,7 @@ class DataFragment : Fragment() {
     // === Graph === //
     private var aaChartModel = AAChartModel()
     private var arrayWeekDays = arrayOfNulls<Any>(7)
+    private var arrayWeekGoal = arrayOfNulls<Any>(7)
 
     // === week days === //
     private var monday = 0
@@ -67,6 +63,15 @@ class DataFragment : Fragment() {
     private var counterWeeksSunday = 0
     private var counterWeeksMonday = 0
 
+    // === goals === //
+    private var mondayGoal = 0
+    private var thuesdayGoal = 0
+    private var wednesdayGoal = 0
+    private var thursdayGoal = 0
+    private var fridayGoal = 0
+    private var saturdayGoal = 0
+    private var sundayGoal = 0
+
     private lateinit var dateMonday: String
     private lateinit var dateThuesday: String
     private var arrayDays = arrayOf("", "", "", "", "", "", "")
@@ -76,6 +81,8 @@ class DataFragment : Fragment() {
     private var progress: Float = 0F
 
     private var goal = 0f
+
+    private var counterDate = 0
 
 
     override fun onCreateView(
@@ -102,20 +109,26 @@ class DataFragment : Fragment() {
                 counterWeeksSunday -= 1
                 loadDbData()
             } else {
-                toast("Aktuelles Datum")
+                toast(getString(R.string.currentDate))
             }
         }
 
-        binding.imageButtonSave.setOnClickListener {
+        binding.ButtonSave.setOnClickListener {
 
-            goal = binding.EditTextSetGoal.text.toString().toFloatOrNull()!!
-            binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, goal.toInt())
-            // Aktualisierung der Anzeige
-            // https://github.com/lopspower/CircularProgressBar
-            binding.circularProgressBarData.apply {
-                progressMax = goal
+            if(binding.EditTextSetGoal.text.toString() != "") {
+                goal = binding.EditTextSetGoal.text.toString().toFloatOrNull()!!
+                binding.textViewExercises.text =
+                    getString(R.string.text_view_exercises_done, counterDate, goal.toInt())
+                // Aktualisierung der Anzeige
+                // https://github.com/lopspower/CircularProgressBar
+
+                binding.circularProgressBarData.apply {
+                    progressMax = goal
+                }
+
+                saveGoal()
+                loadDbGoalWeek()
             }
-            saveGoal()
         }
 
         // --- Konfiguration CircularProgressBar --- //
@@ -127,8 +140,7 @@ class DataFragment : Fragment() {
 
             // ProgressBar Farbe
             progressBarColorStart = Color.parseColor("#924275")
-            progressBarColorEnd = Color.parseColor("#3C002C")
-
+            progressBarColorEnd = Color.parseColor("#5A1144")
             // Farbgradient
             progressBarColorDirection = CircularProgressBar.GradientDirection.RIGHT_TO_LEFT
 
@@ -147,34 +159,8 @@ class DataFragment : Fragment() {
 
 
 
-        // --- Initialisierung und Konfiguration des Graphen --- //
-        val calendar = Calendar.getInstance()
-        val format = SimpleDateFormat("yyyy-MM-dd")
-        dateMonday = format.format(calendar.time)
-        dateThuesday = format.format(calendar.time)
 
-        val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
-
-
-        calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
-
-
-        for(i in 0 until 7) {
-
-            //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
-
-
-            val date1 = format.format(calendar.time)
-
-            arrayDays[i] = date1
-
-            calendar.add(Calendar.DAY_OF_WEEK, + 1)
-
-        }
-
-        setUpAAChartView()
-
-        loadDbData()
+        loadGoal()
 
     }
     private fun saveGoal() {
@@ -184,13 +170,21 @@ class DataFragment : Fragment() {
 
         data.setGoalExercises(goal)
 
+        // --- Initialisierung und Konfiguration des Graphen --- //
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("dd.MM.yyyy")
+        var date = format.format(calendar.time)
+        val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
+
+        data.setDate(format.parse(date) as Date)
+        data.setDayOfWeek(day)
+
 
         // Schreibe Daten als Document in die Collection Messungen in DB;
         // Eine id als Document Name wird automatisch vergeben
         // Implementiere auch onSuccess und onFailure Listender
         val uid = mFirebaseAuth.currentUser!!.uid
-        db.collection("users").document(uid).collection("DatenGoal")
-            .document("Ziel")
+        db.collection("users").document(uid).collection("DatenGoal").document(date)
             .set(data)
             .addOnSuccessListener { documentReference ->
                 toast(getString(R.string.save))
@@ -206,10 +200,16 @@ class DataFragment : Fragment() {
 
         var data: DataGoal?
 
+        // --- Initialisierung und Konfiguration des Graphen --- //
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("dd.MM.yyyy")
+        val date = format.format(calendar.time)
+
+
         // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenGoal")
-            .document("Ziel")
+            .document(date)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -224,10 +224,39 @@ class DataFragment : Fragment() {
                             progressMax = goal
                         }
 
-                        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, goal.toInt())
+                        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, 0, goal.toInt())
                     } else {
-                        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, 0)
+                        binding.textViewExercises.text = getString(R.string.text_view_exercises_done,0 , 0)
                     }
+
+                    // --- Initialisierung und Konfiguration des Graphen --- //
+                    val calendar = Calendar.getInstance()
+                    val format = SimpleDateFormat("dd.MM.yyyy")
+                    dateMonday = format.format(calendar.time)
+                    dateThuesday = format.format(calendar.time)
+
+                    val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
+
+
+                    calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+
+                    for(i in 0 until 7) {
+
+                        //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+
+                        val date1 = format.format(calendar.time)
+
+                        arrayDays[i] = date1
+
+                        calendar.add(Calendar.DAY_OF_WEEK, + 1)
+
+                    }
+
+                    setUpAAChartView()
+
+                    loadDbData()
                 } else {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
@@ -260,17 +289,13 @@ class DataFragment : Fragment() {
         return AAChartModel.Builder(requireContext().applicationContext)
             .setChartType(AAChartType.Column)
             .setXAxisVisible(true)
-            .setTitle(getString(R.string.chart_title))
-            .setColorsTheme(arrayOf("#291521","#3C002C",
-                "#311303", "#80543D",
-                       "#1F1A1C", "#4F4349"))
-            .setStacking(AAChartStackingType.Normal)
+            .setStacking(AAChartStackingType.False)
             .setTitleStyle(AAStyle.Companion.style("#3C002C"))
-            .setBackgroundColor(R.color.light_pink)
+            .setBackgroundColor(R.color.background)
             .setAxesTextColor("#291521")
             .setCategories(arrayDays[0], arrayDays[1], arrayDays[2],arrayDays[3],arrayDays[4],arrayDays[5],arrayDays[6])
-            .setYAxisTitle("Anzahl")
             .setYAxisMax(30f)
+            .setYAxisTitle(R.string.chart_title_y)
             .setScrollablePlotArea(
                 AAScrollablePlotArea()
                     .minWidth(600)
@@ -285,8 +310,11 @@ class DataFragment : Fragment() {
 
         return arrayOf(
             AASeriesElement()
-                .name("Anzahl")
+                .name(getString(R.string.chart_title))
                 .data(arrayWeekDays as Array<Any>),
+            AASeriesElement()
+                .name(getString(R.string.chart_title_goals))
+                .data(arrayWeekGoal as Array<Any>),
         )
     }
 
@@ -302,13 +330,13 @@ class DataFragment : Fragment() {
             arrayWeekDays[i] = 0
         }
 
-        val seriesArr = configureChartSeriesArray()
-        binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
+        //val seriesArr = configureChartSeriesArray()
+     //   binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
 
         val calendar = Calendar.getInstance()
-        val format = SimpleDateFormat("yyyy-MM-dd")
+        val format = SimpleDateFormat("dd.MM.yyyy")
 
-        val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
+        val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
         calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
 
@@ -356,17 +384,31 @@ class DataFragment : Fragment() {
     private fun updateListView(task: Task<QuerySnapshot>) {
         // Einträge in dbList kopieren, um sie im ListView anzuzeigen
         val zeitformat = SimpleDateFormat("dd.MMMM yyyy")
+        val calendar = Calendar.getInstance()
+        val currentDate = zeitformat.parse(zeitformat.format(calendar.time)) as Date
+        var dateCompare = zeitformat.parse(zeitformat.format(calendar.time)) as Date
+        counterDate = 0
+
 
         if(task.result!!.size() > 0 ) {
             date = zeitformat.format(task.result!!.first().toObject(Data::class.java).getDate()!!)
-            dbList.add("$date:")
+            dateCompare = zeitformat.parse(zeitformat.format(task.result!!.first().toObject(Data::class.java).getDate()!!)) as Date
+            dbList.add("$date")
         }
 
         // Diese for schleife durchläuft alle Documents der Abfrage
         for (document in task.result!!) {
 
-            if(zeitformat.format(document.toObject(Data::class.java).getDate()!!) > date) {
-                dbList.add("Datum: ${zeitformat.format(document.toObject(Data::class.java).getDate()!!)}")
+            if((zeitformat.parse(zeitformat.format(document.toObject(Data::class.java).getDate()!!)) as Date) > dateCompare) {
+                dbList.add(zeitformat.format(document.toObject(Data::class.java).getDate()!!))
+            }
+
+            // date neu zuweisen
+            dateCompare = zeitformat.parse(zeitformat.format(document.toObject(Data::class.java).getDate()!!)) as Date
+
+
+            if(document.toObject(Data::class.java).getDate()!! >= currentDate) {
+                counterDate++
             }
 
             (dbList).add(document.toObject(Data::class.java))
@@ -378,16 +420,18 @@ class DataFragment : Fragment() {
 
         // Adapter für den ListView
         val adapter = ArrayAdapter(requireContext(),
-            android.R.layout.simple_list_item_1,   // Layout zur Darstellung der ListItems
+            R.layout.layout_list_view, R.id.textView,  // Layout zur Darstellung der ListItems
             dbList)
 
         binding.listViewData.adapter = adapter
 
-        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, dbList.size, goal.toInt())
+
+
+        binding.textViewExercises.text = getString(R.string.text_view_exercises_done, counterDate, goal.toInt())
 
         // Aktualisierung der Anzeige
         // https://github.com/lopspower/CircularProgressBar
-        binding.circularProgressBarData.progress = dbList.size.toFloat()
+        binding.circularProgressBarData.progress = counterDate.toFloat()
 
         dataToGraph(dbList)
     }
@@ -403,31 +447,31 @@ class DataFragment : Fragment() {
 
                 when ((i as Data).getDayOfWeek()) {
                     0 -> {
-                        monday++
+                        sunday++
                     }
 
                     1 -> {
-                        thuesday++
+                        monday++
                     }
 
                     2 -> {
-                        wednesday++
+                        thuesday++
                     }
 
                     3 -> {
-                        thursday++
+                        wednesday++
                     }
 
                     4 -> {
-                        friday++
+                        thursday++
                     }
 
                     5 -> {
-                        saturday++
+                        friday++
                     }
 
                     6 -> {
-                        sunday++
+                        saturday++
                     }
 
                     else -> {}
@@ -435,19 +479,146 @@ class DataFragment : Fragment() {
             }
         }
 
-        arrayWeekDays[0] = monday
-        arrayWeekDays[1] = thuesday
-        arrayWeekDays[2] = wednesday
-        arrayWeekDays[3] = thursday
-        arrayWeekDays[4] = friday
-        arrayWeekDays[5] = saturday
-        arrayWeekDays[6] = sunday
+        arrayWeekDays[0] = sunday
+        arrayWeekDays[1] = monday
+        arrayWeekDays[2] = thuesday
+        arrayWeekDays[3] = wednesday
+        arrayWeekDays[4] = thursday
+        arrayWeekDays[5] = friday
+        arrayWeekDays[6] = saturday
+
+      //  val seriesArr = configureChartSeriesArray()
+       // binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
+
+        loadDbGoalWeek()
+    }
+
+    // === loadDbData === //
+    // Einlesen der Daten aus der Datenbank
+    private fun loadDbGoalWeek() {
+
+        dbListGoals.clear()
+
+        mondayGoal = 0; thuesdayGoal = 0; wednesdayGoal = 0; thursdayGoal = 0; fridayGoal = 0; saturdayGoal = 0; sundayGoal = 0;
+
+        for (i in 0 until 7) {
+            arrayWeekGoal[i] = 0
+        }
+
+        //val seriesArr = configureChartSeriesArray()
+      //  binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
+
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("dd.MM.yyyy")
+
+        val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
+
+        calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+        dateMonday = format.format(calendar.time)
+
+        val dateMondayNew = format.parse(dateMonday) as Date
+
+        //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+
+
+        for(i in 0 until 7) {
+
+            val date = format.format(calendar.time)
+
+            arrayDays[i] = date
+
+            calendar.add(Calendar.DAY_OF_WEEK, + 1)
+
+        }
+
+        setUpAAChartView()
+
+        calendar.add(Calendar.DAY_OF_WEEK, - 1)
+
+        val dateSunday: Date = calendar.time
+
+
+
+        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
+        val uid = mFirebaseAuth.currentUser!!.uid
+        db.collection("users").document(uid).collection("DatenGoal")
+            .whereGreaterThanOrEqualTo("date", dateMondayNew) // abrufen
+            .whereLessThanOrEqualTo("date", dateSunday)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Datenbankantwort in Objektvariable speichern
+                    updateGraph(task)
+                } else {
+                    Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
+                }
+            }
+
+    }
+
+    private fun updateGraph(task: Task<QuerySnapshot>) {
+
+        // Diese for schleife durchläuft alle Documents der Abfrage
+        for (document in task.result!!) {
+
+            (dbListGoals).add(document.toObject(DataGoal::class.java))
+            Log.d("Daten", document.id + " => " + document.data)
+        }
+
+        for(i in dbListGoals){
+
+
+            if(i::class.simpleName != "String") {
+
+                when ((i as DataGoal).getDayOfWeek()) {
+                    0 -> {
+                        sundayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    1 -> {
+                        mondayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    2 -> {
+                        thuesdayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    3 -> {
+                        wednesdayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    4 -> {
+                        thursdayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    5 -> {
+                        fridayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    6 -> {
+                        saturdayGoal = i.getGoalExercises().toInt()
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+
+        arrayWeekGoal[0] = sundayGoal
+        arrayWeekGoal[1] = mondayGoal
+        arrayWeekGoal[2] = thuesdayGoal
+        arrayWeekGoal[3] = wednesdayGoal
+        arrayWeekGoal[4] = thursdayGoal
+        arrayWeekGoal[5] = fridayGoal
+        arrayWeekGoal[6] = saturdayGoal
 
         val seriesArr = configureChartSeriesArray()
         binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
-
-        loadGoal()
     }
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
