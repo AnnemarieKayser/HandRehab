@@ -45,6 +45,11 @@
             app:destination="@id/exerciseFragment"
             app:popUpTo="@id/exerciseFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_CameraFragment_to_exerciseListFragment"
+            app:destination="@id/exerciseListFragment"
+            app:popUpTo="@id/exerciseListFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/permissionsFragment"
@@ -66,7 +71,9 @@
         tools:layout="@layout/fragment_exercise_list" >
         <action
             android:id="@+id/action_exerciseListFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
+            app:destination="@id/MainFragment"
+            app:popUpTo="@id/MainFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_exerciseListFragment_to_exerciseFragment"
             app:destination="@id/exerciseFragment" />
@@ -75,6 +82,9 @@
             app:destination="@id/plannerFragment"
             app:popUpTo="@id/plannerFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_exerciseListFragment_to_MainFragment2"
+            app:destination="@id/MainFragment" />
     </fragment>
     <fragment
         android:id="@+id/exerciseFragment"
