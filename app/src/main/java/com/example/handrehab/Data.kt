@@ -7,7 +7,7 @@ import java.util.Date
 import java.util.Locale
 
 class Data {
-    private var zeitformat = SimpleDateFormat("yyyy-MM-dd-kk-mm")
+    private var zeitformat = SimpleDateFormat("kk:mm")
     private var counterExercises = 0
     private var dateTimestamp: Date? = null
     private var repetitions = 0
@@ -19,6 +19,7 @@ class Data {
     private var max = 0f
     private var min = 0f
     private var startMode = ""
+    private var currentPhase = ""
     // serverTimestamp soll automatisch vom Server gesetzt werden
     @ServerTimestamp
     private var serverTimestamp: Timestamp? = null
@@ -32,6 +33,13 @@ class Data {
         this.exerciseId = ExerciseId
     }
 
+    fun getCurrentPhase(): String {
+        return currentPhase
+    }
+
+    fun setCurrentPhase(phase: String) {
+        this.currentPhase = phase
+    }
 
     fun getMin(): Float {
         return min
@@ -123,12 +131,13 @@ class Data {
 
     override fun toString(): String {
         return  "Übung: " + exerciseName +
-                ", Uhrzeit: " + zeitformat.format(dateTimestamp) +
-                ", Wiederholungen: " + repetitions +
-                ", Sätze: " + sets +
-                ", Maximale Distanz: " + max +
-                ", Trainierte Hand: " + selectedHandSide +
-                ", Startposition: " + startMode
+                "\nUhrzeit: " + zeitformat.format(dateTimestamp) +
+                "\nWiederholungen: " + repetitions +
+                "\nSätze: " + sets +
+                "\nMax./Min.: " + max + " cm" +
+                "\nTrainierte Hand: " + selectedHandSide +
+                "\nStartposition: " + startMode +
+                "\nAktuelle Phase: " + currentPhase
     }
 
 }
