@@ -10,22 +10,25 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.handrehab.Data
 import com.example.handrehab.DataMinMax
 import com.example.handrehab.MainViewModel
-import com.example.handrehab.PermissionsFragment
 import com.example.handrehab.R
 import com.example.handrehab.databinding.FragmentExerciseBinding
 import com.example.handrehab.item.Datasource
 import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.Legend.LegendForm
+import com.github.mikephil.charting.components.Legend.LegendVerticalAlignment
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
@@ -35,12 +38,13 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import splitties.toast.toast
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.Locale
 
 
@@ -61,17 +65,9 @@ class ExerciseFragment : Fragment() {
     private var counterExercise = 0
 
     // === Graph === //
-    private lateinit var dateMonday: String
-    private lateinit var dateThuesday: String
-    private var arrayDays = arrayOf("", "", "", "", "", "", "")
-    private var counterWeeksMonday = 0
-    private var arrayWeekDays = arrayOfNulls<Any>(7)
     private var dbList = ArrayList <Data> ()
     private var dbListMinMax = ArrayList <DataMinMax> ()
-    private var values = arrayListOf<Float>()
-    private var valuesDate = arrayOf<String>()
-    private var listValuesDate = arrayListOf<String>()
-    private var categoriesString = ""
+
 
     // === Line Graph === //
     private var valueSeries : ArrayList<Entry> = ArrayList()
@@ -81,10 +77,6 @@ class ExerciseFragment : Fragment() {
     private var valueSeriesThumb : ArrayList<Entry> = ArrayList()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val baseTimestamp = LocalDateTime.now()
-
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -118,17 +110,36 @@ class ExerciseFragment : Fragment() {
             viewModel.setStartModus("")
         }
 
+        if(id == 12){
+            binding.toggleButton.visibility = GONE
+            binding.textView4.visibility = GONE
+        }
+
+        if(id == 15 || id == 16 || id == 17 || id == 18){
+            binding.toggleButtonLevel.visibility = GONE
+            binding.textViewLevel.visibility = GONE
+        }
+
+        if (id == 2 || id == 20 || id == 13) {
+            binding.textView6.visibility = GONE
+        }
+
+        if(id == 2){
+            binding.textViewLevel.visibility = GONE
+            binding.toggleButtonLevel.visibility = GONE
+            viewModel.setDivideFactor(3.0)
+        }
+
 
         binding.extendedFab.setOnClickListener {
             binding.editTextRepetition.text.toString().toIntOrNull()
                 ?.let { it1 -> viewModel.setRepetitions(it1) }
             binding.editTextSets.text.toString().toIntOrNull()
                 ?.let { it1 -> viewModel.setSets(it1) }
-            Log.i("Repetition", viewModel.getRepetitions().toString())
             counterExercise++
            // insertDataInDb(counterExercise)
             if(viewModel.getRepetitions() == 0 || viewModel.getSets() == 0){
-                toast("Trage bitte eine Anzahl ein")
+                toast(getString(R.string.toast_enter_number))
                 binding.editTextRepetition.setHintTextColor(Color.RED)
             } else findNavController().navigate(R.id.action_exerciseFragment_to_permissionsFragment)
 
@@ -136,7 +147,7 @@ class ExerciseFragment : Fragment() {
 
         // --- Änderung des Status des toggle-Buttons --- //
         // Einstellung der Start Position der Hand
-        binding.toggleButton.check(if(viewModel.getStartModus() == "geschlossen") R.id.button2 else R.id.button1)
+        binding.toggleButton.check(if(viewModel.getStartModus() == getString(R.string.closed)) R.id.button2 else R.id.button1)
         binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
             if (isChecked) {
@@ -144,14 +155,12 @@ class ExerciseFragment : Fragment() {
                 when (checkedId) {
                     R.id.button1 -> {
                         viewModel.setStartModus(getString(R.string.start_mode_open))
-                        Log.i("ToggleButton", "Button 1 checked")
                         dbList.clear()
                         loadDbData()
                     }
 
                     R.id.button2 -> {
                         viewModel.setStartModus(getString(R.string.start_mode_close))
-                        Log.i("ToggleButton", "Button 2 checked")
                         dbList.clear()
                         loadDbData()
                     }
@@ -171,7 +180,6 @@ class ExerciseFragment : Fragment() {
                 when (checkedId) {
                     R.id.buttonRight -> {
                         viewModel.setSelectedHandSide(getString(R.string.selected_hand_right))
-                        Log.i("ToggleButton", "Button 1 checked")
                         dbList.clear()
                         dbListMinMax.clear()
                         if(viewModel.getSelectedExercise()!!.id == 2){
@@ -181,7 +189,6 @@ class ExerciseFragment : Fragment() {
 
                     R.id.buttonLeft -> {
                         viewModel.setSelectedHandSide(getString(R.string.selected_hand_left))
-                        Log.i("ToggleButton", "Button 2 checked")
                         dbList.clear()
                         dbListMinMax.clear()
                         if(viewModel.getSelectedExercise()!!.id == 2){
@@ -192,18 +199,42 @@ class ExerciseFragment : Fragment() {
             }
         }
 
+        binding.imageButtonInfoGraph.setOnClickListener {
+
+            val id = viewModel.getSelectedExercise()!!.id
+            var text = getString(R.string.supporting_text_info_graph_close_fingers)
+
+            if(id == 2 || id == 3 || id == 4 || id == 5 || id == 6) text = getString(R.string.supporting_text_info_graph_spread_finger)
+            if(id == 8 || id == 9 || id == 10|| id == 11|| id == 12 || id == 13) {
+                text = if(viewModel.getStartModus()!! == getString(R.string.closed)){
+                    getString(R.string.supporting_text_info_graph_close_fingers)
+                } else getString(R.string.supporting_text_info_graph_open_fingers)
+        }
+
+            context?.let {
+                MaterialAlertDialogBuilder(it)
+                    .setTitle(resources.getString(R.string.title_alert_dialog_info_graph))
+                    .setMessage(text)
+                    .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
+                        // Respond to positive button press
+                    }
+                    .show()
+            }
+        }
+
 
         // --- Änderung des Status des toggle-Buttons --- //
         // Einstellung der Start Position der Hand
 
-        var buttonId = when(viewModel.getDivideFactor()) {
-            1.5 -> R.id.buttonEasy
+        val buttonId = when(viewModel.getDivideFactor()) {
+            1.5 -> R.id.buttonHard
             2.0 -> R.id.buttonMedium
-            3.0 -> R.id.buttonHard
+            3.0 -> R.id.buttonEasy
             else -> R.id.buttonMedium
         }
 
         binding.toggleButtonLevel.check(buttonId)
+
 
         binding.toggleButtonLevel.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
 
@@ -223,6 +254,33 @@ class ExerciseFragment : Fragment() {
             }
         }
 
+        if(viewModel.getSelectedExercise()!!.id == 13){
+            binding.toggleButtonLevel.visibility = GONE
+            binding.textViewLevel.text = getString(R.string.text_open_close_all_fingers)
+        } else binding.toggleButtonLevelAllFingers.visibility = GONE
+
+        val buttonId2 = when(viewModel.getAllFingersOpenOrClose()) {
+            1 -> R.id.buttonHalfOpenClose
+            2-> R.id.buttonOpenClose
+            else -> R.id.buttonHalfOpenClose
+        }
+
+        binding.toggleButtonLevelAllFingers.check(buttonId2)
+
+        binding.toggleButtonLevelAllFingers.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
+
+            if (isChecked) {
+                // Überprüfen, welcher Button ausgewählt wurde
+                when (checkedId) {
+                    R.id.buttonHalfOpenClose -> {
+                        viewModel.setAllFingersOpenOrClose(1)
+                    }
+                    R.id.buttonOpenClose -> {
+                        viewModel.setAllFingersOpenOrClose(2)
+                    }
+                }
+            }
+        }
 
         // --- Initialisierung MediaController --- //
         if (mediaController == null) {
@@ -253,16 +311,83 @@ class ExerciseFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun configGraph(arr: ArrayList<String>) {
 
-        Log.i("arrLength", arr.size.toString())
-
 
         val formatter: ValueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase): String {
-                Log.i("FloatValue", value.toString())
                 return if(value.toInt() < arr.size && value.toInt() >= 0) arr[value.toInt()]
                 else "0"
             }
         }
+
+        val formatterY: ValueFormatter = object : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase): String {
+                return "${value.toBigDecimal().setScale(2, RoundingMode.DOWN).toDouble()} cm"
+            }
+        }
+
+        val id = viewModel.getSelectedExercise()!!.id
+        if( id == 2 || id == 3 || id == 4 || id == 5 || id == 6 ) {
+            //Finger spreizen
+            val lGood = LimitLine(5F, "Gut")
+            lGood.lineColor = Color.GREEN
+            lGood.lineWidth = 1F
+
+            lGood.textColor = Color.BLACK
+            lGood.textSize = 10f
+
+            val lMiddle = LimitLine(2F, "Mittel")
+            lMiddle.lineColor = Color.YELLOW
+            lMiddle.lineWidth = 1F
+
+            lMiddle.textColor = Color.BLACK
+            lMiddle.textSize = 10f
+
+            val lBad = LimitLine(0F, "Verbesserungsfähig")
+            lBad.lineColor = Color.RED
+            lBad.lineWidth = 1F
+
+            lBad.textColor = Color.BLACK
+            lBad.textSize = 10f
+
+            binding.lineChart.axisLeft.addLimitLine(lGood)
+            binding.lineChart.axisLeft.addLimitLine(lMiddle)
+            binding.lineChart.axisLeft.addLimitLine(lBad)
+
+
+            binding.lineChart.axisLeft.setDrawLimitLinesBehindData(true)
+        } else {
+            //Finger spreizen
+            val lGood = LimitLine(14F, "Gut")
+            lGood.lineColor = Color.GREEN
+            lGood.lineWidth = 1F
+
+            lGood.textColor = Color.BLACK
+            lGood.textSize = 10f
+
+
+            val lMiddle = LimitLine(10F, "Mittel")
+            lMiddle.lineColor = Color.YELLOW
+            lMiddle.lineWidth = 1F
+
+            lMiddle.textColor = Color.BLACK
+            lMiddle.textSize = 10f
+
+            val lBad = LimitLine(0F, "Verbesserungsfähig")
+            lBad.lineColor = Color.RED
+            lBad.lineWidth = 1F
+
+            lBad.textColor = Color.BLACK
+            lBad.textSize = 10f
+
+            binding.lineChart.axisLeft.addLimitLine(lGood)
+            binding.lineChart.axisLeft.addLimitLine(lMiddle)
+            binding.lineChart.axisLeft.addLimitLine(lBad)
+
+
+            binding.lineChart.axisLeft.setDrawLimitLinesBehindData(true)
+        }
+
+
 
 
         //Beschreibung
@@ -272,6 +397,7 @@ class ExerciseFragment : Fragment() {
         val yAxis : YAxis = binding.lineChart.axisLeft
         yAxis.axisMinimum = 0f
         yAxis.gridColor = Color.LTGRAY
+        yAxis.valueFormatter = formatterY
 
 
         //rechte y-Achse
@@ -290,6 +416,12 @@ class ExerciseFragment : Fragment() {
         //enable scrolling and scaling
         binding.lineChart.isDragEnabled = true
         binding.lineChart.setScaleEnabled(true)
+
+        val l: Legend = binding.lineChart.legend
+        //l.formSize = 10f // set the size of the legend forms/shapes
+
+        l.form = LegendForm.CIRCLE // set what type of form/shape should be used
+        l.verticalAlignment = LegendVerticalAlignment.TOP
     }
 
 
@@ -350,7 +482,6 @@ class ExerciseFragment : Fragment() {
         // Diese for schleife durchläuft alle Documents der Abfrage
         for (document in task.result!!) {
             (dbListMinMax).add(document.toObject(DataMinMax::class.java))
-            Log.d("Daten", document.id + " => " + document.data)
         }
 
         val yourList: List<DataMinMax> = dbListMinMax
@@ -364,7 +495,7 @@ class ExerciseFragment : Fragment() {
         valueSeriesPointingFinger.clear()
         valueSeriesThumb.clear()
 
-        val zeitformat = SimpleDateFormat("MM-dd-kk-mm", Locale.GERMANY)
+        val zeitformat = SimpleDateFormat("dd.MM kk:mm", Locale.GERMANY)
         val year = SimpleDateFormat("yyyy")
 
 
@@ -382,6 +513,11 @@ class ExerciseFragment : Fragment() {
         }
 
         if(dbListMinMax.size != 0) {
+            binding.textViewPhase.visibility = GONE
+            binding.lineChart.visibility = VISIBLE
+            binding.textViewTitleGraph.visibility = VISIBLE
+            binding.imageButtonInfoGraph.visibility = VISIBLE
+
             if(dbListMinMax.last().getRepetitions() >= 10) {
                 binding.editTextRepetition.setText("5")
                 binding.editTextSets.setText((yourSortedList.last().getSets()+1).toString())
@@ -392,19 +528,23 @@ class ExerciseFragment : Fragment() {
         } else {
             binding.editTextRepetition.setText("2")
             binding.editTextSets.setText("2")
+            binding.lineChart.visibility = GONE
+            binding.textViewTitleGraph.visibility = GONE
+            binding.imageButtonInfoGraph.visibility = GONE
+            binding.textViewPhase.text = getString(R.string.no_data)
         }
 
 
-        val lineDataSetLittleFinger = LineDataSet(valueSeriesLittleFinger, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte kleiner Finger rechts" else "Messwerte kleiner Finger links")
+        val lineDataSetLittleFinger = LineDataSet(valueSeriesLittleFinger, if(viewModel.getSelectedHandSide() == getString(R.string.right)) getString(R.string.values_right_little_finger_cm) else getString(R.string.values_left_little_finger_cm))
         lineDataSetLittleFinger.setColors(Color.MAGENTA)
         lineDataSetLittleFinger.setCircleColor(Color.MAGENTA)
-        val lineDataSetMiddleFinger = LineDataSet(valueSeriesMiddleFinger, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Mittelfinger rechts" else "Messwerte Mittelfinger links")
+        val lineDataSetMiddleFinger = LineDataSet(valueSeriesMiddleFinger, if(viewModel.getSelectedHandSide() == getString(R.string.right)) getString(R.string.values_right_middle_finger_cm) else getString(R.string.values_left_middle_finger_cm))
         lineDataSetMiddleFinger.setColors(Color.CYAN)
         lineDataSetMiddleFinger.setCircleColor(Color.CYAN)
-        val lineDataSetPointingFinger = LineDataSet(valueSeriesPointingFinger, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Zeigefinger rechts" else "Messwerte Zeigefinger links")
+        val lineDataSetPointingFinger = LineDataSet(valueSeriesPointingFinger, if(viewModel.getSelectedHandSide() == getString(R.string.right)) getString(R.string.values_right_pointing_finger_cm) else getString(R.string.values_left_pointing_finger_cm))
         lineDataSetPointingFinger.color = Color.BLUE
         lineDataSetPointingFinger.setCircleColor(Color.BLUE)
-        val lineDataSetThumb = LineDataSet(valueSeriesThumb, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Daumen rechts" else "Messwerte Daumen links")
+        val lineDataSetThumb = LineDataSet(valueSeriesThumb, if(viewModel.getSelectedHandSide() == getString(R.string.right)) getString(R.string.values_right_thumb_cm) else getString(R.string.values_left_thumb_cm))
         lineDataSetThumb.color = Color.DKGRAY
         lineDataSetThumb.setCircleColor(Color.DKGRAY)
 
@@ -413,6 +553,13 @@ class ExerciseFragment : Fragment() {
         dataSets.add(lineDataSetMiddleFinger)
         dataSets.add(lineDataSetPointingFinger)
         dataSets.add(lineDataSetThumb)
+
+        val l: Legend = binding.lineChart.legend
+        //l.formSize = 10f // set the size of the legend forms/shapes
+
+        l.form = LegendForm.CIRCLE // set what type of form/shape should be used
+        l.verticalAlignment = LegendVerticalAlignment.TOP
+        l.isWordWrapEnabled = true
 
 
         binding.lineChart.data = LineData(dataSets)
@@ -433,7 +580,6 @@ class ExerciseFragment : Fragment() {
         // Diese for schleife durchläuft alle Documents der Abfrage
         for (document in task.result!!) {
             (dbList).add(document.toObject(Data::class.java))
-            Log.d("Daten", document.id + " => " + document.data)
         }
 
         dataToGraph(dbList)
@@ -450,20 +596,44 @@ class ExerciseFragment : Fragment() {
         var counter = 0f
         val dataArray = arrayListOf<String>()
         valueSeries.clear()
-        val zeitformat = SimpleDateFormat("MM-dd-kk-mm", Locale.GERMANY)
+        val zeitformat = SimpleDateFormat("dd.MM kk:mm", Locale.GERMANY)
         val year = SimpleDateFormat("yyyy")
 
 
 
         for (i in yourSortedList) {
-            Log.i("ValuesNew", i.toString())
             val dateFormat = zeitformat.format(i.getDate()!!)
             valueSeries.add(Entry(counter, i.getMax()))
             dataArray.add(dateFormat)
             counter++
         }
 
+
+
         if(data.size != 0) {
+            val id = viewModel.getSelectedExercise()!!.id
+            binding.lineChart.visibility = VISIBLE
+            binding.textViewTitleGraph.visibility = VISIBLE
+            binding.imageButtonInfoGraph.visibility = VISIBLE
+
+            if(id == 8 || id == 9 || id == 10 || id == 11 || id == 12 || id == 13) {
+                binding.textViewPhase.text = getString(R.string.tv_phase, yourSortedList.last().getCurrentPhase())
+            } else binding.textViewPhase.visibility = GONE
+
+            if(id == 12 || id == 13) {
+                binding.lineChart.visibility = GONE
+                binding.textViewTitleGraph.visibility = GONE
+                binding.imageButtonInfoGraph.visibility = GONE
+            }
+
+            if(id == 15 || id == 16 || id == 17 || id ==18){
+                binding.lineChart.visibility = GONE
+                binding.textViewTitleGraph.visibility = GONE
+                binding.imageButtonInfoGraph.visibility = GONE
+                binding.textViewPhase.visibility = GONE
+                binding.textView5.visibility = GONE
+            }
+
             if(data.last().getRepetitions() >= 10) {
                 binding.editTextRepetition.setText("5")
                 binding.editTextSets.setText((yourSortedList.last().getSets()+1).toString())
@@ -474,10 +644,15 @@ class ExerciseFragment : Fragment() {
         } else {
             binding.editTextRepetition.setText("2")
             binding.editTextSets.setText("2")
+            binding.lineChart.visibility = GONE
+            binding.textViewTitleGraph.visibility = GONE
+            binding.imageButtonInfoGraph.visibility = GONE
+            binding.textViewPhase.text = getString(R.string.no_data)
+
         }
 
 
-        val lineDataSet = LineDataSet(valueSeries, if(viewModel.getSelectedHandSide() == "rechts") "Messwerte Rechte Hand" else "Messwerte Linke Hand")
+        val lineDataSet = LineDataSet(valueSeries, if(viewModel.getSelectedHandSide() == getString(R.string.right)) getString(R.string.values_right_hand_cm) else getString(R.string.values_left_hand_cm))
         binding.lineChart.data = LineData(lineDataSet)
 
 
