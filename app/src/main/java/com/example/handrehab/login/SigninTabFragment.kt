@@ -13,27 +13,46 @@ import splitties.toast.toast
 
 class SigninTabFragment: Fragment() {
 
-/*
-  =============================================================
-  =======                   Variablen                   =======
-  =============================================================
-*/
+
+    /*
+      ======================================================================================
+      ==========================           Einleitung             ==========================
+      ======================================================================================
+      Projektname: HandRehab
+      Autor: Annemarie Kayser
+      Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                 Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                 Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                 sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+      Letztes Update: 12.01.2024
+
+     ======================================================================================
+   */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - Der Nutzer kann mit einer E-Mail und einem Passwort einen
+      Account erstellen
+
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
 
     private var _binding: SigninTabFragmentBinding? = null
     private val binding get() = _binding!!
 
-    // === Datenbank === //
+    // Datenbank
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private lateinit var mAuthListener: FirebaseAuth.AuthStateListener
 
-
-/*
-  =============================================================
-  =======                                               =======
-  =======         onCreateView & onViewCreated          =======
-  =======                                               =======
-  =============================================================
-*/
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,8 +65,20 @@ class SigninTabFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Animation beim Öffnen des Fragments
+        binding.EditViewEmail.translationX = 800F
+        binding.EditViewPassword.translationX = 800F
+        binding.buttonRegister.translationX = 800F
 
-        // --- E-mail wird an Benutzer geschickt zur Verifizierung seiner Mail --- //
+        binding.EditViewEmail.alpha = 0F
+        binding.EditViewPassword.alpha = 0F
+        binding.buttonRegister.alpha =0F
+
+        binding.EditViewEmail.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(300).start()
+        binding.EditViewPassword.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(500).start()
+        binding.buttonRegister.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(500).start()
+
+        // E-mail wird an Benutzer geschickt zur Verifizierung seiner Mail
         mAuthListener = FirebaseAuth.AuthStateListener {
             val user = mFirebaseAuth.currentUser
 
@@ -64,7 +95,7 @@ class SigninTabFragment: Fragment() {
             }
         }
 
-        // --- E-Mail und Passwort werden eingelesen und an die register-Funktion übergeben --- //
+        // E-Mail und Passwort werden eingelesen und an die register-Funktion übergeben
         binding.buttonRegister.setOnClickListener {
 
             val email : String = binding.EditViewEmail.text.toString()
@@ -82,7 +113,6 @@ class SigninTabFragment: Fragment() {
   =============================================================
 */
 
-    // === validateForm === //
     // Überprüfen, ob E-Mail und Passwort eingegeben wurden
     private fun validateForm(email: String, password: String): Boolean {
         var valid = true
@@ -100,7 +130,7 @@ class SigninTabFragment: Fragment() {
         return valid
     }
 
-    // === register === //
+
     private fun register(email: String, password: String) {
 
         // Überprüfen, ob E-mail und Passwort eingegeben wurden
@@ -115,7 +145,7 @@ class SigninTabFragment: Fragment() {
                     if (task.isSuccessful) {
                         mAuthListener.onAuthStateChanged(mFirebaseAuth)
                     } else {
-                        //toast(task.exception!!.message.toString())
+                        toast(task.exception!!.message.toString())
                     }
                 }
         }

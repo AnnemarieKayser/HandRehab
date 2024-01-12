@@ -18,42 +18,58 @@ import splitties.alertdialog.okButton
 class SplashScreen : AppCompatActivity() {
 
 
-    // === Datenbank === //
+    /*
+       ======================================================================================
+       ==========================           Einleitung             ==========================
+       ======================================================================================
+       Projektname: HandRehab
+       Autor: Annemarie Kayser
+       Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                  Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                  Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                  sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+       Letztes Update: 12.01.2024
+
+      ======================================================================================
+    */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - Diese Activity wird bei Start der App aufgerufen und zeigt einen Begrüßungsbildschirm
+      für zwei Sekunden an.
+      - Es wird überprüft, ob eine Verbindung zum W-Lan besteht und ob ein Nuter eingeloggt ist
+
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
+
+
+    // Datenbank
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
-    // === Handler-Runnable-Konstrukt === //
+    // Handler-Runnable-Konstrukt
     private val mHandler: Handler by lazy { Handler() }
     private lateinit var mRunnable: Runnable
 
 
-/*
-  =============================================================
-  =======                                               =======
-  =======                   onCreate                    =======
-  =======                                               =======
-  =============================================================
-*/
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
-        mRunnable = Runnable {
-            if (mFirebaseAuth.currentUser == null) {
-               val intent = Intent(this, LoginInActivity::class.java)
-               startActivity(intent)
-            } else {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-            }
-        }
-        mHandler.postDelayed(mRunnable, 2000)
 
-        // --- Prüfen, ob eine Verbindung zum WLAN besteht --- //
-        // Wenn keine Verbindung besteht, wird ein alertDialog angezeigt und erinnert
-        // den Benutzer daran, sein Handy mit dem Wifi zu verbinden
-        // danach wird die App geschlossen
+        // Prüfen, ob eine Verbindung zum WLAN besteht
+        // Wenn keine Verbindung besteht, wird ein alertDialog mit einer Erinnerung
+        // angezeigt, sich damit zu verbinden
+        // Danach wird die App geschlossen
         if(!isNetworkAvailable(this)){
-            // --- alertDialog --- //
+
             alertDialog (
                 title = getString(R.string.alert_dialog_title_reminder),
                 message = getString(R.string.alert_dialog_message_wifi)) {
@@ -63,8 +79,8 @@ class SplashScreen : AppCompatActivity() {
             }.show()
         }
         else {
-            // LoginActivity oder MainActivity wird nach 2 Sekunden geöffnet, je nachdem
-            // ob der User eingeloggt ist oder nicht
+            // Wenn der User eingeloggt ist, öffnet sich die MainActivity nach 2 Sekunden
+            // Wenn nicht, öffnet sich die LogInActivity
             mRunnable = Runnable {
                 if (mFirebaseAuth.currentUser == null) {
                     val intent = Intent (this, LoginInActivity::class.java)
@@ -87,10 +103,8 @@ class SplashScreen : AppCompatActivity() {
   =============================================================
 */
 
-    // === isNetworkAvailable === //
-    // diese Funktion prüft, ob eine Verbindung zum WLAN besteht
-    // gibt true zurück, wenn eine Verbindung vorhanden ist
-    // sonst gibt sie false zurück
+
+    // Diese Funktion überprüft, ob eine Verbindung zum WLAN besteht
     private fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

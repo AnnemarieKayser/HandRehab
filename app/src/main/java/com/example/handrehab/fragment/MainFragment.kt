@@ -13,7 +13,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,13 +27,11 @@ import com.example.handrehab.databinding.FragmentMainBinding
 import com.example.handrehab.item.Datasource
 import com.example.handrehab.item.Exercises
 import com.google.android.gms.tasks.Task
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
-import splitties.toast.toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -42,31 +39,63 @@ import java.util.Locale
 
 class MainFragment : Fragment() {
 
-    private var _binding: FragmentMainBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    /*
+      ======================================================================================
+      ==========================           Einleitung             ==========================
+      ======================================================================================
+      Projektname: HandRehab
+      Autor: Annemarie Kayser
+      Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                 Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                 Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                 sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+      Letztes Update: 12.01.2024
+
+     ======================================================================================
+   */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - In diesem Fragment wird eine erste Übersicht über die App gegeben
+      - Es kann über verschiedene Button in die anderen Fragmente gewechselt werden
+      - Es wird in einer CircularProgressBar die Anzahl an durchgeführten
+      Übungen an dem aktuellen Tag angezeigt
+      - Es werden die Übungen des aktuellen Tags aus dem Wochenplan angezeigt
+      - Der Nutzer kann sich ausloggen
+
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
+
+
+    private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-    // === Datenbank === //
+
+
+    // Datenbank
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-    private lateinit var dateMonday: String
-    private var data: Data? = null
+    private lateinit var date: String
     private var dbList = ArrayList <Data> ()
 
-    // === ListView === //
+    // ListView
     private lateinit var layoutManager : LinearLayoutManager
     private lateinit var adapter : RecyclerAdapter
     private var listExercises = arrayListOf<Exercises>()
 
-    // === Circular-Progress-Bar === //
-    private var timeMaxProgressBar = 20F
-    private var progressTime: Float = 0F
+    // Circular-Progress-Bar
     private var goal = 0f
 
     private val viewModel: MainViewModel by activityViewModels()
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,18 +110,20 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // LayoutManger an Liste binden
         layoutManager = LinearLayoutManager(activity)
         layoutManager.orientation = LinearLayoutManager.HORIZONTAL
         binding.recyclerView.layoutManager = layoutManager
 
+        // Anzeige aller Übungen im ExerciseListFragment
         viewModel.setExercisesListMode(1)
+
         setHasOptionsMenu(true)
 
 
         binding.buttonGoToData.setOnClickListener {
             findNavController().navigate(R.id.action_MainFragment_to_dataFragment)
         }
-
 
         binding.buttonToExerciseList.setOnClickListener {
             findNavController().navigate(R.id.action_MainFragment_to_exerciseListFragment)
@@ -102,15 +133,14 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_MainFragment_to_plannerFragment)
         }
 
-
-
         binding.buttonStartPlan.setOnClickListener {
+            // Anzeige der Übungen des aktuellen Tages aus dem Wochenplan im ExerciseListFragment
             viewModel.setExercisesListMode(2)
             findNavController().navigate(R.id.action_MainFragment_to_exerciseListFragment)
         }
 
-        // --- Konfiguration CircularProgressBar --- //
-        // Anzeige des Fortschritts mit gerader Haltung
+        // Konfiguration CircularProgressBar
+        // Anzeige des Fortschritts an durchgeführten Übungen
         // https://github.com/lopspower/CircularProgressBar
         binding.circularProgressBar.apply {
             // Progress Max
@@ -138,24 +168,23 @@ class MainFragment : Fragment() {
 
         binding.circularProgressBar.progress = 0f
 
-
         loadDbData()
-
     }
 
-    // === onCreateOptionsMenu === //
+    /*
+   =============================================================
+   =======                   Funktionen                  =======
+   =============================================================
+   */
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_main_2, menu)
-
     }
 
-    // === onOptionsItemSelected === //
+
     // Hier werden Klicks auf Elemente der Aktionsleiste behandelt
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Ausloggen
         return when (item.itemId) {
             R.id.menu_item_log_out-> {
                 mFirebaseAuth.signOut()
@@ -168,36 +197,27 @@ class MainFragment : Fragment() {
         }
     }
 
-    // === loadDbData === //
-    // Einlesen der Daten aus der Datenbank
+
+    // Einlesen der durchgeführten Übungen an dem aktuellen Tag aus der Datenbank
     private fun loadDbData() {
 
         dbList.clear()
 
+        // Abrufen des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("dd.MM.yyyy")
 
-       // val day = calendar.get(Calendar.DAY_OF_WEEK) - 2
+        date = format.format(calendar.time)
+        val dateNew = format.parse(date) as Date
 
-       // calendar.add(Calendar.DAY_OF_WEEK, - day)
-
-        dateMonday = format.format(calendar.time)
-
-        val dateMondayNew = format.parse(dateMonday) as Date
-
-        calendar.add(Calendar.DAY_OF_WEEK, + 6)
-
-        val dateSunday: Date = calendar.time
-
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("Daten")
-            .whereGreaterThanOrEqualTo("date", dateMondayNew) // abrufen
+            .whereGreaterThanOrEqualTo("date", dateNew) // abrufen
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // Datenbankantwort in Objektvariable speichern
-                    updateListView(task)
+                    updateView(task)
                 } else {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
@@ -205,20 +225,32 @@ class MainFragment : Fragment() {
 
     }
 
+    private fun updateView(task: Task<QuerySnapshot>) {
 
-    // === loadDbData === //
-    // Einlesen der Daten aus der Datenbank
+        // Diese for-Schleife durchläuft alle Dokumente der Abfrage
+        for (document in task.result!!) {
+            dbList.add(document.toObject(Data::class.java))
+        }
+
+        // Aktualisierung der Anzeige
+        // https://github.com/lopspower/CircularProgressBar
+        binding.circularProgressBar.progress = dbList.size.toFloat()
+
+        loadDbGoalData()
+    }
+
+
+
+    // Einlesen des aktuellen Ziels an Übungen pro Tag
     private fun loadDbGoalData() {
 
         var data: DataGoal?
 
-        // --- Initialisierung und Konfiguration des Graphen --- //
+        // Abfrage des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("dd.MM.yyyy")
         val date = format.format(calendar.time)
 
-
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenGoal")
             .document(date)
@@ -230,6 +262,7 @@ class MainFragment : Fragment() {
 
                     if (data != null) {
                         goal = data!!.getGoalExercises()
+
                         // Aktualisierung der Anzeige
                         // https://github.com/lopspower/CircularProgressBar
                         binding.circularProgressBar.apply {
@@ -240,44 +273,26 @@ class MainFragment : Fragment() {
                     } else {
                         binding.textViewNumber.text = getString(R.string.text_view_goal_main, dbList.size, 0)
                     }
+
                     loadDbWeekPlan()
                 } else {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
             }
     }
-    private fun updateListView(task: Task<QuerySnapshot>) {
-        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
-
-        // Diese for schleife durchläuft alle Documents der Abfrage
-        for (document in task.result!!) {
-            (dbList as ArrayList<Data>).add(document.toObject(Data::class.java))
-            Log.d("Daten", document.id + " => " + document.data)
-        }
 
 
-        // Aktualisierung der Anzeige
-        // https://github.com/lopspower/CircularProgressBar
-        binding.circularProgressBar.progress = dbList.size.toFloat()
-
-        loadDbGoalData()
-
-    }
-
-    // === loadDbData === //
-    // Einlesen der Daten aus der Datenbank
+    // Einlesen des aktuellen Tages aus dem Wochenplan
     private fun loadDbWeekPlan() {
 
         listExercises.clear()
 
+        // Abfrage des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("EEEE", Locale.ENGLISH)
 
         val day = format.format(calendar.time).lowercase()
 
-        Log.i("InfoTag", day)
-
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DataWeekPlanner").document(day)
             .get()
@@ -291,10 +306,12 @@ class MainFragment : Fragment() {
             }
     }
 
+    // Anzeige der Übungen des aktuellen Tages aus dem Wochenplan in einer Liste
     private fun updateListViewWeekPlanner(task: Task<DocumentSnapshot>) {
-        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+
         val result = task.result!!.toObject(DataWeekPlanner::class.java)
 
+        // Übungen zu Liste hinzufügen
         if(result != null) {
 
             for (j in Datasource().loadItems()) {

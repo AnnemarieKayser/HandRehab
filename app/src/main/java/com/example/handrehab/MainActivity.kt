@@ -1,27 +1,57 @@
+
+
 package com.example.handrehab
 
 import android.os.Bundle
-import android.util.Log
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import androidx.activity.viewModels
 import androidx.navigation.ui.setupWithNavController
 import com.example.handrehab.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
+
+    /*
+      ======================================================================================
+      ==========================           Einleitung             ==========================
+      ======================================================================================
+      Projektname: HandRehab
+      Autor: Annemarie Kayser
+      Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                 Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                 Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                 sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+      Letztes Update: 12.01.2024
+
+     ======================================================================================
+   */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - Initialisierung der unteren Navigationsleiste
+
+
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
+
+
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

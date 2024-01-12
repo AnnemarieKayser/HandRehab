@@ -1,10 +1,11 @@
 package com.example.handrehab
 
-import com.example.handrehab.item.Exercises
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
+// Objekt für das Speichern der Daten in der Datenbank
+// Speichern des Wochenplans
 class DataWeekPlanner {
 
     private lateinit var listExercises : List<Int>

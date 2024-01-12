@@ -22,13 +22,14 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.activityViewModels
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.gesturerecognizer.GestureRecognizerResult
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import kotlin.math.max
 import kotlin.math.min
 
+// übernommen von:
+// https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
 
@@ -53,10 +54,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var selectedHandSide = ""
     private var startPositionHand = ""
 
+    // übernommen von:
+    // https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
     init {
         initPaints()
     }
 
+    // übernommen von:
+    // https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
     fun clear() {
         results = null
         linePaint.reset()
@@ -67,6 +72,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         initPaints()
     }
 
+    // übernommen von:
+    // https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
     private fun initPaints() {
         linePaint.color =
             ContextCompat.getColor(context!!, R.color.mp_color_primary)
@@ -79,26 +86,28 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     }
 
+    // übernommen von:
+    // https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
         var i = 0
         boxPaint.style = Paint.Style.FILL
         counterPaint.color = resources.getColor(R.color.md_theme_light_onPrimaryContainer)
 
-        boxPaint.color = resources.getColor(R.color.md_theme_light_primaryContainer)
-        counterPaint.setTextSize(20F)
+        boxPaint.color = resources.getColor(R.color.light_pink)
+        counterPaint.textSize = 35F
         if (exerciseCompleted) {
-            counterPaint.setTextSize(30F)
-            canvas.drawRoundRect(30f, 20f, 400f, 70f, 20f, 20f, boxPaint)
+            counterPaint.textSize = 30F
+            canvas.drawRoundRect(30f, 20f, 550f, 70f, 20f, 20f, boxPaint)
             canvas.drawText("Übung abgeschlossen", 50F, 55F, counterPaint)
         } else {
-            canvas.drawRoundRect(30f, 20f, 400f, 60f, 20f, 20f, boxPaint)
-            canvas.drawText("Wiederholungen: $counterFinger / $repetitions, Sets: $setsCompleted / $sets", 50F, 45F, counterPaint)
+            canvas.drawRoundRect(30f, 15f, 600f, 60f, 20f, 20f, boxPaint)
+            canvas.drawText("Wiederholungen: $counterFinger / $repetitions, Sätze: $setsCompleted / $sets", 50F, 45F, counterPaint)
         }
 
         if(showInfo) {
-            counterPaint.setTextSize(20F)
-            canvas.drawRoundRect(30f, 80f, 500f, 190f, 20f, 20f, boxPaint)
+            counterPaint.textSize = 25F
+            canvas.drawRoundRect(30f, 80f, 600f, 190f, 20f, 20f, boxPaint)
             canvas.drawText("Übung: $exerciseName", 50F, 110F, counterPaint)
             canvas.drawText("Ausgewählte Hand: $selectedHandSide", 50F, 140F, counterPaint)
             if(startPositionHand != "") {
@@ -109,8 +118,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         results?.let { gestureRecognizerResult ->
             for(landmark in gestureRecognizerResult.landmarks()) {
                 for(normalizedLandmark in landmark) {
-                    numberPaint.setColor(Color.WHITE)
-                    numberPaint.setTextSize(20F)
+                    numberPaint.color = Color.WHITE
+                    numberPaint.textSize = 20F
                     canvas.drawPoint(
                         normalizedLandmark.x() * imageWidth * scaleFactor,
                         normalizedLandmark.y() * imageHeight * scaleFactor,
@@ -136,6 +145,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
+    // übernommen von:
+    // https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
     fun setResults(
         gestureRecognizerResult: GestureRecognizerResult,
         imageHeight: Int,
@@ -180,6 +191,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
         invalidate()
     }
+
 
     companion object {
         private const val LANDMARK_STROKE_WIDTH = 8F

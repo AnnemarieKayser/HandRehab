@@ -16,26 +16,46 @@ import splitties.toast.toast
 
 class LoginTabFragment: Fragment() {
 
-/*
-  =============================================================
-  =======                   Variablen                   =======
-  =============================================================
-*/
+
+    /*
+      ======================================================================================
+      ==========================           Einleitung             ==========================
+      ======================================================================================
+      Projektname: HandRehab
+      Autor: Annemarie Kayser
+      Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                 Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                 Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                 sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+      Letztes Update: 12.01.2024
+
+     ======================================================================================
+   */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - Der Nutzer kann sich mit einer E-Mail und einem Passwort einloggen
+      - Der Nutzer kann sein Passwort zurücksetzen
+
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
+
 
     private var _binding: LoginTabFragmentBinding? = null
     private val binding get() = _binding!!
 
-    // === Datenbank === //
+    // Datenbank
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
-
-/*
-  =============================================================
-  =======                                               =======
-  =======         onCreateView & onViewCreated          =======
-  =======                                               =======
-  =============================================================
-*/
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,34 +68,15 @@ class LoginTabFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // --- Animation beim Öffnen des Fragments --- //
-        binding.email.translationX = 800F
-        binding.password.translationX = 800F
-        binding.buttonLogin.translationX = 800F
-        binding.textViewPasswortVergessen.translationX = 800F
 
-        binding.email.alpha = 0F
-        binding.password.alpha = 0F
-        binding.buttonLogin.alpha =0F
-        binding.textViewPasswortVergessen.alpha = 0F
-
-        binding.email.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(300).start()
-        binding.password.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(500).start()
-        binding.buttonLogin.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(500).start()
-        binding.textViewPasswortVergessen.animate().translationX(0F).alpha(1F).setDuration(800).setStartDelay(700).start()
-
-
-        // --- E-Mail und Passwort werden eingelesen und an die signIn-Funktion übergeben --- //
+        // E-Mail und Passwort werden eingelesen und an die signIn-Funktion übergeben
         binding.buttonLogin.setOnClickListener {
-            val email : String
-            val password : String
 
-            email = binding.email.text.toString()
-            password = binding.password.text.toString()
+            val email : String = binding.email.text.toString()
+            val password : String = binding.password.text.toString()
             signIn(email, password)
         }
 
-        // --- Passwort zurücksetzen --- //
         binding.textViewPasswortVergessen.setOnClickListener {
             sendResetPw()
         }
@@ -89,7 +90,7 @@ class LoginTabFragment: Fragment() {
   =============================================================
 */
 
-    // === validateForm === //
+
     // Überprüfen, ob E-Mail und Passwort eingegeben wurden
     private fun validateForm(email: String, password: String): Boolean {
         var valid = true
@@ -107,7 +108,7 @@ class LoginTabFragment: Fragment() {
         return valid
     }
 
-    // === signIn === //
+
     private fun signIn(email: String, password: String) {
 
         // Überprüfen, ob E-mail und Passwort eingegeben wurden
@@ -122,8 +123,8 @@ class LoginTabFragment: Fragment() {
                     if (mFirebaseAuth.currentUser!!.isEmailVerified) {
                          toast(R.string.login_success)
                         // Starten der MainActivity
-                        val intent = Intent (getActivity(), MainActivity::class.java)
-                        getActivity()?.startActivity(intent)
+                        val intent = Intent (activity, MainActivity::class.java)
+                        activity?.startActivity(intent)
                     } else {
                         toast(R.string.reminder_verify)
                     }
@@ -133,7 +134,7 @@ class LoginTabFragment: Fragment() {
             }
     }
 
-    // === sendResetPw === //
+
     private fun sendResetPw() {
 
         // AlertDialog mit Eingabefeld
@@ -159,7 +160,7 @@ class LoginTabFragment: Fragment() {
         }
     }
 
-    // === sendMail === //
+
     // Versenden einer Mail, um das Passwort zurückzusetzen
     private fun sendMail(mail: String) {
         mFirebaseAuth.sendPasswordResetEmail(mail)

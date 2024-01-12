@@ -4,7 +4,7 @@
     tools:context="com.example.handrehab.MainActivity">
     <item
         android:id="@+id/app_bar_switch"
-        android:icon="@drawable/ic_info"
+        android:icon="@drawable/ic_info_purple"
         android:title="@string/toggle_button_show_info"
         app:showAsAction="always" />
 

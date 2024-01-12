@@ -8,22 +8,22 @@ import androidx.fragment.app.FragmentPagerAdapter
 
 class MyAdapter(private val myContext: Context, fm: FragmentManager, internal var totalTabs: Int) : FragmentPagerAdapter(fm) {
 
-    // === getItem === //
+
     // Anzeige des ausgewählten Tabs
     override fun getItem(position: Int): Fragment {
-        when (position) {
+        return when (position) {
             0 -> {
-                return SigninTabFragment()
-            }
-            1 -> {
-                return LoginTabFragment()
+                SigninTabFragment()
             }
 
-            else -> return LoginTabFragment()
+            1 -> {
+                LoginTabFragment()
+            }
+
+            else -> LoginTabFragment()
         }
     }
 
-    // === getCount === //
     // Dies zählt die Gesamtzahl der Tabs
     override fun getCount(): Int {
         return totalTabs

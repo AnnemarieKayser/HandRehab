@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.handrehab.databinding.FragmentPlannerBinding
 import com.example.handrehab.item.Datasource
@@ -19,7 +18,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import splitties.toast.toast
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -29,10 +27,42 @@ import java.util.Locale
 
 class PlannerFragment : Fragment() {
 
+
+    /*
+       ======================================================================================
+       ==========================           Einleitung             ==========================
+       ======================================================================================
+       Projektname: HandRehab
+       Autor: Annemarie Kayser
+       Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                  Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                  Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                  sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+       Letztes Update: 12.01.2024
+
+      ======================================================================================
+    */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - In diesem Fragment kann der Nutzer einen individuellen Wochenplan erstellen
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
+
+
     private var _binding: FragmentPlannerBinding? = null
     private val binding get() = _binding!!
 
-    // === ListView === //
+    // ListView Layout Manager
     private lateinit var layoutManagerMonday : LinearLayoutManager
     private lateinit var layoutManagerTuesday : LinearLayoutManager
     private lateinit var layoutManagerWednesday : LinearLayoutManager
@@ -41,12 +71,11 @@ class PlannerFragment : Fragment() {
     private lateinit var layoutManagerSaturday : LinearLayoutManager
     private lateinit var layoutManagerSunday : LinearLayoutManager
 
-    private lateinit var adapter : RecyclerAdapter
-
+    // ListView Arrays
     private var listExercises = arrayListOf<Exercises>()
     private var listExercisesMonday = arrayListOf<Exercises>()
     private var listExercisesTuesday = arrayListOf<Exercises>()
-    private var listExercisesWednesay = arrayListOf<Exercises>()
+    private var listExercisesWednesday = arrayListOf<Exercises>()
     private var listExercisesThursday = arrayListOf<Exercises>()
     private var listExercisesFriday = arrayListOf<Exercises>()
     private var listExercisesSaturday = arrayListOf<Exercises>()
@@ -54,14 +83,12 @@ class PlannerFragment : Fragment() {
 
     private lateinit var checkedItems : BooleanArray
     private var items = arrayListOf<String>()
-
     private val listSelected = arrayListOf<Int>()
     private val listStringSelected = arrayListOf<String>()
-
-
+    private lateinit var adapter : RecyclerAdapter
     private val viewModel: MainViewModel by activityViewModels()
 
-    // === Datenbank === //
+    // Datenbank
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private var dbList = ArrayList <DataWeekPlanner> ()
@@ -78,6 +105,8 @@ class PlannerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+        // Initialisierung der Layout Manager für jede Liste
         layoutManagerMonday = LinearLayoutManager(activity)
         layoutManagerTuesday = LinearLayoutManager(activity)
         layoutManagerWednesday = LinearLayoutManager(activity)
@@ -104,18 +133,22 @@ class PlannerFragment : Fragment() {
 
         checkedItems = BooleanArray(Datasource().loadItems().size)
 
+
+        // Laden des Wochenplans aus der Datenbank
         loadDbData()
 
-        binding.imageButtonMonday.setOnClickListener {
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
+        binding.imageButtonMonday.setOnClickListener {
 
             items.clear()
             viewModel.setSelectedDay("monday")
             checkedItems = BooleanArray(Datasource().loadItems().size)
             listStringSelected.clear()
 
+
             for((counter,i) in Datasource().loadItems().withIndex()){
-                if(!(i.checked)) items.add(i.textItem)
+                items.add(i.textItem)
                 for(k in listExercisesMonday){
                     if(k == i) {
                         checkedItems[counter] = true
@@ -147,8 +180,11 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
+
+                        // Aktualisieren der Übungen
                         adapter = RecyclerAdapter(listExercisesMonday, "Main", viewModel.getExerciseListMode()!!)
                         binding.recyclerViewMonday.adapter = adapter
+                        // Speichern der ausgewählten Übungen
                         saveList()
 
                     }
@@ -156,6 +192,7 @@ class PlannerFragment : Fragment() {
             }
         }
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
         binding.imageButtonTuesday.setOnClickListener {
 
             viewModel.setSelectedDay("tuesday")
@@ -196,9 +233,10 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
-
+                        // Aktualisieren der Übungen
                         adapter = RecyclerAdapter(listExercisesTuesday, "Main", viewModel.getExerciseListMode()!!)
                         binding.recyclerViewTuesday.adapter = adapter
+                        // Speichern der ausgewählten Übungen
                         saveList()
 
                     }
@@ -206,6 +244,7 @@ class PlannerFragment : Fragment() {
             }
         }
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
         binding.imageButtonWednesday.setOnClickListener {
 
             viewModel.setSelectedDay("wednesday")
@@ -215,7 +254,7 @@ class PlannerFragment : Fragment() {
 
             for((counter,i) in Datasource().loadItems().withIndex()){
                 items.add(i.textItem)
-                for(k in listExercisesWednesay){
+                for(k in listExercisesWednesday){
                     if(k == i) {
                         checkedItems[counter] = true
                         listStringSelected.add(k.textItem)
@@ -235,19 +274,21 @@ class PlannerFragment : Fragment() {
                     .setPositiveButton(R.string.dialog_OK) { dialog, which ->
 
                         listSelected.clear()
-                        listExercisesWednesay.clear()
+                        listExercisesWednesday.clear()
 
                         for(i in Datasource().loadItems()){
 
                             for(j in listStringSelected){
                                 if(i.textItem == j) {
                                     listSelected.add(i.id)
-                                    listExercisesWednesay.add(i)
+                                    listExercisesWednesday.add(i)
                                 }
                             }
                         }
-                        adapter = RecyclerAdapter(listExercisesWednesay, "Main", viewModel.getExerciseListMode()!!)
+                        // Aktualisieren der Übungen
+                        adapter = RecyclerAdapter(listExercisesWednesday, "Main", viewModel.getExerciseListMode()!!)
                         binding.recyclerViewWednesday.adapter = adapter
+                        // Speichern der Übungen
                         saveList()
 
                     }
@@ -255,6 +296,7 @@ class PlannerFragment : Fragment() {
             }
         }
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
         binding.imageButtonThursday.setOnClickListener {
 
             viewModel.setSelectedDay("thursday")
@@ -295,8 +337,10 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
+                        // Aktualisieren der Übungen
                         adapter = RecyclerAdapter(listExercisesThursday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewThursday.adapter = adapter
+                        // Speichern der Übungen
                         saveList()
 
                     }
@@ -304,6 +348,7 @@ class PlannerFragment : Fragment() {
             }
         }
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
         binding.imageButtonFriday.setOnClickListener {
 
             viewModel.setSelectedDay("friday")
@@ -344,8 +389,10 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
+                        // Aktualisieren der Übungen
                         adapter = RecyclerAdapter(listExercisesFriday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewFriday.adapter = adapter
+                        // Speichern der Übungen
                         saveList()
 
                     }
@@ -353,6 +400,7 @@ class PlannerFragment : Fragment() {
             }
         }
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
         binding.imageButtonSaturday.setOnClickListener {
 
             viewModel.setSelectedDay("saturday")
@@ -393,8 +441,10 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
+                        // Aktualisieren der Übungen
                         adapter = RecyclerAdapter(listExercisesSaturday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewSaturday.adapter = adapter
+                        // Speichern der Übungen
                         saveList()
 
                     }
@@ -402,6 +452,7 @@ class PlannerFragment : Fragment() {
             }
         }
 
+        // Öffnen eines AlertDialogs, in dem Übungen ausgewählt werden können
         binding.imageButtonSunday.setOnClickListener {
 
             viewModel.setSelectedDay("sunday")
@@ -442,8 +493,10 @@ class PlannerFragment : Fragment() {
                                 }
                             }
                         }
+                        // Aktualisieren der Übungen
                         adapter = RecyclerAdapter(listExercisesSunday, "Main",  viewModel.getExerciseListMode()!!)
                         binding.recyclerViewSunday.adapter = adapter
+                        // Speichern der Übungen
                         saveList()
 
                     }
@@ -451,13 +504,8 @@ class PlannerFragment : Fragment() {
             }
         }
 
-
-
-
-
     }
 
-    // === loadDbData === //
     // Einlesen der Daten aus der Datenbank
     private fun loadDbData() {
 
@@ -466,14 +514,13 @@ class PlannerFragment : Fragment() {
         listExercisesSunday.clear()
         listExercisesFriday.clear()
         listExercisesSaturday.clear()
-        listExercisesWednesay.clear()
+        listExercisesWednesday.clear()
         listExercisesMonday.clear()
         listExercisesTuesday.clear()
         listExercisesThursday.clear()
         listExercises.clear()
 
 
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DataWeekPlanner")
             .get()
@@ -489,19 +536,19 @@ class PlannerFragment : Fragment() {
     }
 
     private fun updateListView(task: Task<QuerySnapshot>) {
-        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
 
-        // Diese for schleife durchläuft alle Documents der Abfrage
+        // Diese for-Schleife durchläuft alle Dokumente der Abfrage
         for (document in task.result!!) {
             (dbList).add(document.toObject(DataWeekPlanner::class.java))
-            Log.d("Daten", document.id + " => " + document.data)
         }
 
+        // Aktuelles Datum abfragen
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("EEEE", Locale.ENGLISH)
 
         val day = format.format(calendar.time).lowercase()
 
+        // Übungen des aktuellen Tags im viewModel speichern
         for(i in dbList) {
             when (i.getDay()) {
                 day -> {
@@ -522,6 +569,8 @@ class PlannerFragment : Fragment() {
 
 
 
+        // Übungen zu den jeweiligen Tagen zuordnen
+        // Aktualisierung der Listen
         for(i in dbList){
 
             when(i.getDay()){
@@ -555,11 +604,11 @@ class PlannerFragment : Fragment() {
 
                         for(k in i.getListExercises()){
                             if(k == j.id) {
-                                listExercisesWednesay.add(j)
+                                listExercisesWednesday.add(j)
                             }
                         }
                     }
-                    adapter = RecyclerAdapter(listExercisesWednesay, "Main",  viewModel.getExerciseListMode()!!)
+                    adapter = RecyclerAdapter(listExercisesWednesday, "Main",  viewModel.getExerciseListMode()!!)
                     binding.recyclerViewWednesday.adapter = adapter
                 }
                 "thursday" -> {
@@ -620,6 +669,7 @@ class PlannerFragment : Fragment() {
     }
 
 
+    // Speichern der Übungen
     @SuppressLint("SimpleDateFormat")
     private fun saveList() {
 
@@ -636,16 +686,14 @@ class PlannerFragment : Fragment() {
             e.printStackTrace()
         }
 
-        //Data Objekt mit Daten befüllen (ID wird automatisch ergänzt)
+        //DataWeekPlanner-Objekt mit Daten befüllen (ID wird automatisch ergänzt)
         val data = DataWeekPlanner()
         data.setDate(datetimestamp!!)
         data.setListExercises(listSelected)
         data.setDay(viewModel.getSelectedDay()!!)
 
 
-        // Schreibe Daten als Document in die Collection Messungen in DB;
         // Eine id als Document Name wird automatisch vergeben
-        // Implementiere auch onSuccess und onFailure Listender
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DataWeekPlanner").document(viewModel.getSelectedDay()!!)
             .set(data)

@@ -31,28 +31,65 @@ import java.util.Date
 
 class DataFragment : Fragment() {
 
+
+    /*
+      ======================================================================================
+      ==========================           Einleitung             ==========================
+      ======================================================================================
+      Projektname: HandRehab
+      Autor: Annemarie Kayser
+      Anwendung: Dies ist eine App-Anwendung für die Handrehabilitation nach einem Schlaganfall.
+                 Es werden verschiedene Übungen für die linke als auch für die rechte Hand zur
+                 Verfügung gestellt. Zudem kann ein individueller Wochenplan erstellt
+                 sowie die Daten zu den durchgeführten Übungen eingesehen werden.
+      Letztes Update: 12.01.2024
+
+     ======================================================================================
+   */
+
+
+    /*
+      =============================================================
+      =======                    Funktion                   =======
+      =============================================================
+
+      - In diesem Fragment werden die Ergebnisse der durchgeführten Übungen dargestellt
+      - In einem Graphen wird die Anzahl an absolvierten Übungen für jeden Tag angezeigt
+      - In dem Graphen wird ebenfalls das festgelegte Tagesziel an Übungen angezeigt
+      - In einer Liste werden die Details zu den Übungen dargestellt
+      - Es kann ein Ziel an Übungen eingestellt werden, dass der Nutzer täglich erreichen möchte
+
+
+    */
+
+    /*
+      =============================================================
+      =======                   Variablen                   =======
+      =============================================================
+    */
+
     private var _binding: FragmentDataBinding? = null
     private val binding get() = _binding!!
 
     // Datum
     private var date = ""
 
-    // ListView
-    private var dbList = ArrayList <Any> ()
-    private var dbListGoals = ArrayList <Any> ()
-    private lateinit var adapter : ArrayAdapter<String>
-
-    // === Firebase database === //
+    // Firebase Datenbank
     private val db : FirebaseFirestore by lazy { FirebaseFirestore.getInstance()  }
     private val mFirebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private var data: Data? = null
+    private var dbList = ArrayList <Any> ()
+    private var dbListGoals = ArrayList <Any> ()
 
-    // === Graph === //
+    // Graph
     private var aaChartModel = AAChartModel()
     private var arrayWeekDays = arrayOfNulls<Any>(7)
     private var arrayWeekGoal = arrayOfNulls<Any>(7)
+    // Start der Wochenanzeige an einem Sonntag im Graphen
+    private lateinit var dateSunday: String
+    private var arrayDays = arrayOf("", "", "", "", "", "", "")
 
-    // === week days === //
+    // Variablen für Graphen
+    // Variablen für die durchgeführten Übungen für jeden Wochentag
     private var monday = 0
     private var thuesday = 0
     private var wednesday = 0
@@ -60,28 +97,23 @@ class DataFragment : Fragment() {
     private var friday = 0
     private var saturday = 0
     private var sunday = 0
-    private var counterWeeksSunday = 0
-    private var counterWeeksMonday = 0
 
-    // === goals === //
+    // Variablen für das festgelegte Ziel an Übungen für jeden Wochentag
     private var mondayGoal = 0
-    private var thuesdayGoal = 0
+    private var tuesdayGoal = 0
     private var wednesdayGoal = 0
     private var thursdayGoal = 0
     private var fridayGoal = 0
     private var saturdayGoal = 0
     private var sundayGoal = 0
 
-    private lateinit var dateMonday: String
-    private lateinit var dateThuesday: String
-    private var arrayDays = arrayOf("", "", "", "", "", "", "")
+    // Variablen für das Ändern der angezeigten Woche
+    private var counterWeeksSunday = 0
+    private var counterWeeksMonday = 0
 
-    // === Circular-Progress-Bar === //
+    // Circular-Progress-Bar
     private var maxProgressBar = 0F
-    private var progress: Float = 0F
-
     private var goal = 0f
-
     private var counterDate = 0
 
 
@@ -97,9 +129,11 @@ class DataFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
+        // Wechsel zwischen den Wochen im Graphen
         binding.imageButtonBefore.setOnClickListener {
             counterWeeksMonday+= 7
             counterWeeksSunday += 1
+            // Daten zu der jeweiligen Woche laden
             loadDbData()
         }
 
@@ -107,21 +141,23 @@ class DataFragment : Fragment() {
             if(counterWeeksSunday != 0 && counterWeeksMonday != 0) {
                 counterWeeksMonday -= 7
                 counterWeeksSunday -= 1
+                // Daten zu der jeweiligen Woche laden
                 loadDbData()
             } else {
                 toast(getString(R.string.currentDate))
             }
         }
 
+        // Speichern der Eingabe für ein tägliches Ziel
         binding.ButtonSave.setOnClickListener {
 
             if(binding.EditTextSetGoal.text.toString() != "") {
                 goal = binding.EditTextSetGoal.text.toString().toFloatOrNull()!!
                 binding.textViewExercises.text =
                     getString(R.string.text_view_exercises_done, counterDate, goal.toInt())
+
                 // Aktualisierung der Anzeige
                 // https://github.com/lopspower/CircularProgressBar
-
                 binding.circularProgressBarData.apply {
                     progressMax = goal
                 }
@@ -131,8 +167,8 @@ class DataFragment : Fragment() {
             }
         }
 
-        // --- Konfiguration CircularProgressBar --- //
-        // Anzeige des Fortschritts mit gerader Haltung
+        // Konfiguration der CircularProgressBar
+        // Anzeige des Fortschritts der durchgeführten Übungen
         // https://github.com/lopspower/CircularProgressBar
         binding.circularProgressBarData.apply {
             // Progress Max
@@ -157,32 +193,37 @@ class DataFragment : Fragment() {
             progressDirection = CircularProgressBar.ProgressDirection.TO_RIGHT
         }
 
-
-
-
+        // Aktuelle Zielanzahl aus der Datenbank laden
         loadGoal()
-
     }
+
+    /*
+     =============================================================
+     =======                   Funktionen                  =======
+     =============================================================
+   */
+
+
+    // Speichern des festgelegten Ziels an Übungen pro Tag
     private fun saveGoal() {
 
-        //Data Objekt mit Daten befüllen (ID wird automatisch ergänzt)
+        //DataGoal Objekt mit Daten befüllen (ID wird automatisch ergänzt)
         val data = DataGoal()
 
         data.setGoalExercises(goal)
 
-        // --- Initialisierung und Konfiguration des Graphen --- //
+        // Einlesen des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("dd.MM.yyyy")
-        var date = format.format(calendar.time)
+        val date = format.format(calendar.time)
+        // Anpassen des Bereich der Tage (1-7) auf den Bereich des Graphen (0-6)
         val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
         data.setDate(format.parse(date) as Date)
         data.setDayOfWeek(day)
 
 
-        // Schreibe Daten als Document in die Collection Messungen in DB;
         // Eine id als Document Name wird automatisch vergeben
-        // Implementiere auch onSuccess und onFailure Listender
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenGoal").document(date)
             .set(data)
@@ -194,19 +235,17 @@ class DataFragment : Fragment() {
             }
     }
 
-    // === loadMinMax === //
-    // Einlesen der Daten aus der Datenbank
+
+    // Einlesen des festgelegten Ziels an dem aktuellen Tag aus der Datenbank
     private fun loadGoal() {
 
         var data: DataGoal?
 
-        // --- Initialisierung und Konfiguration des Graphen --- //
+        // Einlesen des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("dd.MM.yyyy")
         val date = format.format(calendar.time)
 
-
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenGoal")
             .document(date)
@@ -218,6 +257,7 @@ class DataFragment : Fragment() {
 
                     if (data != null) {
                         goal = data!!.getGoalExercises()
+
                         // Aktualisierung der Anzeige
                         // https://github.com/lopspower/CircularProgressBar
                         binding.circularProgressBarData.apply {
@@ -229,34 +269,12 @@ class DataFragment : Fragment() {
                         binding.textViewExercises.text = getString(R.string.text_view_exercises_done,0 , 0)
                     }
 
-                    // --- Initialisierung und Konfiguration des Graphen --- //
-                    val calendar = Calendar.getInstance()
-                    val format = SimpleDateFormat("dd.MM.yyyy")
-                    dateMonday = format.format(calendar.time)
-                    dateThuesday = format.format(calendar.time)
-
-                    val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
 
-                    calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
-
-
-                    for(i in 0 until 7) {
-
-                        //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
-
-
-                        val date1 = format.format(calendar.time)
-
-                        arrayDays[i] = date1
-
-                        calendar.add(Calendar.DAY_OF_WEEK, + 1)
-
-                    }
-
-                    setUpAAChartView()
-
+                    // Nachdem das Ziel geladen wurde, sollen anschließend die Daten
+                    // zu den durchgeführten Übungen geladen werden für die aktuelle Woche
                     loadDbData()
+
                 } else {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
@@ -265,16 +283,13 @@ class DataFragment : Fragment() {
     }
 
 
-
-
-    // === setUpAAChartView === //
     // https://github.com/AAChartModel/AAChartCore-Kotlin
-    fun setUpAAChartView() {
+    private fun setUpAAChartView() {
         aaChartModel = configureAAChartModel()
         binding.chartView.aa_drawChartWithChartModel(aaChartModel)
     }
 
-    // === configureAAChartModel === //
+
     // https://github.com/AAChartModel/AAChartCore-Kotlin
     private fun configureAAChartModel(): AAChartModel {
         val aaChartModel = configureChartBasicContent()
@@ -282,7 +297,6 @@ class DataFragment : Fragment() {
         return aaChartModel
     }
 
-    // === configureChartBasicContent === //
     // https://github.com/AAChartModel/AAChartCore-Kotlin
     private fun configureChartBasicContent(): AAChartModel {
 
@@ -303,7 +317,7 @@ class DataFragment : Fragment() {
             .build()
     }
 
-    // === configureChartSeriesArray === //
+
     // Initialisierung Datentyp und Kategorien
     // https://github.com/AAChartModel/AAChartCore-Kotlin
     private fun configureChartSeriesArray(): Array<AASeriesElement> {
@@ -318,10 +332,10 @@ class DataFragment : Fragment() {
         )
     }
 
-    // === loadDbData === //
     // Einlesen der Daten aus der Datenbank
     private fun loadDbData() {
 
+        // Daten zurücksetzen, für den Fall, wenn die Woche geändert wird
         dbList.clear()
 
         monday = 0; thuesday = 0; wednesday = 0; thursday = 0; friday = 0; saturday = 0; sunday = 0;
@@ -330,23 +344,21 @@ class DataFragment : Fragment() {
             arrayWeekDays[i] = 0
         }
 
-        //val seriesArr = configureChartSeriesArray()
-     //   binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
-
+        // Abrufen des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("dd.MM.yyyy")
 
+        // Anpassen des Bereich der Tage (1-7) auf den Bereich des Graphen (0-6)
         val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
+        // Anpassen des Kalenders auf die ausgewählte Woche
         calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
 
-        dateMonday = format.format(calendar.time)
+        // Datum am Anfang der ausgewählten Woche
+        dateSunday = format.format(calendar.time)
+        val dateSundayNew = format.parse(dateSunday) as Date
 
-        val dateMondayNew = format.parse(dateMonday) as Date
-
-        //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
-
-
+        // Aktuelle Daten der Woche zu Array für Anzeige im Graphen hinzufügen
         for(i in 0 until 7) {
 
             val date = format.format(calendar.time)
@@ -354,21 +366,21 @@ class DataFragment : Fragment() {
             arrayDays[i] = date
 
             calendar.add(Calendar.DAY_OF_WEEK, + 1)
-
         }
 
+        // Aktualisierung der Konfiguration des Graphen
         setUpAAChartView()
 
         calendar.add(Calendar.DAY_OF_WEEK, - 1)
 
-        val dateSunday: Date = calendar.time
+        // Datum am Ende der ausgewählten Woche
+        val dateSaturday: Date = calendar.time
 
 
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("Daten")
-            .whereGreaterThanOrEqualTo("date", dateMondayNew) // abrufen
-            .whereLessThanOrEqualTo("date", dateSunday)
+            .whereGreaterThanOrEqualTo("date", dateSundayNew) // abrufen
+            .whereLessThanOrEqualTo("date", dateSaturday)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -378,54 +390,55 @@ class DataFragment : Fragment() {
                     Log.d(ContentValues.TAG, "FEHLER: Daten lesen ", task.exception)
                 }
             }
-
     }
 
+    // Auslesen der Daten aus der Datenbank
+    // Aktualisierung der Liste
+    // Aktualisierung der CircularProgressBar
     private fun updateListView(task: Task<QuerySnapshot>) {
-        // Einträge in dbList kopieren, um sie im ListView anzuzeigen
+
+        // Aktuelles Datum
         val zeitformat = SimpleDateFormat("dd.MMMM yyyy")
         val calendar = Calendar.getInstance()
         val currentDate = zeitformat.parse(zeitformat.format(calendar.time)) as Date
         var dateCompare = zeitformat.parse(zeitformat.format(calendar.time)) as Date
         counterDate = 0
 
-
+        // Datum zu Liste hinzufügen
         if(task.result!!.size() > 0 ) {
             date = zeitformat.format(task.result!!.first().toObject(Data::class.java).getDate()!!)
             dateCompare = zeitformat.parse(zeitformat.format(task.result!!.first().toObject(Data::class.java).getDate()!!)) as Date
             dbList.add("$date")
         }
 
-        // Diese for schleife durchläuft alle Documents der Abfrage
+        // Diese for Schleife durchläuft alle Dokumente der Abfrage
+        // Einträge werden in dbList geschrieben, um sie im ListView anzuzeigen
+        // Datum wird zu der Liste hinzugefügt und anschließend die Daten zu den
+        // durchgeführten Übungen an diesem Tag
         for (document in task.result!!) {
 
+            // Datum zu Liste hinzufügen, wenn noch nicht vorhanden
             if((zeitformat.parse(zeitformat.format(document.toObject(Data::class.java).getDate()!!)) as Date) > dateCompare) {
                 dbList.add(zeitformat.format(document.toObject(Data::class.java).getDate()!!))
             }
 
-            // date neu zuweisen
+            // Datum neu zuweisen
             dateCompare = zeitformat.parse(zeitformat.format(document.toObject(Data::class.java).getDate()!!)) as Date
 
 
+            // Anzahl der Übungen an dem aktuellen Tag zählen für die Anzeige in der CircularProgressBar
             if(document.toObject(Data::class.java).getDate()!! >= currentDate) {
                 counterDate++
             }
 
             (dbList).add(document.toObject(Data::class.java))
-             Log.d("Daten", document.id + " => " + document.data)
         }
 
-        // jetzt liegt die vollständige Liste vor und
-        // kann im ListView angezeigt werden
 
         // Adapter für den ListView
-        val adapter = ArrayAdapter(requireContext(),
-            R.layout.layout_list_view, R.id.textView,  // Layout zur Darstellung der ListItems
-            dbList)
-
+        val adapter = ArrayAdapter(requireContext(), R.layout.layout_list_view, R.id.textView, dbList)
+        // Aktualisierung der Anzeige
         binding.listViewData.adapter = adapter
-
-
 
         binding.textViewExercises.text = getString(R.string.text_view_exercises_done, counterDate, goal.toInt())
 
@@ -436,12 +449,10 @@ class DataFragment : Fragment() {
         dataToGraph(dbList)
     }
 
+    // Anzeige der durchgeführten Übungen im Graphen
     private fun dataToGraph(data: ArrayList<Any>) {
 
-
-
         for(i in data){
-
 
             if(i::class.simpleName != "String") {
 
@@ -487,64 +498,54 @@ class DataFragment : Fragment() {
         arrayWeekDays[5] = friday
         arrayWeekDays[6] = saturday
 
-      //  val seriesArr = configureChartSeriesArray()
-       // binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
 
+        // Laden der festgelegten Ziele an Übungen für jeden Tag der ausgewählten Woche
         loadDbGoalWeek()
     }
 
-    // === loadDbData === //
-    // Einlesen der Daten aus der Datenbank
+
+    // Einlesen der festgelegten Ziele an Übungen an jedem Tag
+    // der ausgewählten Woche aus der Datenbank
     private fun loadDbGoalWeek() {
 
+        // Daten zurücksetzen, für den Fall, wenn die Woche geändert wird
         dbListGoals.clear()
 
-        mondayGoal = 0; thuesdayGoal = 0; wednesdayGoal = 0; thursdayGoal = 0; fridayGoal = 0; saturdayGoal = 0; sundayGoal = 0;
+        mondayGoal = 0; tuesdayGoal = 0; wednesdayGoal = 0; thursdayGoal = 0; fridayGoal = 0; saturdayGoal = 0; sundayGoal = 0;
 
         for (i in 0 until 7) {
             arrayWeekGoal[i] = 0
         }
 
-        //val seriesArr = configureChartSeriesArray()
-      //  binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
-
+        // Einlesen des aktuellen Datums
         val calendar = Calendar.getInstance()
         val format = SimpleDateFormat("dd.MM.yyyy")
-
+        // Anpassen des Bereich der Tage (1-7) auf den Bereich des Graphen (0-6)
         val day = calendar.get(Calendar.DAY_OF_WEEK) - 1
 
+        // Anpassen des Kalenders auf die ausgewählte Woche
         calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
 
-        dateMonday = format.format(calendar.time)
-
-        val dateMondayNew = format.parse(dateMonday) as Date
-
-        //calendar.add(Calendar.DAY_OF_WEEK, - (day + counterWeeksMonday))
+        // Datum am Anfang der ausgewählten Woche
+        dateSunday = format.format(calendar.time)
+        val dateSundayNew = format.parse(dateSunday) as Date
 
 
+        // Aktuelle Daten der Woche zu Array für Anzeige im Graphen hinzufügen
         for(i in 0 until 7) {
-
-            val date = format.format(calendar.time)
-
-            arrayDays[i] = date
-
             calendar.add(Calendar.DAY_OF_WEEK, + 1)
-
         }
-
-        setUpAAChartView()
 
         calendar.add(Calendar.DAY_OF_WEEK, - 1)
 
-        val dateSunday: Date = calendar.time
+        // Datum am Ende der ausgewählten Woche
+        val dateSaturday: Date = calendar.time
 
 
-
-        // Einstiegspunkt für die Abfrage ist users/uid/date/Daten
         val uid = mFirebaseAuth.currentUser!!.uid
         db.collection("users").document(uid).collection("DatenGoal")
-            .whereGreaterThanOrEqualTo("date", dateMondayNew) // abrufen
-            .whereLessThanOrEqualTo("date", dateSunday)
+            .whereGreaterThanOrEqualTo("date", dateSundayNew) // abrufen
+            .whereLessThanOrEqualTo("date", dateSaturday)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -557,17 +558,15 @@ class DataFragment : Fragment() {
 
     }
 
+    // Anzeige der festgelegten Ziele an Übungen im Graphen
     private fun updateGraph(task: Task<QuerySnapshot>) {
 
-        // Diese for schleife durchläuft alle Documents der Abfrage
+        // Diese for-Schleife durchläuft alle Dokumente der Abfrage
         for (document in task.result!!) {
-
             (dbListGoals).add(document.toObject(DataGoal::class.java))
-            Log.d("Daten", document.id + " => " + document.data)
         }
 
         for(i in dbListGoals){
-
 
             if(i::class.simpleName != "String") {
 
@@ -581,7 +580,7 @@ class DataFragment : Fragment() {
                     }
 
                     2 -> {
-                        thuesdayGoal = i.getGoalExercises().toInt()
+                        tuesdayGoal = i.getGoalExercises().toInt()
                     }
 
                     3 -> {
@@ -607,17 +606,17 @@ class DataFragment : Fragment() {
 
         arrayWeekGoal[0] = sundayGoal
         arrayWeekGoal[1] = mondayGoal
-        arrayWeekGoal[2] = thuesdayGoal
+        arrayWeekGoal[2] = tuesdayGoal
         arrayWeekGoal[3] = wednesdayGoal
         arrayWeekGoal[4] = thursdayGoal
         arrayWeekGoal[5] = fridayGoal
         arrayWeekGoal[6] = saturdayGoal
 
+        // Aktualisierung des Graphen mit den geladenen Werten
+        // https://github.com/AAChartModel/AAChartCore-Kotlin
         val seriesArr = configureChartSeriesArray()
         binding.chartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(seriesArr)
     }
-
-
 
 
     override fun onDestroyView() {
