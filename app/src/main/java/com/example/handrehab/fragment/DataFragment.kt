@@ -308,7 +308,6 @@ class DataFragment : Fragment() {
             .setBackgroundColor(R.color.background)
             .setAxesTextColor("#291521")
             .setCategories(arrayDays[0], arrayDays[1], arrayDays[2],arrayDays[3],arrayDays[4],arrayDays[5],arrayDays[6])
-            .setYAxisMax(30f)
             .setYAxisTitle(R.string.chart_title_y)
             .setScrollablePlotArea(
                 AAScrollablePlotArea()

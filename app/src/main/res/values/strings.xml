@@ -170,5 +170,5 @@
     <string name="tv_gauge_meter">Auf der unteren Hälfte des Bildschirms ist eine Messanzeige. Diese zeigt dir, wie weit du deinen Finger noch bewegen musst, damit eine Wiederholung gezählt wird.</string>
     <string name="tv_log_in">Logge dich nun mit deiner E-mail und deinem Passwort ein:</string>
     <string name="tv_video">Videoanleitung</string>
-    <string name="camera_fragment">CameraFragment</string>
+    <string name="camera_fragment"></string>
 </resources>

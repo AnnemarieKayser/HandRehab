@@ -212,7 +212,7 @@ class CameraFragment : Fragment(),
 
 
     // Aktuelle Phase
-    private var currentPhase = 1
+    private var currentPhase = 0
     private var phase = ""
 
     // Variable für die Anzeige der Infos auf dem Kamera Bildschirm
@@ -433,11 +433,22 @@ class CameraFragment : Fragment(),
     // Hier werden Klicks auf Elemente der Aktionsleiste behandelt
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
+        // Nummer der ausgewählte Übung zu Variablen zuweisen
+        val id = viewModel.getSelectedExercise()?.id
+
         return when (item.itemId) {
             R.id.app_bar_switch -> {
                 showInfo = !showInfo
 
-                if (showInfo) fragmentCameraBinding.halfGauge.visibility = VISIBLE
+                if (showInfo) {
+                    // Messanzeige wird auf der unteren Hälfte bei den Übungen, wo die Finger nur halb
+                    // geöffnet/geschlossen werden, ALle Finger gespreizt und ALle Finger geöfffnet/geschlossen
+                    // werden nicht angezeigt
+                    // https://github.com/Gruzer/simple-gauge-android/tree/master
+                    if (id == 2 ||  id == 13 || id == 15 || id == 16 || id == 17 || id == 18) {
+                        fragmentCameraBinding.halfGauge.visibility = GONE
+                    } else fragmentCameraBinding.halfGauge.visibility = VISIBLE
+                }
                 else fragmentCameraBinding.halfGauge.visibility = GONE
                 true
             }
@@ -781,11 +792,10 @@ class CameraFragment : Fragment(),
             12 -> phase = "Alle Finger sind halb geöffnet"
             13 -> phase = "Alle Finger sind halb geschlossen"
             14 -> phase = "Alle Finger sind geschlossen"
+            else -> phase = ""
         }
 
-        if(viewModel.getStartModus() == getString(R.string.start_mode_close) || viewModel.getStartModus() == getString(R.string.start_mode_open)){
-            data.setCurrentPhase(phase)
-        }
+        data.setCurrentPhase(phase)
 
         // Eine id als Document Name wird automatisch vergeben
         val uid = mFirebaseAuth.currentUser!!.uid
@@ -1071,8 +1081,12 @@ class CameraFragment : Fragment(),
             distMinMax = 0.008f
         }
 
-        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel
-        val threshold = pointingFingerMin + distMinMax / divideFactor
+        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel und
+        // der Startposition
+        val threshold = if(viewModel.getStartModus() == getString(R.string.start_mode_open)){
+            pointingFingerMax - distMinMax / divideFactor
+        } else pointingFingerMin + distMinMax / divideFactor
+
 
         //Hochzählen des Counters, wenn der Grenzwert wieder unterschritten wird
         if (d08 > threshold) {
@@ -1198,8 +1212,14 @@ class CameraFragment : Fragment(),
         if(distMinMax < 0.008){
             distMinMax = 0.008f
         }
-        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel
-        val threshold =  middleFingerMin + distMinMax / divideFactor
+
+        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel und
+        // der Startposition
+        val threshold = if(viewModel.getStartModus() == getString(R.string.start_mode_open)){
+            middleFingerMax - distMinMax / divideFactor
+        } else middleFingerMin + distMinMax / divideFactor
+
+
 
         //Hochzählen des Counters, wenn Grenzwert überschritten und wieder unterschritten wird
         if (dy012 > threshold) {
@@ -1324,8 +1344,13 @@ class CameraFragment : Fragment(),
         if(distMinMax < 0.008){
             distMinMax = 0.008f
         }
-        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel
-        val threshold =  ringFingerMin + distMinMax / divideFactor
+
+        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel und
+        // der Startposition
+        val threshold = if(viewModel.getStartModus() == getString(R.string.start_mode_open)){
+            ringFingerMax - distMinMax / divideFactor
+        } else ringFingerMin + distMinMax / divideFactor
+
 
         //Hochzählen des Counters, wenn Grenzwert wieder unterschritten wird
         if (dy016 > threshold) {
@@ -1449,8 +1474,12 @@ class CameraFragment : Fragment(),
         if(distMinMax < 0.008){
             distMinMax = 0.008f
         }
-        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel
-        val threshold =  littleFingerMin + distMinMax / divideFactor
+
+        // Berechnung eines Grenzwertes abhängig von dem ausgewählten Schwierigkeitslevel und
+        // der Startposition
+        val threshold = if(viewModel.getStartModus() == getString(R.string.start_mode_open)){
+            littleFingerMax - distMinMax / divideFactor
+        } else littleFingerMin + distMinMax / divideFactor
 
         //Hochzählen des Counters, wenn Grenzwert wieder unterschritten wird
         if (dy020 > threshold) {
@@ -1548,7 +1577,7 @@ class CameraFragment : Fragment(),
             if(viewModel.getStartModus() == getString(R.string.start_mode_open)) currentPhase = 14
         }
 
-        if (thumbHalfClosed && pointingFingerHalfClosed && ringFingerHalfClosed && littleFingerHalfClosed && middleFingerHalfClosed) {
+        if (pointingFingerHalfClosed && ringFingerHalfClosed && littleFingerHalfClosed && middleFingerHalfClosed) {
             allFingersHalfClosed = true
             // Abhängig von der Startpositon wird die Phase zugewiesen
             // wenn die Finger halb geöffnet/geschlossen sind
@@ -1567,7 +1596,7 @@ class CameraFragment : Fragment(),
             allFingersHalfClosed = false
         }
 
-        if (thumbOpen && pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen) {
+        if (pointingFingerOpen && middleFingerOpen && ringFingerOpen && littleFingerOpen) {
             allFingersOpen = true
             if(viewModel.getStartModus() == getString(R.string.start_mode_close)) {
                 currentPhase = 11 }
@@ -1849,7 +1878,6 @@ class CameraFragment : Fragment(),
                 middleFingerOpenClose(d09, d010, d011, d012)
                 ringFingerOpenClose(d013, d014, d015, d016)
                 littleFingerOpenClose(d017, d018, d19, d20)
-                thumbToPalm(gestureRecognizer)
                 allFingersCloseOpen()
             }
             15 -> {
