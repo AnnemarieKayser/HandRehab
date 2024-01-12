@@ -4,11 +4,12 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
+
+// Objekt für das Speichern der Daten in der Datenbank
+// Speichern der Daten zu einer durchgeführten Übung
 class Data {
     private var zeitformat = SimpleDateFormat("kk:mm")
-    private var counterExercises = 0
     private var dateTimestamp: Date? = null
     private var repetitions = 0
     private var sets = 0
@@ -23,7 +24,6 @@ class Data {
     // serverTimestamp soll automatisch vom Server gesetzt werden
     @ServerTimestamp
     private var serverTimestamp: Timestamp? = null
-
 
     fun getExerciseId(): Int {
         return exerciseId
@@ -57,7 +57,6 @@ class Data {
         this.max = Max
     }
 
-
     fun getDayOfWeek(): Int {
         return dayOfWeek
     }
@@ -74,13 +73,6 @@ class Data {
         this.dateTimestamp = Date
     }
 
-    fun getCounterExercises(): Int {
-        return counterExercises
-    }
-
-    fun setCounterExercises(counter: Int) {
-        this.counterExercises = counter
-    }
 
     fun getRepetitions(): Int {
         return repetitions
@@ -139,5 +131,4 @@ class Data {
                 "\nStartposition: " + startMode +
                 "\nAktuelle Phase: " + currentPhase
     }
-
 }

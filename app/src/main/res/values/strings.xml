@@ -1,49 +1,5 @@
 <resources>
     <string name="app_name">HandRehab</string>
-    <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="media_pipe">MediaPipe</string>
-
-    <string name="alt_bottom_sheet_chevron">Bottom sheet expandable indicator</string>
-
-    <string name="alt_bottom_sheet_max_results_button_minus">Decreasing
-        maximum recognized results button</string>
-    <string name="alt_bottom_sheet_max_results_button_plus">Increasing maximum recognized results
-        button</string>
-    <string name="alt_bottom_sheet_threshold_button_minus">Decreasing
-        threshold of recognized hand gesture results button</string>
-    <string name="alt_bottom_sheet_threshold_button_plus">Increasing
-        threshold of recognized hand gesture results button</string>
-    <string name="alt_bottom_sheet_thread_button_minus">Decrease the number of threads used</string>
-    <string name="alt_bottom_sheet_thread_button_plus">Increase the number of threads used</string>
-    <string name="menu_camera">Camera</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="tv_gallery_placeholder">Click + to add an image or a video
-        to begin running the gesture recognizer.</string>
-
-    <string name="label_inference_time">Inference Time</string>
-    <string name="label_fps">Frames per Second</string>
-    <string name="label_hand_detection_confidence_threshold">Detection
-        Threshold</string>
-    <string name="label_hand_tracking_confidence_threshold">Tracking
-        Threshold</string>
-    <string name="label_hand_presence_confidence_threshold">Presence
-        Threshold</string>
-    <string name="label_delegate">Delegate</string>
-    <string name="main_fragment">Hauptmenü</string>
-    <string name="camera_fragment"></string>
-
-    <string-array name="delegate_spinner_titles">
-        <item>CPU</item>
-        <item>GPU</item>
-    </string-array>
-
-    <!-- LoginInFragment-->
     <string name="tv_welcome">Willkommen in der HandRehab-App</string>
     <string name="hint_email">Email</string>
     <string name="hint_passwort">Passwort</string>
@@ -64,15 +20,12 @@
     <string name="button_cancel">Abbrechen</string>
     <string name="fill_out">Email eintragen</string>
     <string name="btn_log_out">Ausloggen</string>
-
     <string name="alert_dialog_message_wifi">Für die Nutzung dieser App wird W-lan benötigt. Bitte verbinde dein Smartphone zunächst mit dem W-lan.</string>
     <string name="alert_dialog_title_reminder">Erinnerung:</string>
     <string name="accept">Ok</string>
-
     <string name="title_home">Startseite</string>
     <string name="title_exercise">Übungen</string>
     <string name="title_setting">Einstellungen</string>
-
     <string name="hand_rehab">HandRehab</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_view_description">Hier steht die Beschreibung zu dieser Übung. Die Übung wird erläutert und erklärt. Stellen Sie zunächst die Anzahl
@@ -82,15 +35,12 @@
     <string name="button_start">Übung starten</string>
     <string name="hint_text_repetitions">Wiederholungen</string>
     <string name="hint_text_sets">Sätze</string>
-
-
     <!-- Titel der Übungen-->
     <string name="title_hand_extension_flexion">Finger Extension/Flexion</string>
     <string name="title_little_finger_extension_flexion">Kleiner Finger Extension/Flexion</string>
     <string name="title_middle_finger_extension_flexion">Mittelfinger Extension/Flexion</string>
     <string name="title_pointing_finger_extension_flexion">Zeigefinger Extension/Flexion</string>
     <string name="title_thumb_extension_flexion">Daumen Extension/Flexion</string>
-
 
     <!-- Beschreibung der Übungen-->
     <string name="note_exercise">Stelle dein Smartphone angelehnt gegen einen Gegenstand, sodass deine Hand gut sichtbar in der Kamera ist. Optional: Stütze deinen Ellenbogen auf einem Tisch als zusätzliche Hilfestellung ab.</string>
@@ -220,4 +170,5 @@
     <string name="tv_gauge_meter">Auf der unteren Hälfte des Bildschirms ist eine Messanzeige. Diese zeigt dir, wie weit du deinen Finger noch bewegen musst, damit eine Wiederholung gezählt wird.</string>
     <string name="tv_log_in">Logge dich nun mit deiner E-mail und deinem Passwort ein:</string>
     <string name="tv_video">Videoanleitung</string>
+    <string name="camera_fragment">CameraFragment</string>
 </resources>

@@ -6,40 +6,10 @@
     <color name="mp_color_primary">#007F8B</color>
     <color name="mp_color_primary_variant">#12B5CB</color>
     <color name="mp_color_primary_dark">#00676D</color>
-    <color name="mp_color_secondary">#FBBC04</color>
-    <color name="mp_color_secondary_variant">#F9AB00</color>
-    <color name="mp_color_error">#B00020</color>
-    <color name="toolbar_background">#E0E0E0</color>
-    <color name="ic_launcher_background">#FFFFFF</color>
-    <color name="bottom_sheet_background">#EEEEEE</color>
-    <color name="bottom_sheet_text_color">@android:color/black</color>
-    <color name="icActive">#FFFFFFFF</color>
-    <color name="icFocused">#DDFFFFFF</color>
-    <color name="icPressed">#AAFFFFFF</color>
 
     <color name="grey_light">#CFC6C6</color>
 
-    <color name="green">#49613F</color>
-    <color name="green_dark">#94af76</color>
-    <color name="green_dark2">#182015</color>
-    <color name="green_light">#BEFCA4</color>
-    <color name="green_medium">#232F1F</color>
-    <color name="yellow">#8CD34F</color>
-
     <!-- color theme-->
-
-    <color name="color_primary">#7a5900</color>
-    <color name="color_on_primary">#ffffff</color>
-    <color name="color_primary_container">#ffdea1</color>
-    <color name="color_on_primary_container">#261900</color>
-    <color name="color_on_primary_surface">#fffbff</color>
-
-    <color name ="color_surface_variant">#ede1cf</color>
-    <color name="color_on_surface_variant">#4d4639</color>
-    <color name= "color_on_surface">#1e1b16</color>
-    <color name="color_surface">#fffbff</color>
-    <color name="outline">#7f7667</color>
-
     <color name="seed">#693555</color>
     <color name="md_theme_light_primary">#924275</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
