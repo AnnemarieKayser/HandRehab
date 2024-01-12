@@ -4,7 +4,9 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
-class DataMinMax {
+// Objekt für das Speichern der Daten in der Datenbank
+// Speichern der Daten zu der Übung "Alle Finger: Spreizen"
+class DataAllFingersSpread {
 
     private var dateTimestamp: Date? = null
     private var exerciseName = ""
@@ -111,10 +113,9 @@ class DataMinMax {
     }
 
     override fun toString(): String {
-        return "DataMinMax{" +
+        return "DataAllFingersSpread{" +
                 ", Name=" + exerciseName +
                 ", dateTimestamp=" + dateTimestamp +
                 '}'
     }
-
 }

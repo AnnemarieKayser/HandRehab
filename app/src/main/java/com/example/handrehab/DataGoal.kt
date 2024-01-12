@@ -4,6 +4,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
+// Objekt für das Speichern der Daten in der Datenbank
+// Speichern des Ziels an täglichen Übungen
 class DataGoal {
     private var goalExercises = 10f
     @ServerTimestamp
@@ -36,7 +38,7 @@ class DataGoal {
         this.dayOfWeek = day
     }
     override fun toString(): String {
-        return "DataMinMax{" +
+        return "DataGoal{" +
                 ", Ziel: " + goalExercises +
                 '}'
     }

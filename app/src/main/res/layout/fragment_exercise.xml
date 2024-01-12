@@ -177,7 +177,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/textView6"
-                        app:srcCompat="@drawable/ic_gauge_meter" />
+                        app:srcCompat="@drawable/ic_gauge" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
